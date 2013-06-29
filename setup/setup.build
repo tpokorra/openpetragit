@@ -240,7 +240,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
 
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
   <call target="nanttasks"/>
-<!--  <call target="generateSolution"/> -->
+  <call target="generateSolution"/>
 
   <if test="${string::contains(LinuxTargetDistribution-list, 'postgresql')}">
     <property name="DBMS.Type" value="postgresql"/>
@@ -414,15 +414,14 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
       <property name="LinuxTargetDistribution" value="${string::replace(LinuxTargetDistribution, '-' + DBMS.Type, '')}"/>
       <!-- ***************  create the linux config script for the server side ***************  -->
       <property name="RandomDBPassword" value="${script::GetPasswordSalt()}" overwrite="false"/>
-      <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/config.sh.my"/>
-      <if test="${not file::exists(Config.file)}">
-          <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/config.sh"/>
-      </if>
-      <property name="OpenPetraOrgPath" value="$OpenPetraOrgPath"/>
-      <copy file="${Config.file}"
-        tofile="${setupDir}/${LinuxTargetDistribution}/config-sample.sh" overwrite="true">
+      <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/openpetraorg-server.sh"
+        tofile="${setupDir}/${LinuxTargetDistribution}/openpetraorg-server.sh" overwrite="true">
         <filterchain>
-            <expandproperties />
+            <replacetokens>
+                <token key="RandomDBPassword" value="${RandomDBPassword}" />
+                <token key="HostedPort" value="${HostedPort}" />
+                <token key="PostgreSQL.Version" value="${PostgreSQL.Version}" />
+            </replacetokens>
         </filterchain>
       </copy>
       <if test="${platform::is-unix()}">

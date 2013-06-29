@@ -17,12 +17,12 @@ then
   export userName=openpetra
   export OPENPETRA_RDBMSType=postgresql
   export OPENPETRA_DBHOST=localhost
-  export OPENPETRA_DBPWD=${RandomDBPassword}
+  export OPENPETRA_DBPWD=RandomDBPassword
   export OPENPETRA_DBUSER=petraserver
   export OPENPETRA_DBNAME=openpetra
   export OPENPETRA_DBPORT=5432
-  export OPENPETRA_PORT=${HostedPort}
-  export POSTGRESQLVERSION=${PostgreSQL.Version}
+  export OPENPETRA_PORT=HostedPort
+  export POSTGRESQLVERSION=PostgreSQL.Version
   export backupfile=$OpenPetraOrgPath/backup30/backup-`date +%Y%m%d`.sql.gz
   export mono_path=/opt/mono-openpetra
   export FASTCGI_MONO_SERVER=$mono_path/bin/fastcgi-mono-server4
