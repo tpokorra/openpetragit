@@ -13,19 +13,20 @@ fi
 
 if [ ! -d $OpenPetraOrgPath ]
 then
+  export OpenPetraOrgPath=/usr/local/openpetraorg
+  export userName=openpetra
+  export OPENPETRA_RDBMSType=postgresql
+  export OPENPETRA_DBHOST=localhost
+  export OPENPETRA_DBPWD=${RandomDBPassword}
+  export OPENPETRA_DBUSER=petraserver
+  export OPENPETRA_DBNAME=openpetra
+  export OPENPETRA_DBPORT=5432
+  export OPENPETRA_PORT=${HostedPort}
+  export POSTGRESQLVERSION=${PostgreSQL.Version}
+  export backupfile=$OpenPetraOrgPath/backup30/backup-`date +%Y%m%d`.sql.gz
   export mono_path=/opt/mono-openpetra
   export FASTCGI_MONO_SERVER=$mono_path/bin/fastcgi-mono-server4
   export mono=$mono_path/bin/mono
-  export OpenPetraOrgPath=/usr/local/openpetraorg
-  export CustomerName=DefaultTOREPLACE
-  export OPENPETRA_RDBMSType=postgresql
-  export OPENPETRA_DBPWD=TOBESETBYINSTALLER
-  export OPENPETRA_DBHOST=localhost
-  export OPENPETRA_DBPORT=5432
-  export OPENPETRA_DBUSER=petraserver
-  export OPENPETRA_DBNAME=openpetra
-  export OPENPETRA_PORT=9000
-  export backupfile=$OpenPetraOrgPath/backup30/backup-`date +%Y%m%d`.sql.gz
 fi
 
 # Override defaults from /etc/sysconfig/openpetra if file is present
@@ -48,7 +49,6 @@ start() {
     log_daemon_msg "Starting OpenPetra.org server for $CustomerName"
 
     su $userName -c "PATH=$mono_path/bin:$PATH $FASTCGI_MONO_SERVER /socket=tcp:127.0.0.1:$OPENPETRA_PORT /applications=/:/var/www/html /appconfigfile=$OpenPetraOrgPath/etc30/PetraServerConsole.config&"
-
     status=0
     log_end_msg $status
 }
@@ -102,8 +102,6 @@ restore() {
     echo `date` "Start restoring from " $backupfile
     echo "dropping tables and sequences..."
 
-    #echo $OPENPETRA_DBHOST:$OPENPETRA_DBPORT:$OPENPETRA_DBNAME:$OPENPETRA_DBUSER:$OPENPETRA_DBPWD > ~/.pgpass
-
     delCommand="SELECT 'DROP TABLE ' || n.nspname || '.' || c.relname || ' CASCADE;' FROM pg_catalog.pg_class AS c LEFT JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace WHERE relkind = 'r' AND n.nspname NOT IN ('pg_catalog', 'pg_toast') AND pg_catalog.pg_table_is_visible(c.oid)" 
     su $userName -c "psql -t -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -c \"$delCommand\" > /tmp/deleteAllTables.sql"
 
@@ -137,8 +135,23 @@ restore() {
 
 createdb() {
     echo "creating database..."
+    echo "local  $OPENPETRA_DBNAME $OPENPETRA_DBUSER   md5" > /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
+    echo "host  $OPENPETRA_DBNAME $OPENPETRA_DBUSER  127.0.0.1/32   md5" >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
+    cat /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
+    mv /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf
+    /etc/init.d/postgresql-$POSTGRESQLVERSION restart
+
     su postgres -c "psql -q -p $OPENPETRA_DBPORT -c \"CREATE USER \\\"$OPENPETRA_DBUSER\\\" PASSWORD '$OPENPETRA_DBPWD'\""
     su postgres -c "createdb -p $OPENPETRA_DBPORT -T template0 -O $OPENPETRA_DBUSER $OPENPETRA_DBNAME"
+
+    useradd --home /home/$userName $userName
+    mkdir /home/$userName
+    echo "*:$OPENPETRA_DBPORT:$OPENPETRA_DBNAME:$OPENPETRA_DBUSER:$OPENPETRA_DBPWD" >> /home/$userName/.pgpass
+    chown -R $userName:$userName /home/$userName
+    chmod 600 /home/$userName/.pgpass
+    chown $userName /home/$userName/.pgpass
+
+    init
 }
 
 init() {
