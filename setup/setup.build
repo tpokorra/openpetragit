@@ -219,17 +219,40 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
     </if>
 </target>
 
+<target name="createServerTarFilePerDBSystem">
+  <!-- ********* build Linux Server tar.gz ********* -->
+  <property name="BuildArchive" value="server" overwrite="true"/>
+  
+  <call target="prepareSetupDirForTarFile"/>
+   
+  <if test="${not platform::is-windows()}">
+    <ExecCmd program="sh" commandline="/C &quot;cd ${setupDir}/..; tar czpf ${dir.delivery}/openpetraorg-server-${DBMS.Type}-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz openpetraorg-${ReleaseID}&quot;"/>
+  </if>
+  <if test="${platform::is-windows()}">
+      <!-- this does not keep the executable flag -->
+      <tar destfile="${dir.delivery}/openpetraorg-server-${DBMS.Type}-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz" compression="GZip">
+        <fileset basedir="${setupDir}" prefix="openpetraorg-${ReleaseID}">
+          <include name="**/*" />
+        </fileset>
+      </tar>
+  </if>
+</target>
+
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
   <call target="nanttasks"/>
-  <call target="generateSolution"/>
+<!--  <call target="generateSolution"/> -->
 
   <if test="${string::contains(LinuxTargetDistribution-list, 'postgresql')}">
     <property name="DBMS.Type" value="postgresql"/>
-    <call target="createSQLStatements" unless="${target::has-executed('createSQLStatements')}"/>
+    <call target="createSQLStatements"/>
+    <call target="createPostgreSQLDB"/>
+    <call target="createServerTarFilePerDBSystem"/>
   </if>
   <if test="${string::contains(LinuxTargetDistribution-list, 'mysql')}">
     <property name="DBMS.Type" value="mysql"/>
-    <call target="createSQLStatements" unless="${target::has-executed('createSQLStatements')}"/>
+    <call target="createSQLStatements"/>
+    <call target="createMySQLDB"/>
+    <call target="createServerTarFilePerDBSystem"/>
   </if>
 
   <call target="translation" unless="${target::has-executed('translation')}"/>
@@ -239,24 +262,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
     <call target="setupRemote"/>
   </if>
   
-  <!-- ********* build Linux Server tar.gz ********* -->
-  <property name="BuildArchive" value="server" overwrite="true"/>
-  
-  <foreach item="String" property="LinuxTargetDistribution" delim="," in="${LinuxTargetDistribution-list}" >
-    <call target="prepareSetupDirForTarFile"/>
-   
-    <if test="${not platform::is-windows()}">
-      <ExecCmd program="sh" commandline="/C &quot;cd ${setupDir}/..; tar czpf ${dir.delivery}/openpetraorg-server-${LinuxTargetDistribution}-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz openpetraorg-${ReleaseID}&quot;"/>
-    </if>
-    <if test="${platform::is-windows()}">
-      <!-- this does not keep the executable flag -->
-      <tar destfile="${dir.delivery}/openpetraorg-server-${LinuxTargetDistribution}-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz" compression="GZip">
-        <fileset basedir="${setupDir}" prefix="openpetraorg-${ReleaseID}">
-          <include name="**/*" />
-        </fileset>
-      </tar>
-    </if>
-  </foreach>
 
   <!-- ********* build Linux Client tar.gz ********* -->
   <if test="${WithLinuxClient == 'true'}">
@@ -287,7 +292,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   
   <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/startClient.sh"
               tofile="${setupDir}/startClient.sh"/>
-  <copy file="${tempdir}/publickey.xml" tofile="${setupDir}/etc30/publickey-sample.xml"/>
   <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/PetraClientRemote.config"
               tofile="${setupDir}/etc30/PetraClientRemote.config">
         <filterchain>
@@ -405,25 +409,38 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <copy file="${dir.root}/LICENSE" tofile="${setupDir}/LICENSE"/>
   
   <if test="${BuildArchive != 'client'}">
-    <!-- ***************  create the linux config script for the server side ***************  -->
-    <property name="RandomDBPassword" value="${script::GetPasswordSalt()}" overwrite="false"/>
-    <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/config.sh.my"/>
-    <if test="${not file::exists(Config.file)}">
-        <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/config.sh"/>
-    </if>
-    <property name="OpenPetraOrgPath" value="$OpenPetraOrgPath"/>
-    <copy file="${Config.file}"
-        tofile="${setupDir}/config-sample.sh" overwrite="true">
+    <foreach item="String" property="LinuxTargetDistribution" delim="," in="${LinuxTargetDistribution-list}" >
+     <if test="${string::contains(LinuxTargetDistribution, DBMS.Type)}">
+      <property name="LinuxTargetDistribution" value="${string::replace(LinuxTargetDistribution, '-' + DBMS.Type, '')}"/>
+      <!-- ***************  create the linux config script for the server side ***************  -->
+      <property name="RandomDBPassword" value="${script::GetPasswordSalt()}" overwrite="false"/>
+      <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/config.sh.my"/>
+      <if test="${not file::exists(Config.file)}">
+          <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/config.sh"/>
+      </if>
+      <property name="OpenPetraOrgPath" value="$OpenPetraOrgPath"/>
+      <copy file="${Config.file}"
+        tofile="${setupDir}/${LinuxTargetDistribution}/config-sample.sh" overwrite="true">
         <filterchain>
             <expandproperties />
         </filterchain>
-    </copy>
-    <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/setup.sh" tofile="${setupDir}/setup.sh"/>
+      </copy>
+      <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/setup.sh" tofile="${setupDir}/${LinuxTargetDistribution}/setup.sh"/>
+      <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/${LinuxTargetDistribution}/openpetraorg-server.sh"
+                tofile="${setupDir}/${LinuxTargetDistribution}/openpetraorg-server.sh"/>
+      <if test="${platform::is-unix()}">
+        <!-- change the executable flag -->
+        <ExecCmd program="sh" commandline="/C &quot;chmod -R a+x ${setupDir}/${LinuxTargetDistribution}/*.sh&quot;"/>
+        <!-- make sure that the script files are in unix format -->
+        <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/${LinuxTargetDistribution}/*.sh; do dos2unix -o $f; done;&quot;"/>
+      </if>
+     </if>
+    </foreach>
 
     <!-- ***************  create the web.config file ***************  -->
-    <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/web.config.my"/>
+    <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/web.config.my"/>
     <if test="${not file::exists(Config.file)}">
-        <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/web.config"/>
+        <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/linuxserver/${DBMS.Type}/web.config"/>
     </if>
     <if test="${file::exists(Config.file)}">
         <copy file="${Config.file}"
@@ -459,28 +476,24 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
       </fileset>
     </copy>
 
-    <if test="${string::contains(LinuxTargetDistribution, 'postgresql')}">
+    <if test="${string::contains(DBMS.Type, 'postgresql')}">
       <copy file="${dir.root}/setup/petra${PetraRelease}/createtables-PostgreSQL.sql"
                 tofile="${setupDir}/db30/createtables-PostgreSQL.sql"/>
       <copy file="${dir.root}/setup/petra${PetraRelease}/createconstraints-PostgreSQL.sql"
                 tofile="${setupDir}/db30/createconstraints-PostgreSQL.sql"/>
+      <copy file="${dir.root}/setup/petra${PetraRelease}/demodata-PostgreSQL.sql"
+                tofile="${setupDir}/db30/demodata-PostgreSQL.sql"/>
     </if>
-    <if test="${string::contains(LinuxTargetDistribution, 'mysql')}">
+    <if test="${string::contains(DBMS.Type, 'mysql')}">
       <copy file="${dir.root}/setup/petra${PetraRelease}/createtables-MySQL.sql"
                 tofile="${setupDir}/db30/createtables-MySQL.sql"/>
       <copy file="${dir.root}/setup/petra${PetraRelease}/createconstraints-MySQL.sql"
                 tofile="${setupDir}/db30/createconstraints-MySQL.sql"/>
+      <copy file="${dir.root}/setup/petra${PetraRelease}/demodata-MySQL.sql"
+                tofile="${setupDir}/db30/demodata-MySQL.sql"/>
     </if>
     <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/INSTALL"
                 tofile="${setupDir}/INSTALL"/>
-    <copy file="${dir.root}/setup/petra${PetraRelease}/linuxserver/${LinuxTargetDistribution}/openpetraorg-server.sh"
-                tofile="${setupDir}/openpetraorg-server.sh"/>
-    <if test="${platform::is-unix()}">
-      <!-- change the executable flag -->
-      <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
-      <!-- make sure that the script files are in unix format -->
-      <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do dos2unix -o $f; done;&quot;"/>
-    </if>
   </if>
 </target> 
 
