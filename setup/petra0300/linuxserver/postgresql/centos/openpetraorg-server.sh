@@ -11,7 +11,7 @@ then
         NAME=${NAME:3}
 fi
 
-if [ ! -d $OpenPetraOrgPath ]
+if [ -z "$OpenPetraOrgPath" ]
 then
   export OpenPetraOrgPath=/usr/local/openpetraorg
   export userName=openpetra
@@ -122,7 +122,7 @@ restore() {
     echo $backupfile|grep -qE '\.gz$'
     if [ $? -eq 0 ]
     then
-        su $userName -c "cat $backupfile | gunzip | psql -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -q > $OpenPetraOrgPath/log30/pgload.log"
+        su $userName -c "cat $backupfile | gunzip | psql -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -q > /home/$userName/log/pgload.log"
     else
         su $userName -c "psql -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -q -f $backupfile > $OpenPetraOrgPath/log30/pgload.log"
     fi
@@ -133,30 +133,57 @@ restore() {
     echo `date` "Finished!"
 }
 
-createdb() {
+init() {
     echo "creating database..."
+    if [ ! -d /var/lib/pgsql/$POSTGRESQLVERSION/data ]
+    then
+        service postgresql-$POSTGRESQLVERSION initdb
+        service postgresql-$POSTGRESQLVERSION start
+    fi
     echo "local  $OPENPETRA_DBNAME $OPENPETRA_DBUSER   md5" > /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
     echo "host  $OPENPETRA_DBNAME $OPENPETRA_DBUSER  127.0.0.1/32   md5" >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
     cat /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
-    mv /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf
+    mv -f /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf
     /etc/init.d/postgresql-$POSTGRESQLVERSION restart
 
     su postgres -c "psql -q -p $OPENPETRA_DBPORT -c \"CREATE USER \\\"$OPENPETRA_DBUSER\\\" PASSWORD '$OPENPETRA_DBPWD'\""
     su postgres -c "createdb -p $OPENPETRA_DBPORT -T template0 -O $OPENPETRA_DBUSER $OPENPETRA_DBNAME"
 
     useradd --home /home/$userName $userName
-    mkdir /home/$userName
+    mkdir -p /home/$userName/log
     echo "*:$OPENPETRA_DBPORT:$OPENPETRA_DBNAME:$OPENPETRA_DBUSER:$OPENPETRA_DBPWD" >> /home/$userName/.pgpass
     chown -R $userName:$userName /home/$userName
     chmod 600 /home/$userName/.pgpass
     chown $userName /home/$userName/.pgpass
 
-    init
-}
-
-init() {
     export backupfile=$OpenPetraOrgPath/db30/demodata-PostgreSQL.sql
     restore
+
+    # configure lighttpd
+    cat > /etc/lighttpd/vhosts.d/openpetra$OPENPETRA_PORT.conf <<FINISH
+\$HTTP["url"] =~ "^/openpetra$OPENPETRA_PORT" {
+  var.server_name = "openpetra$OPENPETRA_PORT"
+
+  server.name = "openpetra$OPENPETRA_PORT"
+
+  server.document-root = "/var/www/html"
+
+  fastcgi.server = (
+        "/openpetra$OPENPETRA_PORT" => ((
+                "host" => "127.0.0.1",
+                "port" => $OPENPETRA_PORT,
+                "check-local" => "disable"
+        ))
+  )
+}
+FINISH
+    sed -i 's~#include "conf.d/fastcgi.conf"~include "conf.d/fastcgi.conf"~g' /etc/lighttpd/modules.conf
+    sed -i 's/server.use-ipv6 = "enable"/server.use-ipv6 = "disable"/g' /etc/lighttpd/lighttpd.conf
+    sed -i 's/server.max-connections = 1024/server.max-connections = 512/g' /etc/lighttpd/lighttpd.conf
+    echo 'include_shell "cat /etc/lighttpd/vhosts.d/*.conf"' >> /etc/lighttpd/lighttpd.conf
+    service lighttpd restart
+    chkconfig lighttpd on
+    chkconfig openpetra-server on
 }
 
 case "$1" in
@@ -186,7 +213,7 @@ case "$1" in
         menu
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart|menu|backup|restore|createdb|init}"
+        echo "Usage: $0 {start|stop|restart|menu|backup|restore|init|loadYmlGz}"
         exit 1
         ;;
 esac
