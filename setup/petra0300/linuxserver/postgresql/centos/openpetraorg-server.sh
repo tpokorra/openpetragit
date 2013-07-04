@@ -135,11 +135,9 @@ restore() {
 
 init() {
     echo "creating database..."
-    if [ ! -d /var/lib/pgsql/$POSTGRESQLVERSION/data ]
-    then
-        service postgresql-$POSTGRESQLVERSION initdb
-        service postgresql-$POSTGRESQLVERSION start
-    fi
+    service postgresql-$POSTGRESQLVERSION initdb
+    service postgresql-$POSTGRESQLVERSION start
+
     echo "local  $OPENPETRA_DBNAME $OPENPETRA_DBUSER   md5" > /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
     echo "host  $OPENPETRA_DBNAME $OPENPETRA_DBUSER  127.0.0.1/32   md5" >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
     cat /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf >> /var/lib/pgsql/$POSTGRESQLVERSION/data/pg_hba.conf.new
