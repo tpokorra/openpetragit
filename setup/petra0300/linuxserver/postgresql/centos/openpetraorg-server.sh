@@ -46,19 +46,19 @@ log_end_msg() { [ $1 -eq 0 ] && RES=OK; logger ${RES:=FAIL}; }
 
 # start the openpetraorg server
 start() {
-    log_daemon_msg "Starting OpenPetra.org server for $CustomerName"
+    log_daemon_msg "Starting OpenPetra.org server"
 
-    su $userName -c "PATH=$mono_path/bin:$PATH $FASTCGI_MONO_SERVER /socket=tcp:127.0.0.1:$OPENPETRA_PORT /applications=/:/var/www/html /appconfigfile=$OpenPetraOrgPath/etc30/PetraServerConsole.config&"
+    su $userName -c "PATH=$mono_path/bin:$PATH $FASTCGI_MONO_SERVER /socket=tcp:127.0.0.1:$OPENPETRA_PORT /applications=/:/var/www/html /appconfigfile=/home/$userName/etc/PetraServerConsole.config&"
     status=0
     log_end_msg $status
 }
 
 # stop the openpetraorg server
 stop() {
-    log_daemon_msg "Stopping OpenPetra.org server for $CustomerName"
+    log_daemon_msg "Stopping OpenPetra.org server"
     cd $OpenPetraOrgPath/bin30
     
-    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:$OpenPetraOrgPath/etc30/PetraServerAdminConsole.config -Command:Stop"
+    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:/home/$userName/etc/PetraServerAdminConsole.config -Command:Stop"
     
     status=0
     log_end_msg $status
@@ -67,8 +67,7 @@ stop() {
 # load a new database from a yml.gz file. this will overwrite the current database!
 loadYmlGz() {
     cd $OpenPetraOrgPath/bin30
-    parameters="-Server.Port:$OPENPETRA_PORT -Server.ChannelEncryption.PublicKeyfile:$OPENPETRA_LocationPublicKeyFile"
-    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:$OpenPetraOrgPath/etc30/PetraServerAdminConsole.config $parameters -Command:LoadYmlGz -YmlGzFile:$ymlgzfile"
+    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:/home/$userName/etc/PetraServerAdminConsole.config -Command:LoadYmlGz -YmlGzFile:$ymlgzfile"
     status=0
     log_end_msg $status
 }
@@ -76,8 +75,7 @@ loadYmlGz() {
 # display a menu to check for logged in users etc
 menu() {
     cd $OpenPetraOrgPath/bin30
-    parameters="-Server.Port:$OPENPETRA_PORT -Server.ChannelEncryption.PublicKeyfile:$OPENPETRA_LocationPublicKeyFile"
-    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:$OpenPetraOrgPath/etc30/PetraServerAdminConsole.config $parameters"
+    su $userName -c "$mono --runtime=v4.0 --server PetraServerAdminConsole.exe -C:/home/$userName/etc/PetraServerAdminConsole.config"
 }
 
 # backup the postgresql database
@@ -149,6 +147,24 @@ init() {
 
     useradd --home /home/$userName $userName
     mkdir -p /home/$userName/log
+    mkdir -p /home/$userName/tmp
+    mkdir -p /home/$userName/etc
+    # copy config files (server, serveradmin.config) to etc, with adjustments
+    cat $OpenPetraOrgPath/etc30/PetraServerConsole.config \
+       | sed -e "s/OPENPETRA_DBHOST/$OPENPETRA_DBHOST/" \
+       | sed -e "s/OPENPETRA_DBUSER/$OPENPETRA_DBUSER/" \
+       | sed -e "s/OPENPETRA_DBNAME/$OPENPETRA_DBNAME/" \
+       | sed -e "s/OPENPETRA_DBPORT/$OPENPETRA_DBPORT/" \
+       | sed -e "s/USERNAME/$userName/" \
+       > /home/$userName/etc/PetraServerConsole.config
+
+    # copy serveradmin.config.template and replace config values
+    cat $OpenPetraOrgPath/etc30/PetraServerAdminConsole.config \
+       | sed -e "s/DOMAINNAME/`hostname`/" \
+       | sed -e "s/USERNAME/$userName/" \
+       | sed -e "s/OPENPETRA_PORT/$OPENPETRA_PORT/" \
+       > /home/$userName/etc/PetraServerAdminConsole.config
+
     echo "*:$OPENPETRA_DBPORT:$OPENPETRA_DBNAME:$OPENPETRA_DBUSER:$OPENPETRA_DBPWD" >> /home/$userName/.pgpass
     chown -R $userName:$userName /home/$userName
     chmod 600 /home/$userName/.pgpass
