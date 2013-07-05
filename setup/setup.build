@@ -240,9 +240,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
 
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
   <call target="nanttasks"/>
-<!--
   <call target="generateSolution"/>
--->
   <if test="${string::contains(LinuxTargetDistribution-list, 'postgresql')}">
     <property name="DBMS.Type" value="postgresql"/>
     <call target="createSQLStatements"/>
@@ -340,6 +338,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <mkdir dir="${setupDir}/formletters30"/>
   <mkdir dir="${setupDir}/resources30"/>
   <mkdir dir="${setupDir}/bin30"/>
+  <mkdir dir="${setupDir}/asmx"/>
 
   <echo file="${setupDir}/bin30/version.txt">${ReleaseVersion}</echo>
   <copy todir="${setupDir}/bin30">
@@ -358,6 +357,12 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   </copy>
   <copy file="${dir.bin}/Ict.Tools.PatchTool.exe" tofile="${setupDir}/bin30/Ict.Tools.PatchTool.exe" overwrite="true"/>
   <copy file="${dir.bin}/Ict.Tools.PatchTool.Library.dll" tofile="${setupDir}/bin30/Ict.Tools.PatchTool.Library.dll" overwrite="true"/>
+
+  <copy todir="${setupDir}/asmx">
+    <fileset basedir="${dir.root}/csharp/ICT/Petra/Server/app/WebService">
+       <include name="*.asmx" />
+    </fileset>
+  </copy>
 
   <property name="UINavigation.file" value="${dir.root}/csharp/ICT/Petra/Definitions/UINavigation.yml.my"/>
   <if test="${file::exists(UINavigation.file)}">
