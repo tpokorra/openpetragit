@@ -236,6 +236,7 @@ var.mono_fcgi_root = "/var/www/html"
 # virtual and real dirs. are separated by  a  colon.
 var.mono_fcgi_applications = "/:."
 FINISH
+    sed -i 's~#include "conf.d/fastcgi.conf"~include "conf.d/fastcgi.conf"~g' /etc/lighttpd/modules.conf
     sed -i 's/server.use-ipv6 = "enable"/server.use-ipv6 = "disable"/g' /etc/lighttpd/lighttpd.conf
     sed -i 's/server.max-connections = 1024/server.max-connections = 512/g' /etc/lighttpd/lighttpd.conf
     echo 'include_shell "cat /etc/lighttpd/vhosts.d/*.conf"' >> /etc/lighttpd/lighttpd.conf
