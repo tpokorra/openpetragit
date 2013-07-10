@@ -157,8 +157,6 @@ init() {
        | sed -e "s/OPENPETRA_DBPORT/$OPENPETRA_DBPORT/" \
        | sed -e "s/USERNAME/$userName/" \
        > /home/$userName/etc/PetraServerConsole.config
-
-    # copy serveradmin.config.template and replace config values
     cat $OpenPetraOrgPath/etc30/PetraServerAdminConsole.config \
        | sed -e "s/DOMAINNAME/`hostname`/" \
        | sed -e "s/USERNAME/$userName/" \
@@ -191,7 +189,53 @@ init() {
   )
 }
 FINISH
-    sed -i 's~#include "conf.d/fastcgi.conf"~include "conf.d/fastcgi.conf"~g' /etc/lighttpd/modules.conf
+    cat > /etc/lighttpd/conf.d/fastcgi.conf <<FINISH
+include "conf.d/mono.conf"
+
+server.modules += ( "mod_fastcgi" )
+
+fastcgi.server = (
+        "" => ((
+                "socket" => mono_shared_dir + "fastcgi-mono-server",
+                "bin-path" => mono_fastcgi_server,
+                "bin-environment" => (
+                        "PATH" => "/bin:/usr/bin:" + mono_dir + "bin",
+                        "LD_LIBRARY_PATH" => mono_dir + "lib:",
+                        "MONO_SHARED_DIR" => mono_shared_dir,
+                        "MONO_FCGI_LOGLEVELS" => "Standard",
+                        "MONO_FCGI_LOGFILE" => mono_shared_dir + "fastcgi.log",
+                        "MONO_FCGI_ROOT" => mono_fcgi_root,
+                        "MONO_FCGI_APPLICATIONS" => mono_fcgi_applications
+                ),
+                "max-procs" => 1,
+                "check-local" => "disable"
+        ))
+)
+FINISH
+    cat > /etc/lighttpd/conf.d/mono.conf <<FINISH
+# Add index.aspx and default.aspx to the list of files to check when a
+# directory is requested.
+index-file.names += ( "index.aspx", "default.aspx" )
+
+var.mono_dir = "/opt/mono-openpetra/"
+
+### A directory that is writable by the lighttpd process.
+# This is where the log file, communication socket, and Mono's .wapi folder
+# will be created.
+# For a typical system-wide installation on Linux, use:
+var.mono_shared_dir = "/tmp/"
+# For an installation in a user account (dir must exist and be writable):
+#var.mono_shared_dir = "/home/username/lighttpd_scratch/"
+
+var.mono_fastcgi_server = mono_dir + "bin/" + "fastcgi-mono-server4"
+var.mono_fcgi_root = "/var/www/html"
+
+### Application map
+# A comma separated list of virtual directory and real directory
+# for all the applications we want to manage with this server. The
+# virtual and real dirs. are separated by  a  colon.
+var.mono_fcgi_applications = "/:."
+FINISH
     sed -i 's/server.use-ipv6 = "enable"/server.use-ipv6 = "disable"/g' /etc/lighttpd/lighttpd.conf
     sed -i 's/server.max-connections = 1024/server.max-connections = 512/g' /etc/lighttpd/lighttpd.conf
     echo 'include_shell "cat /etc/lighttpd/vhosts.d/*.conf"' >> /etc/lighttpd/lighttpd.conf
