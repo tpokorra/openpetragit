@@ -149,6 +149,7 @@ init() {
     mkdir -p /home/$userName/log
     mkdir -p /home/$userName/tmp
     mkdir -p /home/$userName/etc
+    hostname=`hostname`
     # copy config files (server, serveradmin.config) to etc, with adjustments
     cat $OpenPetraOrgPath/etc30/PetraServerConsole.config \
        | sed -e "s/OPENPETRA_DBHOST/$OPENPETRA_DBHOST/" \
@@ -176,7 +177,7 @@ init() {
 \$HTTP["url"] =~ "^/openpetra$OPENPETRA_PORT" {
   var.server_name = "openpetra$OPENPETRA_PORT"
 
-  server.name = "openpetra$OPENPETRA_PORT"
+  server.name = "$hostname"
 
   server.document-root = "/var/www/html"
 
