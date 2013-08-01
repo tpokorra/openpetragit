@@ -117,6 +117,19 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <call target="buildRemoteInstallers"/>
 </target>
 
+<!-- this will be called from Open Build Service to build the windows client -->
+<target name="buildLinuxClientOBS">
+  <property name="WithLinuxClient" value="true"/>
+  <property name="WithWindowsClient" value="false"/>
+  <property name="LinuxTargetDistribution-list" value="no-server"/>
+  <property name="OrgName" value="MyOpenPetra"/>
+  <property name="OrgNameWithoutSpace" value="MyOpenPetra"/>
+  <property name="HostedServer" value="localhost"/>
+  <property name="HostedPort" value="9000"/>
+  <property name="PublisherUrl" value="www.solidcharity.com"/>
+  <call target="buildRemoteInstallers"/>
+</target>
+
 <!-- Windows -->
 <target name="buildWindowsStandalone">
   <property name="compileForStandalone" value="true" overwrite="true"/>
@@ -287,8 +300,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <call target="translation" unless="${target::has-executed('translation')}"/>
   <property name="BuildArchive" value="client" overwrite="true"/>
   <call target="prepareSetupDirForTarFile"/>
-  copy startclient sh und remote config
-  
+  <!-- copy startclient sh und remote config -->
   <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/startClient.sh"
               tofile="${setupDir}/startClient.sh"/>
   <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/PetraClientRemote.config"
