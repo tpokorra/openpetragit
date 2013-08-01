@@ -117,19 +117,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <call target="buildRemoteInstallers"/>
 </target>
 
-<!-- this will be called from Open Build Service to build the windows client -->
-<target name="buildLinuxClientOBS">
-  <property name="WithLinuxClient" value="true"/>
-  <property name="WithWindowsClient" value="false"/>
-  <property name="LinuxTargetDistribution-list" value="no-server"/>
-  <property name="OrgName" value="MyOpenPetra"/>
-  <property name="OrgNameWithoutSpace" value="MyOpenPetra"/>
-  <property name="HostedServer" value="localhost"/>
-  <property name="HostedPort" value="9000"/>
-  <property name="PublisherUrl" value="www.solidcharity.com"/>
-  <call target="buildRemoteInstallers"/>
-</target>
-
 <!-- Windows -->
 <target name="buildWindowsStandalone">
   <property name="compileForStandalone" value="true" overwrite="true"/>
@@ -251,6 +238,41 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   </if>
 </target>
 
+<!-- this will be called from Open Build Service to build the windows client -->
+<target name="buildLinuxClientOBS">
+  <property name="WithLinuxClient" value="true"/>
+  <property name="WithWindowsClient" value="false"/>
+  <property name="LinuxTargetDistribution-list" value="no-server"/>
+  <property name="OrgName" value="MyOpenPetra"/>
+  <property name="OrgNameWithoutSpace" value="MyOpenPetra"/>
+  <property name="HostedServer" value="localhost"/>
+  <property name="HostedPort" value="9000"/>
+  <property name="PublisherUrl" value="www.solidcharity.com"/>
+  <call target="nanttasks"/>
+  <call target="minimalGenerateSolution"/>
+  <property name="solution" value="Client"/>
+  <call target="quickCompile"/>
+  <call target="translation"/>
+  <property name="BuildArchive" value="client" overwrite="true"/>
+  <call target="prepareSetupDirForTarFile"/>
+  <!-- copy startclient sh und remote config -->
+  <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/startClient.sh"
+              tofile="${setupDir}/startClient.sh"/>
+  <copy file="${dir.root}/setup/petra${PetraRelease}/linuxclient/PetraClientRemote.config"
+              tofile="${setupDir}/etc30/PetraClientRemote.config">
+        <filterchain>
+            <expandproperties />
+        </filterchain>
+  </copy>
+  <!-- change the executable flag -->
+  <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
+  <!-- make sure that the script files are in unix format -->
+  <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do dos2unix -o $f; done;&quot;"/>
+
+  <!-- result is in setupDir for building the rpm or deb package -->
+</target>
+
+
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
   <call target="nanttasks"/>
   <call target="generateSolution"/>
@@ -350,7 +372,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <mkdir dir="${setupDir}/formletters30"/>
   <mkdir dir="${setupDir}/resources30"/>
   <mkdir dir="${setupDir}/bin30"/>
-  <mkdir dir="${setupDir}/asmx"/>
 
   <echo file="${setupDir}/bin30/version.txt">${ReleaseVersion}</echo>
   <copy todir="${setupDir}/bin30">
@@ -369,21 +390,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   </copy>
   <copy file="${dir.bin}/Ict.Tools.PatchTool.exe" tofile="${setupDir}/bin30/Ict.Tools.PatchTool.exe" overwrite="true"/>
   <copy file="${dir.bin}/Ict.Tools.PatchTool.Library.dll" tofile="${setupDir}/bin30/Ict.Tools.PatchTool.Library.dll" overwrite="true"/>
-
-  <copy todir="${setupDir}/asmx">
-    <fileset basedir="${dir.root}/csharp/ICT/Petra/Server/app/WebService">
-       <include name="*.asmx" />
-    </fileset>
-  </copy>
-
-  <property name="UINavigation.file" value="${dir.root}/csharp/ICT/Petra/Definitions/UINavigation.yml.my"/>
-  <if test="${file::exists(UINavigation.file)}">
-      <copy file="${UINavigation.file}" tofile="${setupDir}/bin30/UINavigation.yml" overwrite="true"/>
-  </if>
-  <if test="${not file::exists(UINavigation.file)}">
-      <property name="UINavigation.file" value="${dir.root}/csharp/ICT/Petra/Definitions/UINavigation.yml"/>
-      <copy file="${UINavigation.file}" tofile="${setupDir}/bin30/UINavigation.yml" overwrite="true"/>
-  </if>
 
   <if test="${BuildArchive == 'server'}">
     <delete>
@@ -406,13 +412,24 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
       </fileset>
     </delete>
   </if>
-  
-  <copy todir="${setupDir}/resources30">
-    <fileset basedir="${dir.root}/resources">
+
+  <if test="${BuildArchive != 'server'}">
+    <property name="UINavigation.file" value="${dir.root}/csharp/ICT/Petra/Definitions/UINavigation.yml.my"/>
+    <if test="${file::exists(UINavigation.file)}">
+      <copy file="${UINavigation.file}" tofile="${setupDir}/bin30/UINavigation.yml" overwrite="true"/>
+    </if>
+    <if test="${not file::exists(UINavigation.file)}">
+      <property name="UINavigation.file" value="${dir.root}/csharp/ICT/Petra/Definitions/UINavigation.yml"/>
+      <copy file="${UINavigation.file}" tofile="${setupDir}/bin30/UINavigation.yml" overwrite="true"/>
+    </if>
+    <copy todir="${setupDir}/resources30">
+      <fileset basedir="${dir.root}/resources">
         <include name="*.ico" />
         <include name="*.png" />
-    </fileset>
-  </copy>       
+      </fileset>
+    </copy>       
+  </if>
+  
   <copy todir="${setupDir}/manuals30">
     <fileset basedir="${dir.root}/setup/petra${PetraRelease}/releasenotes/">
       <include name="*.html" />
@@ -421,12 +438,20 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <copy todir="${setupDir}/reports30">
     <fileset basedir="${dir.root}/XmlReports/">
       <include name="*.dtd" />
+      <!-- TODO exclude the report xml files from client tar, only include report settings -->
       <include name="**/*.xml" />
     </fileset>
   </copy>
   <copy file="${dir.root}/LICENSE" tofile="${setupDir}/LICENSE"/>
   
   <if test="${BuildArchive != 'client'}">
+    <mkdir dir="${setupDir}/asmx"/>
+    <copy todir="${setupDir}/asmx">
+      <fileset basedir="${dir.root}/csharp/ICT/Petra/Server/app/WebService">
+         <include name="*.asmx" />
+      </fileset>
+    </copy>
+
     <foreach item="String" property="LinuxTargetDistribution" delim="," in="${LinuxTargetDistribution-list}" >
      <if test="${string::contains(LinuxTargetDistribution, DBMS.Type)}">
       <property name="LinuxTargetDistribution" value="${string::replace(LinuxTargetDistribution, '-' + DBMS.Type, '')}"/>
