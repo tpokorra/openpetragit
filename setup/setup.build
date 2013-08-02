@@ -278,7 +278,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <call target="quickCompile"/>
   <property name="DBMS.Type" value="postgresql"/>
   <call target="createSQLStatements"/>
-  <call target="createPostgreSQLDB"/>
   <property name="BuildArchive" value="server" overwrite="true"/>
   <call target="prepareSetupDirForTarFile"/>
   <move file="${setupDir}/centos/openpetraorg-server.sh" tofile="${setupDir}/openpetraorg-server.sh"/>
