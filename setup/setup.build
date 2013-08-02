@@ -267,11 +267,13 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <!-- change the executable flag -->
   <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
   <!-- make sure that the script files are in unix format -->
-  <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do dos2unix -o $f; done;&quot;"/>
+  <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
 
   <!-- result is in setupDir for building the rpm or deb package -->
 </target>
 
+<target name="buildServerCentOSPostgresqlOBS">
+</target>
 
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
   <call target="nanttasks"/>
@@ -336,7 +338,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
     <!-- change the executable flag -->
     <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
     <!-- make sure that the script files are in unix format -->
-    <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do dos2unix -o $f; done;&quot;"/>
+    <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
     <ExecCmd program="sh" commandline="/C &quot;cd ${setupDir}/..; tar czpf ${dir.delivery}/openpetraorg-client-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz openpetraorg-${ReleaseID}&quot;"/>
   </if>
   <if test="${platform::is-windows()}">
@@ -471,7 +473,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
         <!-- change the executable flag -->
         <ExecCmd program="sh" commandline="/C &quot;chmod -R a+x ${setupDir}/${LinuxTargetDistribution}/*.sh&quot;"/>
         <!-- make sure that the script files are in unix format -->
-        <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/${LinuxTargetDistribution}/*.sh; do dos2unix -o $f; done;&quot;"/>
+        <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/${LinuxTargetDistribution}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
       </if>
      </if>
     </foreach>
