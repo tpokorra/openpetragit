@@ -264,15 +264,26 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
             <expandproperties />
         </filterchain>
   </copy>
-  <!-- change the executable flag -->
-  <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
-  <!-- make sure that the script files are in unix format -->
-  <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
 
   <!-- result is in setupDir for building the rpm or deb package -->
 </target>
 
 <target name="buildServerCentOSPostgresqlOBS">
+  <property name="WithLinuxClient" value="false"/>
+  <property name="WithWindowsClient" value="false"/>
+  <property name="LinuxTargetDistribution-list" value="centos-postgresql"/>
+  <call target="nanttasks"/>
+  <call target="minimalGenerateSolution"/>
+  <property name="solution" value="Server"/>
+  <call target="quickCompile"/>
+  <property name="DBMS.Type" value="postgresql"/>
+  <call target="createSQLStatements"/>
+  <call target="createPostgreSQLDB"/>
+  <property name="BuildArchive" value="server" overwrite="true"/>
+  <call target="prepareSetupDirForTarFile"/>
+  <move file="${setupDir}/centos/openpetraorg-server.sh" tofile="${setupDir}/openpetraorg-server.sh"/>
+
+  <!-- result is in setupDir for building the rpm package -->
 </target>
 
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
