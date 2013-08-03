@@ -272,6 +272,8 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <property name="WithLinuxClient" value="false"/>
   <property name="WithWindowsClient" value="false"/>
   <property name="LinuxTargetDistribution-list" value="centos-postgresql"/>
+  <property name="HostedPort" value="9000"/>
+  <property name="PostgreSQL.Version" value="9.2"/>
   <call target="nanttasks"/>
   <call target="minimalGenerateSolution"/>
   <property name="solution" value="Server"/>
@@ -347,8 +349,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <if test="${not platform::is-windows()}">
     <!-- change the executable flag -->
     <ExecCmd program="sh" commandline="/C &quot;chmod a+x ${setupDir}/*.sh&quot;"/>
-    <!-- make sure that the script files are in unix format -->
-    <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
     <ExecCmd program="sh" commandline="/C &quot;cd ${setupDir}/..; tar czpf ${dir.delivery}/openpetraorg-client-${OrgNameWithoutSpace}-${ReleaseID}.tar.gz openpetraorg-${ReleaseID}&quot;"/>
   </if>
   <if test="${platform::is-windows()}">
@@ -479,12 +479,6 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
             </replacetokens>
         </filterchain>
       </copy>
-      <if test="${platform::is-unix()}">
-        <!-- change the executable flag -->
-        <ExecCmd program="sh" commandline="/C &quot;chmod -R a+x ${setupDir}/${LinuxTargetDistribution}/*.sh&quot;"/>
-        <!-- make sure that the script files are in unix format -->
-        <ExecCmd program="sh" commandline="/C &quot;for f in ${setupDir}/${LinuxTargetDistribution}/*.sh; do ${fromdos} -o $f; done;&quot;"/>
-      </if>
      </if>
     </foreach>
 
@@ -532,8 +526,10 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
                 tofile="${setupDir}/db30/createtables-PostgreSQL.sql"/>
       <copy file="${dir.root}/setup/petra${PetraRelease}/createconstraints-PostgreSQL.sql"
                 tofile="${setupDir}/db30/createconstraints-PostgreSQL.sql"/>
-      <copy file="${dir.root}/setup/petra${PetraRelease}/demodata-PostgreSQL.sql"
+      <if test="${file::exists(dir.root + '/setup/petra' + PetraRelease + '/demodata-PostgreSQL.sql')}">
+         <copy file="${dir.root}/setup/petra${PetraRelease}/demodata-PostgreSQL.sql"
                 tofile="${setupDir}/db30/demodata-PostgreSQL.sql"/>
+      </if>
     </if>
     <if test="${string::contains(DBMS.Type, 'mysql')}">
       <copy file="${dir.root}/setup/petra${PetraRelease}/createtables-MySQL.sql"
