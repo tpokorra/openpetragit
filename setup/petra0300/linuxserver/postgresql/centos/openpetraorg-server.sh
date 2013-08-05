@@ -170,9 +170,6 @@ init() {
     chmod 600 /home/$userName/.pgpass
     chown $userName /home/$userName/.pgpass
 
-    export backupfile=$OpenPetraOrgPath/db30/demodata-PostgreSQL.sql
-    restore
-
     # configure lighttpd
     cat > /etc/lighttpd/vhosts.d/openpetra$OPENPETRA_PORT.conf <<FINISH
 \$HTTP["url"] =~ "^/openpetra$OPENPETRA_PORT" {
@@ -198,6 +195,9 @@ FINISH
     service lighttpd restart
     chkconfig lighttpd on
     chkconfig openpetra-server on
+    service openpetra-server start
+    ymlgzfile=$OpenPetraOrgPath/db30/base.yml.gz
+    loadYmlGz
 }
 
 case "$1" in
