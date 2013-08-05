@@ -170,6 +170,11 @@ init() {
     chmod 600 /home/$userName/.pgpass
     chown $userName /home/$userName/.pgpass
 
+    echo "creating tables..."
+    su $userName -c "psql -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -q -f $OpenPetraOrgPath/db30/createtables-PostgreSQL.sql"
+    echo "enabling indexes and constraints..."
+    su $userName -c "psql -h $OPENPETRA_DBHOST -p $OPENPETRA_DBPORT -U $OPENPETRA_DBUSER $OPENPETRA_DBNAME -q -f $OpenPetraOrgPath/db30/createconstraints-PostgreSQL.sql"
+
     # configure lighttpd
     cat > /etc/lighttpd/vhosts.d/openpetra$OPENPETRA_PORT.conf <<FINISH
 \$HTTP["url"] =~ "^/openpetra$OPENPETRA_PORT" {
