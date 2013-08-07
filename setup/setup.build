@@ -142,7 +142,7 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
     <if test="${not file::exists(Config.file)}">
         <property name="Config.file" value="${dir.root}/setup/petra${PetraRelease}/remoteclientWin/PetraClientRemote.config"/>
     </if>
-    <copy file="${tempdir}/PetraClientRemote_temp.config"
+    <copy file="${Config.file}"
               tofile="${tempdir}/PetraClientRemote.config" overwrite="true">
         <filterchain>
             <expandproperties />
@@ -243,11 +243,11 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <property name="WithLinuxClient" value="true"/>
   <property name="WithWindowsClient" value="false"/>
   <property name="LinuxTargetDistribution-list" value="no-server"/>
-  <property name="OrgName" value="MyOpenPetra"/>
-  <property name="OrgNameWithoutSpace" value="MyOpenPetra"/>
-  <property name="HostedServer" value="localhost"/>
-  <property name="HostedPort" value="9000"/>
-  <property name="PublisherUrl" value="www.solidcharity.com"/>
+  <property name="OrgName" value="MyOpenPetra" overwrite="false"/>
+  <property name="OrgNameWithoutSpace" value="MyOpenPetra" overwrite="false"/>
+  <property name="HostedServer" value="localhost" overwrite="false"/>
+  <property name="HostedPort" value="9000" overwrite="false"/>
+  <property name="PublisherUrl" value="www.solidcharity.com" overwrite="false"/>
   <call target="nanttasks"/>
   <call target="minimalGenerateSolution"/>
   <property name="solution" value="Client"/>
@@ -285,6 +285,31 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <move file="${setupDir}/centos/openpetraorg-server.sh" tofile="${setupDir}/openpetraorg-server.sh"/>
 
   <!-- result is in setupDir for building the rpm package -->
+</target>
+
+<target name="buildWindowsRemoteClient" help="build the windows remote client, and the patches">
+  <property name="WithLinuxClient" value="false"/>
+  <property name="WithWindowsClient" value="true"/>
+  <property name="LinuxTargetDistribution-list" value="no-server"/>
+  <property name="OrgName" value="MyOpenPetra" overwrite="false"/>
+  <property name="OrgNameWithoutSpace" value="MyOpenPetra" overwrite="false"/>
+  <property name="HostedServer" value="localhost" overwrite="false"/>
+  <property name="HostedPort" value="9000" overwrite="false"/>
+  <property name="PublisherUrl" value="www.solidcharity.com" overwrite="false"/>
+  <call target="nanttasks"/>
+  <!--
+  <call target="minimalGenerateSolution"/>
+  <property name="solution" value="Client"/>
+  <call target="quickCompile"/>
+  -->
+  <call target="translation"/>
+  <property name="BuildArchive" value="client" overwrite="true"/>
+  <call target="prepareSetupDirForTarFile"/>
+  <!-- build Remote Setup Windows installer -->
+  <if test="${WithWindowsClient}">
+    <call target="setupRemote"/>
+  </if>
+  <delete dir="${setupDir}"/>
 </target>
 
 <target name="buildRemoteInstallers" help="build a tar.gz file for the server, the remote installer for the client, and a backup for future patches">
