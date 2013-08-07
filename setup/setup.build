@@ -297,11 +297,9 @@ public static string InsertRecursiveAllFilesFromSubdirectoriesForDeletion(string
   <property name="HostedPort" value="9000" overwrite="false"/>
   <property name="PublisherUrl" value="www.solidcharity.com" overwrite="false"/>
   <call target="nanttasks"/>
-  <!--
   <call target="minimalGenerateSolution"/>
   <property name="solution" value="Client"/>
   <call target="quickCompile"/>
-  -->
   <call target="translation"/>
   <property name="BuildArchive" value="client" overwrite="true"/>
   <call target="prepareSetupDirForTarFile"/>
