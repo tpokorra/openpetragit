@@ -4,7 +4,7 @@
 // @Authors:
 //       timop
 //
-// Copyright 2004-2012 by OM International
+// Copyright 2004-2013 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -102,8 +102,8 @@ namespace Ict.Common
         {
             FileMajorPart = System.Convert.ToUInt16(AVersion.Major);
             FileMinorPart = System.Convert.ToUInt16(AVersion.Minor);
-            FileBuildPart = System.Convert.ToUInt16(AVersion.Build);
-            FilePrivatePart = System.Convert.ToUInt16(AVersion.Revision);
+            FileBuildPart = System.Convert.ToUInt16(AVersion.Build == -1 ? 0 : AVersion.Build);
+            FilePrivatePart = System.Convert.ToUInt16(AVersion.Revision == -1 ? 0 : AVersion.Revision);
         }
 
         /// <summary>
@@ -123,6 +123,15 @@ namespace Ict.Common
         /// </summary>
         public TFileVersionInfo()
         {
+        }
+
+        /// <summary>
+        /// convert to System.Version
+        /// </summary>
+        /// <returns></returns>
+        public Version ToVersion()
+        {
+            return new Version(FileMajorPart, FileMinorPart, FileBuildPart, FilePrivatePart);
         }
 
         /// <summary>

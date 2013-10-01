@@ -4,7 +4,7 @@
 // @Authors:
 //       christiank, timop
 //
-// Copyright 2004-2012 by OM International
+// Copyright 2004-2013 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -24,8 +24,6 @@
 using System;
 using System.Collections;
 using System.Net.Sockets;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Lifetime;
 using System.Security.Principal;
 using System.IO;
 using Ict.Common;
@@ -45,52 +43,15 @@ namespace Ict.Common.Remoting.Client
         /// </summary>
         public static TConnectionManagementBase GConnectionManagement = null;
 
-        /// <summary>
-        /// set to typeof(TConnector)
-        /// </summary>
-        public static Type ConnectorType = typeof(TConnector);
-
-        /// <summary>
-        /// keeps the connection to the server
-        /// </summary>
-        protected TConnector FConnector;
-
-        /// <summary>
-        /// the client manager
-        /// </summary>
-        protected IClientManagerInterface FClientManager;
-
-        private String FClientName;
         private Int32 FClientID;
-        private TExecutingOSEnum FServerOS;
-        private String FRemotingURL_PollClientTasks;
-        private IPollClientTasksInterface FRemotePollClientTasks;
         private TEnsureKeepAlive FKeepAlive;
         private TPollClientTasks FPollClientTasks;
-
-        /// <summary>
-        /// the remoting object
-        /// </summary>
-        protected TRemoteBase FRemote;
+        private IClientManager FClientManager;
 
         /// <summary>
         /// the urls of the services
         /// </summary>
         protected Hashtable FRemotingURLs;
-
-        /// <summary>
-        /// we will always contact the server on this URL
-        /// </summary>
-        protected string FCrossDomainURI;
-
-        /// <summary>todoComment</summary>
-        public String ClientName
-        {
-            get
-            {
-                return FClientName;
-            }
-        }
 
         /// <summary>todoComment</summary>
         public Int32 ClientID
@@ -98,15 +59,6 @@ namespace Ict.Common.Remoting.Client
             get
             {
                 return FClientID;
-            }
-        }
-
-        /// <summary>todoComment</summary>
-        public TExecutingOSEnum ServerOS
-        {
-            get
-            {
-                return FServerOS;
             }
         }
 
@@ -119,19 +71,10 @@ namespace Ict.Common.Remoting.Client
             }
         }
 
-        /// <summary>todoComment</summary>
-        public TRemoteBase RemoteObjects
-        {
-            get
-            {
-                return FRemote;
-            }
-        }
-
         /// <summary>
-        /// todoComment
+        /// Connect to the server and authenticate the user
         /// </summary>
-        public bool ConnectToServer(String AUserName,
+        public eLoginEnum ConnectToServer(String AUserName,
             String APassword,
             out Int32 AProcessID,
             out String AWelcomeMessage,
@@ -141,35 +84,24 @@ namespace Ict.Common.Remoting.Client
         {
             AError = "";
             String ConnectionError;
-
-            if (FConnector == null)
-            {
-                FConnector = (TConnector)Activator.CreateInstance(ConnectorType);
-            }
+            AUserInfo = null;
+            ASystemEnabled = false;
+            AWelcomeMessage = string.Empty;
+            AProcessID = -1;
 
             try
             {
-                if (TAppSettingsManager.ConfigFileName.Length > 0)
-                {
-                    // connect to the PetraServer's ClientManager
-                    FConnector.GetRemoteServerConnection(TAppSettingsManager.ConfigFileName, out FClientManager);
-                }
-                else
-                {
-                    // connect to the PetraServer's ClientManager
-                    FConnector.GetRemoteServerConnection(Environment.GetCommandLineArgs()[0] + ".config", out FClientManager);
-                }
+                FClientManager = TConnectionHelper.Connect();
 
                 // register Client session at the PetraServer
-                bool ReturnValue = ConnectClient(AUserName, APassword, FClientManager,
+                eLoginEnum ReturnValue = ConnectClient(AUserName, APassword,
                     out AProcessID,
                     out AWelcomeMessage,
                     out ASystemEnabled,
                     out ConnectionError,
                     out AUserInfo);
-                TRemoteBase.ClientManager = FClientManager;
 
-                if (!ReturnValue)
+                if (ReturnValue != eLoginEnum.eLoginSucceeded)
                 {
                     AError = ConnectionError;
                     return ReturnValue;
@@ -177,29 +109,7 @@ namespace Ict.Common.Remoting.Client
             }
             catch (System.Net.Sockets.SocketException)
             {
-                throw new EServerConnectionServerNotReachableException();
-            }
-            catch (EDBConnectionNotEstablishedException exp)
-            {
-                if (exp.Message.IndexOf("Access denied") != -1)
-                {
-                    // Prevent passing out stack trace in case the PetraServer cannot connect
-                    // a Client (to make this happen, somebody would have tampered with the
-                    // DB Password decryption routines...)
-                    throw new EServerConnectionGeneralException("PetraServer misconfiguration!");
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            catch (EClientVersionMismatchException)
-            {
-                throw;
-            }
-            catch (ELoginFailedServerTooBusyException)
-            {
-                throw;
+                return eLoginEnum.eLoginServerNotReachable;
             }
             catch (Exception exp)
             {
@@ -207,28 +117,25 @@ namespace Ict.Common.Remoting.Client
                 throw new EServerConnectionGeneralException(exp.ToString());
             }
 
-            //
-            // acquire .NET Remoting Proxy objects for remoted Server objects
-            //
+            if (TClientSettings.RunAsStandalone)
+            {
+                FKeepAlive = null;
+                FPollClientTasks = null;
+            }
+            else
+            {
+                //
+                // start the KeepAlive Thread (which needs to run as long as the Client is running)
+                //
+                FKeepAlive = new TEnsureKeepAlive();
 
-            FRemotePollClientTasks =
-                (IPollClientTasksInterface)FConnector.GetRemoteObject(FRemotingURL_PollClientTasks, typeof(IPollClientTasksInterface));
+                //
+                // start the PollClientTasks Thread (which needs to run as long as the Client is running)
+                //
+                FPollClientTasks = new TPollClientTasks(FClientID);
+            }
 
-            //
-            // start the KeepAlive Thread (which needs to run as long as the Client is running)
-            //
-            FKeepAlive = new TEnsureKeepAlive();
-
-            //
-            // start the PollClientTasks Thread (which needs to run as long as the Client is running)
-            //
-            FPollClientTasks = new TPollClientTasks(FClientID, FRemotePollClientTasks);
-
-            //
-            // initialise object that holds references to all our remote object .NET Remoting Proxies
-            //
-            FRemote = new TRemoteBase(FClientManager);
-            return true;
+            return eLoginEnum.eLoginSucceeded;
         }
 
         /// <summary>
@@ -236,16 +143,14 @@ namespace Ict.Common.Remoting.Client
         /// </summary>
         /// <param name="AUserName"></param>
         /// <param name="APassword"></param>
-        /// <param name="AClientManager"></param>
         /// <param name="AProcessID"></param>
         /// <param name="AWelcomeMessage"></param>
         /// <param name="ASystemEnabled"></param>
         /// <param name="AError"></param>
         /// <param name="AUserInfo"></param>
         /// <returns></returns>
-        virtual protected bool ConnectClient(String AUserName,
+        virtual protected eLoginEnum ConnectClient(String AUserName,
             String APassword,
-            IClientManagerInterface AClientManager,
             out Int32 AProcessID,
             out String AWelcomeMessage,
             out Boolean ASystemEnabled,
@@ -260,67 +165,28 @@ namespace Ict.Common.Remoting.Client
 
             try
             {
-                AClientManager.ConnectClient(AUserName, APassword,
+                eLoginEnum result = FClientManager.ConnectClient(AUserName, APassword,
                     TClientInfo.ClientComputerName,
                     TClientInfo.ClientIPAddress,
                     new Version(TClientInfo.ClientAssemblyVersion),
                     DetermineClientServerConnectionType(),
-                    out FClientName,
                     out FClientID,
-                    out FCrossDomainURI,
-                    out FRemotingURLs,
-                    out FServerOS,
-                    out AProcessID,
                     out AWelcomeMessage,
                     out ASystemEnabled,
                     out AUserInfo);
 
-                if (FRemotingURLs.ContainsKey(RemotingConstants.REMOTINGURL_IDENTIFIER_POLLCLIENTTASKS))
+                if (result != eLoginEnum.eLoginSucceeded)
                 {
-                    FRemotingURL_PollClientTasks = (String)FRemotingURLs[RemotingConstants.REMOTINGURL_IDENTIFIER_POLLCLIENTTASKS];
+                    AError = result.ToString();
                 }
 
-                FConnector.Init(FCrossDomainURI, FClientID.ToString());
-
-                return true;
-            }
-            catch (EUserNotExistantException exp)
-            {
-                AError = exp.Message;
-                return false;
-            }
-            catch (EUserRetiredException exp)
-            {
-                AError = exp.Message;
-                return false;
-            }
-            catch (EAccessDeniedException exp)
-            {
-                AError = exp.Message;
-                return false;
-            }
-            catch (EUserRecordLockedException exp)
-            {
-                AError = exp.Message;
-                return false;
-            }
-            catch (ESystemDisabledException exp)
-            {
-                AError = exp.Message;
-                return false;
-            }
-            catch (EClientVersionMismatchException)
-            {
-                throw;
-            }
-            catch (ELoginFailedServerTooBusyException)
-            {
-                throw;
+                return result;
             }
             catch (Exception exp)
             {
                 TLogging.Log(exp.ToString() + Environment.NewLine + exp.StackTrace, TLoggingType.ToLogfile);
-                throw;
+                AError = exp.Message;
+                return eLoginEnum.eLoginFailedForUnspecifiedError;
             }
         }
 
@@ -344,14 +210,9 @@ namespace Ict.Common.Remoting.Client
                 if (FPollClientTasks != null)
                 {
                     FPollClientTasks.StopPollClientTasks();
-                    RemotingServices.Disconnect((MarshalByRefObject)FRemotePollClientTasks);
                 }
 
-                if (FRemote != null)
-                {
-                    ReturnValue = TRemoteBase.ClientManager.DisconnectClient(FClientID, out ACantDisconnectReason);
-                    TRemoteBase.Disconnect();
-                }
+                ReturnValue = FClientManager.DisconnectClient(out ACantDisconnectReason);
             }
             catch (System.Net.Sockets.SocketException)
             {
@@ -383,31 +244,6 @@ namespace Ict.Common.Remoting.Client
 
             return ReturnValue;
         }
-    }
-
-    /// <summary>
-    /// todoComment
-    /// </summary>
-    public class EServerConnectionServerNotReachableException : ApplicationException
-    {
-        #region EServerConnectionServerNotReachableException
-
-        /// <summary>
-        /// constructor
-        /// </summary>
-        public EServerConnectionServerNotReachableException() : base()
-        {
-        }
-
-        /// <summary>
-        /// constructor
-        /// </summary>
-        /// <param name="msg"></param>
-        public EServerConnectionServerNotReachableException(String msg) : base(msg)
-        {
-        }
-
-        #endregion
     }
 
     /// <summary>

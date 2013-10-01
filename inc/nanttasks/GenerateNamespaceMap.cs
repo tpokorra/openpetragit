@@ -130,6 +130,18 @@ namespace Ict.Tools.NAntTasks
             }
         }
 
+        private bool FCompilingForStandalone = false;
+        /// <summary>
+        /// if we are compiling for standalone, we are allowed to reference the server namespaces from the client
+        /// </summary>
+        [TaskAttribute("CompilingForStandalone", Required = false)]
+        public bool CompilingForStandalone {
+            set
+            {
+                FCompilingForStandalone = value;
+            }
+        }
+
         /// <summary>
         /// create namespace map
         /// </summary>
@@ -293,7 +305,9 @@ namespace Ict.Tools.NAntTasks
                                 ReferencesWinForms = true;
                             }
 
-                            if (Namespace.StartsWith("System.Web") && !Path.GetDirectoryName(filename).EndsWith("WebService"))
+                            if (Namespace.StartsWith("System.Web")
+                                && !Path.GetDirectoryName(filename).EndsWith("WebService")
+                                && !Path.GetDirectoryName(filename).EndsWith("Server"))
                             {
                                 Console.WriteLine(
                                     "Warning: we should not reference System.Web since that is not part of the client profile of .net 4.0! in " +
@@ -309,7 +323,7 @@ namespace Ict.Tools.NAntTasks
                                     filename);
                             }
 
-                            if (Namespace.StartsWith("Ict.Petra.Server")
+                            if (!FCompilingForStandalone && Namespace.StartsWith("Ict.Petra.Server")
                                 && Path.GetDirectoryName(filename).Replace("\\", "/").Contains("ICT/Petra/Client"))
                             {
                                 Console.WriteLine(
@@ -318,7 +332,7 @@ namespace Ict.Tools.NAntTasks
                                     filename);
                             }
 
-                            if (Namespace.StartsWith("Ict.Petra.Server")
+                            if (!FCompilingForStandalone && Namespace.StartsWith("Ict.Petra.Server")
                                 && Path.GetDirectoryName(filename).Replace("\\", "/").Contains("ICT/Petra/Shared"))
                             {
                                 Console.WriteLine(

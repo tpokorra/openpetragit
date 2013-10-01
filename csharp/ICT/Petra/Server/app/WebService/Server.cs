@@ -60,8 +60,6 @@ namespace PetraWebService
 ///             R6030
 ///             - CRT not initialized
 /// Solution: run xsp with ms.net, or use sqlite with managed version only and native sqlite
-///
-/// TODO: generate soap functions with nant generateGlue from interfaces/instantiators?
 /// </summary>
 [WebService(Namespace = "http://www.openpetra.org/webservices/")]
 [ScriptService]
@@ -107,6 +105,8 @@ public class TOpenPetraOrg : WebService
                 TSystemDefaultsCache.GSystemDefaultsCache = new TSystemDefaultsCache();
                 DomainManager.GSiteKey = TSystemDefaultsCache.GSystemDefaultsCache.GetInt64Default(
                     Ict.Petra.Shared.SharedConstants.SYSDEFAULT_SITEKEY);
+
+                StringHelper.CurrencyFormatTable = DBAccess.GDBAccessObj.SelectDT("SELECT * FROM PUB_a_currency", "a_currency", null);
             }
             catch (Exception e)
             {
@@ -121,7 +121,6 @@ public class TOpenPetraOrg : WebService
 
     private bool LoginInternal(string username, string password)
     {
-        Int32 ProcessID;
         bool ASystemEnabled;
 
         try
@@ -129,7 +128,7 @@ public class TOpenPetraOrg : WebService
             InitServer();
 
             TClientManager.PerformLoginChecks(
-                username.ToUpper(), password.Trim(), "WEB", "127.0.0.1", out ProcessID, out ASystemEnabled);
+                username.ToUpper(), password.Trim(), "WEB", "127.0.0.1", out ASystemEnabled);
             Session["LoggedIn"] = true;
 
             DBAccess.GDBAccessObj.UserID = username.ToUpper();
