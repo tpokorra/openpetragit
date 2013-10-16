@@ -111,6 +111,7 @@ Log("filename " + FileName);
                         Directory.CreateDirectory(physicalDir + "bin" + Path.DirectorySeparatorChar);
                     }
 Log("before ocpy");
+return;
                     File.Copy(FileName, physicalDir + "bin" + Path.DirectorySeparatorChar + Path.GetFileName(FileName), true);
 Log("aftercopy");                    
                 }
@@ -119,7 +120,6 @@ Log("aftercopy");
                     ;
                 }
 Log("before create application host");
-return;
 
                 Fthlw = (ThreadedHttpListenerWrapper)ApplicationHost.CreateApplicationHost(
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
