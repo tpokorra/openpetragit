@@ -157,7 +157,7 @@
               spawn="false">
            <arg value="/c" />
            <arg value="start" />
-           <arg value="${dir.delivery}/Ict.Tools.TinyWebServer.exe ${Server.Port} &quot;${dir.log}/Ict.Tools.WebServer.log&quot; ${TinyServer.MaximumRuntime.InMinutes}" />
+           <arg value="&quot;${dir.delivery}/Ict.Tools.TinyWebServer.exe&quot; ${Server.Port} &quot;${dir.log}/Ict.Tools.WebServer.log&quot; ${TinyServer.MaximumRuntime.InMinutes}" />
       </exec>
       
     </if>
