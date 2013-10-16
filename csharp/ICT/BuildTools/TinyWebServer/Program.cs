@@ -101,6 +101,7 @@ namespace Ict.Tools.TinyWebServer
                     physicalDir = physicalDir + Path.DirectorySeparatorChar;
                 }
 Log("before getexec assembly location");
+return;
                 // Copy this hosting DLL into the /bin directory of the application
                 string FileName = Assembly.GetExecutingAssembly().Location;
 Log("filename " + FileName);
@@ -111,7 +112,6 @@ Log("filename " + FileName);
                         Directory.CreateDirectory(physicalDir + "bin" + Path.DirectorySeparatorChar);
                     }
 Log("before ocpy");
-return;
                     File.Copy(FileName, physicalDir + "bin" + Path.DirectorySeparatorChar + Path.GetFileName(FileName), true);
 Log("aftercopy");                    
                 }
