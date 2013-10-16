@@ -94,33 +94,31 @@ namespace Ict.Tools.TinyWebServer
                     FMaxRunTime = TimeSpan.FromMinutes(Convert.ToInt32(parameters[3]));
                 }
                 
-//                FLogFile = @"C:\Program Files (x86)\Jenkins\OpenPetraBuildWinTimotheus9248\log\Ict.Tools.WebServer.log";
-                Log("test");
-                return;
                 string physicalDir = Directory.GetCurrentDirectory();
 
                 if (!(physicalDir.EndsWith(Path.DirectorySeparatorChar.ToString())))
                 {
                     physicalDir = physicalDir + Path.DirectorySeparatorChar;
                 }
-
+Log("before getexec assembly location");
                 // Copy this hosting DLL into the /bin directory of the application
                 string FileName = Assembly.GetExecutingAssembly().Location;
-
+Log("filename " + FileName);
                 try
                 {
                     if (!Directory.Exists(physicalDir + "bin" + Path.DirectorySeparatorChar))
                     {
                         Directory.CreateDirectory(physicalDir + "bin" + Path.DirectorySeparatorChar);
                     }
-
+Log("before ocpy");
                     File.Copy(FileName, physicalDir + "bin" + Path.DirectorySeparatorChar + Path.GetFileName(FileName), true);
+Log("aftercopy");                    
                 }
                 catch
                 {
                     ;
                 }
-
+Log("before create application host");
                 Fthlw = (ThreadedHttpListenerWrapper)ApplicationHost.CreateApplicationHost(
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
 
