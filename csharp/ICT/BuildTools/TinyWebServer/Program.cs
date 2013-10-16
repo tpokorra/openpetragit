@@ -123,7 +123,7 @@ Log("before create application host");
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
 
                 Log("trying to listen on port " + port);
-
+return;
                 string[] prefixes = new string[] {
                     "http://+:" + port + "/"
                 };
