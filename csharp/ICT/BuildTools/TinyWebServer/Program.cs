@@ -130,6 +130,8 @@ Log("before create application host");
                 };
 
                 Fthlw.Configure(prefixes, "/", Directory.GetCurrentDirectory());
+                    Log(
+                        "  netsh http add urlacl url=http://+:" + port + "/ user=" + Environment.MachineName + "\\" + Environment.UserName);
 
                 try
                 {
