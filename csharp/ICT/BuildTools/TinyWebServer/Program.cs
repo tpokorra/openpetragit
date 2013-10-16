@@ -76,6 +76,26 @@ namespace Ict.Tools.TinyWebServer
         {
             try
             {
+                string port = "8888";
+                string[] parameters = Environment.GetCommandLineArgs();
+
+                if (parameters.Length > 1)
+                {
+                    port = parameters[1];
+                }
+
+                if (parameters.Length > 2)
+                {
+                    FLogFile = parameters[2];
+                }
+
+                if (parameters.Length > 3)
+                {
+                    FMaxRunTime = TimeSpan.FromMinutes(Convert.ToInt32(parameters[3]));
+                }
+
+                Log("test");
+                
                 string physicalDir = Directory.GetCurrentDirectory();
 
                 if (!(physicalDir.EndsWith(Path.DirectorySeparatorChar.ToString())))
@@ -102,24 +122,6 @@ namespace Ict.Tools.TinyWebServer
 
                 Fthlw = (ThreadedHttpListenerWrapper)ApplicationHost.CreateApplicationHost(
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
-
-                string port = "8888";
-                string[] parameters = Environment.GetCommandLineArgs();
-
-                if (parameters.Length > 1)
-                {
-                    port = parameters[1];
-                }
-
-                if (parameters.Length > 2)
-                {
-                    FLogFile = parameters[2];
-                }
-
-                if (parameters.Length > 3)
-                {
-                    FMaxRunTime = TimeSpan.FromMinutes(Convert.ToInt32(parameters[3]));
-                }
 
                 Log("trying to listen on port " + port);
 
