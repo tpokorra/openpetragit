@@ -119,11 +119,12 @@ Log("aftercopy");
                     ;
                 }
 Log("before create application host");
+return;
+
                 Fthlw = (ThreadedHttpListenerWrapper)ApplicationHost.CreateApplicationHost(
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
 
                 Log("trying to listen on port " + port);
-return;
                 string[] prefixes = new string[] {
                     "http://+:" + port + "/"
                 };
