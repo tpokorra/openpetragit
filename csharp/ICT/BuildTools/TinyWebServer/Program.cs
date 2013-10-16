@@ -78,9 +78,6 @@ namespace Ict.Tools.TinyWebServer
             {
                 string port = "8888";
                 string[] parameters = Environment.GetCommandLineArgs();
-                FLogFile = @"C:\Program Files (x86)\Jenkins\OpenPetraBuildWinTimotheus9248\log\Ict.Tools.WebServer.log";
-                Log("test");
-                return;
 
                 if (parameters.Length > 1)
                 {
@@ -97,6 +94,9 @@ namespace Ict.Tools.TinyWebServer
                     FMaxRunTime = TimeSpan.FromMinutes(Convert.ToInt32(parameters[3]));
                 }
                 
+//                FLogFile = @"C:\Program Files (x86)\Jenkins\OpenPetraBuildWinTimotheus9248\log\Ict.Tools.WebServer.log";
+                Log("test");
+                return;
                 string physicalDir = Directory.GetCurrentDirectory();
 
                 if (!(physicalDir.EndsWith(Path.DirectorySeparatorChar.ToString())))
