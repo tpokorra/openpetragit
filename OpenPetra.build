@@ -360,6 +360,7 @@ useful parameters
 &lt;project name="OpenPetra-userconfig">
     &lt;property name="Server.Port" value="${Server.Port}"/>
     &lt;property name="DBMS.Type" value="${DBMS.Type}"/>
+    &lt;property name="DBMS.DBHostOrFile" value="${DBMS.DBHostOrFile}"/>
     &lt;property name="DBMS.DBName" value="${DBMS.DBName}"/>
     &lt;property name="DBMS.UserName" value="${DBMS.UserName}"/>
     &lt;property name="DBMS.Password" value="${DBMS.Password}"/>
