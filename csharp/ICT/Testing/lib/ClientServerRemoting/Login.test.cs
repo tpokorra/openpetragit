@@ -54,11 +54,6 @@ namespace Ict.Testing.ClientServerRemoting
             new TLogging("../../log/test.log");
             new TAppSettingsManager("../../etc/TestServer.config");
             CommonNUnitFunctions.InitRootPath();
-
-            // stop any server that might still be running
-            CommonNUnitFunctions.nant("stopServer", true);
-
-            CommonNUnitFunctions.nant("startServer", false);
         }
 
         /// <summary>
@@ -67,7 +62,6 @@ namespace Ict.Testing.ClientServerRemoting
         [TearDown]
         public void TearDown()
         {
-            CommonNUnitFunctions.nant("stopServer", true);
         }
 
         /// <summary>
