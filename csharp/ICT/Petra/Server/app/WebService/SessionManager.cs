@@ -195,15 +195,7 @@ namespace Ict.Petra.Server.App.WebService
                 TLogging.Log(e.Message);
                 TLogging.Log(e.StackTrace);
                 Session["LoggedIn"] = false;
-                //DBAccess.GDBAccessObj.RollbackTransaction();
-                TLogging.Log("test1");
-                DBAccess.GDBAccessObj.CloseDBConnection();
-                TLogging.Log("test2");
-                DBAccess.GDBAccessObj.CloseDBConnection();
-                TLogging.Log("test3");
-                DBAccess.GDBAccessObj.CloseDBConnection();
-                TLogging.Log("test4");
-                DBAccess.GDBAccessObj.CloseDBConnection();
+                DBAccess.GetGDBAccessObjWithoutOpening().CloseDBConnection();
                 Session.Clear();
                 TLogging.Log("after closedbconnection");
                 return TClientManager.LoginErrorFromException(e);
