@@ -24,7 +24,9 @@
 using System;
 using System.Collections;
 using System.Data;
+using System.Data.Common;
 using System.Data.Odbc;
+using System.Runtime.Serialization;
 
 namespace Ict.Common.DB
 {
@@ -93,7 +95,7 @@ namespace Ict.Common.DB
         /// <param name="AStateChangeEventHandler">for connection state changes</param>
         /// <returns>Opened Connection (null if connection could not be established).
         /// </returns>
-        public IDbConnection GetConnection(IDataBaseRDBMS ADataBaseRDBMS,
+        public DbConnection GetConnection(IDataBaseRDBMS ADataBaseRDBMS,
             String AServer,
             String APort,
             String ADatabaseName,
@@ -112,7 +114,7 @@ namespace Ict.Common.DB
         }
 
         /// <summary>
-        /// Closes a DB connection.
+        /// Closes a DB connection. Also calls the <c>Dispose()</c> Method on the DB connection object.
         /// </summary>
         /// <remarks>
         /// Although the .NET FCL allows the <see cref="IDbConnection.Close" /> method to be
@@ -171,6 +173,7 @@ namespace Ict.Common.DB
     /// <summary>
     /// Thrown if an attempt is made to close an already/still closed DB Connection.
     /// </summary>
+    [Serializable()]
     public class EDBConnectionAlreadyClosedException : ApplicationException
     {
         /// <summary>
@@ -193,6 +196,26 @@ namespace Ict.Common.DB
         /// </summary>
         public EDBConnectionAlreadyClosedException(string AMessage, Exception AException) : base(AMessage, AException)
         {
+        }
+
+        /// <summary>
+        /// Only to be used by the .NET Serialization system (eg within .NET Remoting).
+        /// </summary>
+        /// <param name="info">The object that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        public EDBConnectionAlreadyClosedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
+        /// <summary>
+        /// Only to be used by the .NET Serialization system (eg within .NET Remoting).
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo" /> that holds the
+        /// serialized object data about the exception being thrown. </param>
+        /// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
         }
     }
     #endregion
