@@ -165,6 +165,7 @@ namespace Ict.Petra.Server.App.WebService
             try
             {
                 TLogging.Log("SessionManager.LoginInternal");
+                
                 TConnectedClient CurrentClient = TClientManager.ConnectClient(
                     username.ToUpper(), password.Trim(),
                     HttpContext.Current.Request.UserHostName,
@@ -262,7 +263,7 @@ namespace Ict.Petra.Server.App.WebService
         /// </summary>
         private static SortedList <string, TDataBase>FDatabaseObjects = new SortedList <string, TDataBase>();
 
-        static private TDataBase GetDatabaseFromSession()
+        static private TDataBase GetDatabaseFromSession(bool AOpenConnection = true)
         {
             // if another thread gets called, then the session object is null
             if (HttpContext.Current == null)
@@ -277,15 +278,16 @@ namespace Ict.Petra.Server.App.WebService
                 {
                     TDataBase db = new TDataBase();
 
-                    // wollen wir eine Db verbindung aufbauen? oder schliessen?
-                    TLogging.Log("sessionmanager establishconnection");
-                    db.EstablishDBConnection(TSrvSetting.RDMBSType,
-                        TSrvSetting.PostgreSQLServer,
-                        TSrvSetting.PostgreSQLServerPort,
-                        TSrvSetting.PostgreSQLDatabaseName,
-                        TSrvSetting.DBUsername,
-                        TSrvSetting.DBPassword,
-                        "");
+                    if (AOpenConnection)
+                    {
+                        db.EstablishDBConnection(TSrvSetting.RDMBSType,
+                            TSrvSetting.PostgreSQLServer,
+                            TSrvSetting.PostgreSQLServerPort,
+                            TSrvSetting.PostgreSQLDatabaseName,
+                            TSrvSetting.DBUsername,
+                            TSrvSetting.DBPassword,
+                            "");
+                    }
 
                     FDatabaseObjects.Add(Thread.CurrentThread.Name, db);
                 }
