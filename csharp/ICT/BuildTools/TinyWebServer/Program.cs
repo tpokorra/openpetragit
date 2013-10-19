@@ -100,26 +100,23 @@ namespace Ict.Tools.TinyWebServer
                 {
                     physicalDir = physicalDir + Path.DirectorySeparatorChar;
                 }
-Log("before getexec assembly location");
 
                 // Copy this hosting DLL into the /bin directory of the application
                 string FileName = Assembly.GetExecutingAssembly().Location;
-Log("filename " + FileName);
+
                 try
                 {
                     if (!Directory.Exists(physicalDir + "bin" + Path.DirectorySeparatorChar))
                     {
                         Directory.CreateDirectory(physicalDir + "bin" + Path.DirectorySeparatorChar);
                     }
-Log("before ocpy");
+
                     File.Copy(FileName, physicalDir + "bin" + Path.DirectorySeparatorChar + Path.GetFileName(FileName), true);
-Log("aftercopy");                    
                 }
                 catch
                 {
                     ;
                 }
-Log("before create application host");
 
                 Fthlw = (ThreadedHttpListenerWrapper)ApplicationHost.CreateApplicationHost(
                     typeof(ThreadedHttpListenerWrapper), "/", physicalDir);
@@ -130,8 +127,6 @@ Log("before create application host");
                 };
 
                 Fthlw.Configure(prefixes, "/", Directory.GetCurrentDirectory());
-                    Log(
-                        "  netsh http add urlacl url=http://+:" + port + "/ user=" + Environment.MachineName + "\\" + Environment.UserName);
 
                 try
                 {

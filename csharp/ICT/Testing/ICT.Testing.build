@@ -25,7 +25,6 @@
         <test assemblyname="${dir.bin}/Ict.Testing.lib.MFinance.GLForm.dll" />
 -->
     <nant inheritall="false" target="stopServer" buildfile="${path::combine(dir.root, 'OpenPetra.build')}" verbose="${verbose}"/>
-
 </target>
 
 <target name="test-tools">
