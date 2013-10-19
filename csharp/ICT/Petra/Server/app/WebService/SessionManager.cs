@@ -194,9 +194,10 @@ namespace Ict.Petra.Server.App.WebService
                 TLogging.Log(e.Message);
                 TLogging.Log(e.StackTrace);
                 Session["LoggedIn"] = false;
-                Ict.Common.DB.DBAccess.GDBAccessObj.RollbackTransaction();
+                //Ict.Common.DB.DBAccess.GDBAccessObj.RollbackTransaction();
                 DBAccess.GDBAccessObj.CloseDBConnection();
                 Session.Clear();
+                TLogging.Log("after closedbconnection");
                 return TClientManager.LoginErrorFromException(e);
             }
         }

@@ -936,6 +936,7 @@ namespace Ict.Common.Remoting.Server
                         }
 
                         #endregion
+                        TLogging.Log("throw EClientVersionMismatchException");
                         throw new EClientVersionMismatchException(String.Format(StrClientServerExeProgramVersionMismatchMessage,
                                 AClientExeVersion.ToString(), TSrvSetting.ApplicationVersion.ToString()));
                     }
@@ -947,6 +948,7 @@ namespace Ict.Common.Remoting.Server
                     // Perform login checks such as User authentication and Site Key check
                     try
                     {
+TLogging.Log("performloginchecks");
                         AUserInfo = PerformLoginChecks(AUserName,
                             APassword,
                             AClientComputerName,
