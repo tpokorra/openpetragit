@@ -164,6 +164,7 @@ namespace Ict.Petra.Server.App.WebService
 
             try
             {
+                TLogging.Log("SessionManager.LoginInternal");
                 TConnectedClient CurrentClient = TClientManager.ConnectClient(
                     username.ToUpper(), password.Trim(),
                     HttpContext.Current.Request.UserHostName,
@@ -189,6 +190,7 @@ namespace Ict.Petra.Server.App.WebService
             }
             catch (Exception e)
             {
+                TLogging.Log("SessionManager exception "+ e.GetType().ToString());
                 TLogging.Log(e.Message);
                 TLogging.Log(e.StackTrace);
                 Session["LoggedIn"] = false;
