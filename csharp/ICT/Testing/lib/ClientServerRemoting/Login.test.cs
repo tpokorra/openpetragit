@@ -125,37 +125,12 @@ namespace Ict.Testing.ClientServerRemoting
             TFileVersionInfo ServerVersion = new TFileVersionInfo(strServerVersion);
             sr.Close();
             
-            StreamWriter sw = new StreamWriter("../../delivery/bin/version.txt");
-            TFileVersionInfo testVersion =
-                new TFileVersionInfo(new Version(ServerVersion.FileMajorPart, ServerVersion.FileMinorPart, ServerVersion.FileBuildPart - 1,
-                        ServerVersion.FilePrivatePart));
-            sw.WriteLine(testVersion.ToString());
-            sw.Close();
-            Assert.AreEqual(eLoginEnum.eLoginVersionMismatch, TPetraConnector.Connect("../../etc/TestClient.config", false), "client is too old test1");
-
-            sw = new StreamWriter("../../delivery/bin/version.txt");
-            testVersion =
-                new TFileVersionInfo(new Version(ServerVersion.FileMajorPart, ServerVersion.FileMinorPart, ServerVersion.FileBuildPart - 1,
-                        ServerVersion.FilePrivatePart));
-            sw.WriteLine(testVersion.ToString());
-            sw.Close();
-            Assert.AreEqual(eLoginEnum.eLoginVersionMismatch, TPetraConnector.Connect("../../etc/TestClient.config", false), "client is too old test2");
-            
-            sw = new StreamWriter("../../delivery/bin/version.txt");
-            testVersion =
-                new TFileVersionInfo(new Version(ServerVersion.FileMajorPart, ServerVersion.FileMinorPart, ServerVersion.FileBuildPart - 1,
-                        ServerVersion.FilePrivatePart));
-            sw.WriteLine(testVersion.ToString());
-            sw.Close();
-            Assert.AreEqual(eLoginEnum.eLoginVersionMismatch, TPetraConnector.Connect("../../etc/TestClient.config", false), "client is too old test3");
-            TLogging.Log("test4");
-
             Assert.AreEqual(eLoginEnum.eLoginSucceeded, TPetraConnector.Connect(
                     "../../etc/TestClient.config", false), "connecting with the same version number");
             TPetraConnector.Disconnect();
 
-            sw = new StreamWriter("../../delivery/bin/version.txt");
-            testVersion =
+            StreamWriter sw = new StreamWriter("../../delivery/bin/version.txt");
+            TFileVersionInfo testVersion =
                 new TFileVersionInfo(new Version(ServerVersion.FileMajorPart, ServerVersion.FileMinorPart, ServerVersion.FileBuildPart,
                         ServerVersion.FilePrivatePart + 1));
             sw.WriteLine(testVersion.ToString());

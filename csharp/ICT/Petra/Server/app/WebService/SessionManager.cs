@@ -195,14 +195,11 @@ namespace Ict.Petra.Server.App.WebService
                 TLogging.Log(e.Message);
                 TLogging.Log(e.StackTrace);
                 Session["LoggedIn"] = false;
-                try
+                TDataBase db = DBAccess.GetGDBAccessObjWithoutOpening();
+                if (db != null)
                 {
-                DBAccess.GetGDBAccessObjWithoutOpening().CloseDBConnection();
-                TLogging.Log("after closedbconnection");
-                }
-                catch(Exception e2)
-                {
-                    TLogging.Log(e2.ToString());
+                    db.CloseDBConnection();
+                    TLogging.Log("after closedbconnection");
                 }
                 Session.Clear();
                 return TClientManager.LoginErrorFromException(e);
