@@ -301,7 +301,10 @@ namespace Ict.Petra.Server.App.WebService
                     // disconnect normal users after 3 hours of inactivity
                     TServerManager.TheCastedServerManager.DisconnectTimedoutDatabaseConnections(3 * 60 * 60, "");
 
-                    TServerManager.TheCastedServerManager.EstablishDBConnection();
+                    if (AOpenConnection)
+                    {
+                        TServerManager.TheCastedServerManager.EstablishDBConnection();
+                    }
                 }
             }
 
