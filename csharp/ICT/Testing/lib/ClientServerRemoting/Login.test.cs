@@ -65,6 +65,20 @@ namespace Ict.Testing.ClientServerRemoting
         }
 
         /// <summary>
+        /// test what happens with multiple consecutive logins
+        /// </summary>
+        [Test]
+        public void TestManyLogins()
+        {
+            for (int i = 0; i < 15; i++)
+            {
+                Assert.AreEqual(eLoginEnum.eLoginSucceeded, TPetraConnector.Connect(
+                    "../../etc/TestClient.config", false), "connecting the client");
+                TPetraConnector.Disconnect();
+            }
+        }
+        
+        /// <summary>
         /// test how authentication fails and succeeds
         /// </summary>
         [Test]
