@@ -35,7 +35,6 @@ using System.IO;
 using System.Xml;
 
 using Ict.Common;
-using Ict.Common.Exceptions;
 using Ict.Common.DB.DBCaching;
 using Ict.Common.DB.Exceptions;
 using Ict.Common.IO;

@@ -34,7 +34,7 @@ using System.Runtime.Serialization;
 // Put remotable Exceptions which are specific to a certain Petra Module
 // into shared Petra Module DLLs - eg Ict.Petra.Shared.MPartner, Ict.Petra.Shared.MFinance...
 
-namespace Ict.Common.Exceptions
+namespace Ict.Common
 {
     #region OutOfRangeException
 

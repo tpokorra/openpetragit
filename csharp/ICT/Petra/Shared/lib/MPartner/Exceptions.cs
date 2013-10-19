@@ -23,6 +23,7 @@
 //
 using System;
 using System.Runtime.Serialization;
+using Ict.Common;
 using Ict.Common.Remoting.Shared;
 using Ict.Petra.Shared.Security;
 
