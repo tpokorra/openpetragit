@@ -690,6 +690,7 @@ namespace Ict.Common.Verification
         {
         }
 
+        /// <summary>
         /// constructor
         /// </summary>
         public TVerificationResultCollection(System.Guid ACurrentDataValidationRunID)
