@@ -73,8 +73,11 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             btnOk.Text = (_openMode == OpenMode.MODE_ADD) ? "Add" : "Modify";
             btnOk.Enabled = (_openMode != OpenMode.MODE_READONLY);
+
             if (_openMode == OpenMode.MODE_ADD)
+            {
                 lblInfo.Text = "Enter the properties for the new web site.";
+            }
 
             btnBrowse.Enabled = (_openMode != OpenMode.MODE_READONLY);
             btnPageBrowse.Enabled = btnBrowse.Enabled && txtPhysicalPath.Text != "";
@@ -82,12 +85,16 @@ namespace Ict.Tools.OpenPetraWebServer
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            if (!ValidateInput()) DialogResult = DialogResult.None;
+            if (!ValidateInput())
+            {
+                DialogResult = DialogResult.None;
+            }
         }
 
         private bool ValidateInput()
         {
             string sTry = txtKeyName.Text.Trim();
+
             if (sTry.Length == 0)
             {
                 MessageBox.Show("You must enter a friendly name for this web site.",
@@ -126,16 +133,20 @@ namespace Ict.Tools.OpenPetraWebServer
 
             char[] chars = sTry.ToCharArray();
             bool bOk = true;
+
             foreach (char c in chars)
             {
-                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '/')
+                if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z')) || ((c >= '0') && (c <= '9')) || (c == '/'))
+                {
                     continue;
+                }
                 else
                 {
                     bOk = false;
                     break;
                 }
             }
+
             if (!bOk)
             {
                 MessageBox.Show("The format of the virtual path is not valid.  It must be made up of alphanumeric characters only.",
@@ -149,6 +160,7 @@ namespace Ict.Tools.OpenPetraWebServer
 
             sTry = txtPortNumber.Text.Trim();
             int n;
+
             if (!Int32.TryParse(sTry, out n))
             {
                 MessageBox.Show("Please enter a port number.",
@@ -160,7 +172,7 @@ namespace Ict.Tools.OpenPetraWebServer
                 return false;
             }
 
-            if (n < 80 || n > 65535)
+            if ((n < 80) || (n > 65535))
             {
                 MessageBox.Show("The port number is not valid.  It should be between 80 and 65535.",
                     Program.ApplicationTitle,
@@ -183,6 +195,7 @@ namespace Ict.Tools.OpenPetraWebServer
             }
 
             sTry = txtPhysicalPath.Text.ToLower().Trim();
+
             if (sTry == "")
             {
                 MessageBox.Show("Please enter a physical path.",
@@ -199,36 +212,41 @@ namespace Ict.Tools.OpenPetraWebServer
                 MessageBox.Show("The physical path does not exist.",
                     Program.ApplicationTitle,
                     MessageBoxButtons.OK,
-                MessageBoxIcon.Exclamation);
+                    MessageBoxIcon.Exclamation);
                 txtPhysicalPath.Focus();
                 txtPhysicalPath.SelectAll();
                 return false;
             }
 
-            foreach (KeyValuePair<string, WebSite> kvp in _webSites)
+            foreach (KeyValuePair <string, WebSite>kvp in _webSites)
             {
                 //the active key will be gone so we don't need to validate against that one
-                if (_activeSitekey != null && kvp.Key.Equals(_activeSitekey)) continue;
+                if ((_activeSitekey != null) && kvp.Key.Equals(_activeSitekey))
+                {
+                    continue;
+                }
 
                 n = Convert.ToInt32(txtPortNumber.Text);
+
                 if (kvp.Value.Port == n)
                 {
                     MessageBox.Show("The port number is the same as another site that is already in use.",
                         Program.ApplicationTitle,
                         MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
+                        MessageBoxIcon.Exclamation);
                     txtPortNumber.Focus();
                     txtPortNumber.SelectAll();
                     return false;
                 }
 
                 sTry = txtPhysicalPath.Text;
+
                 if (kvp.Value.PhysicalPath.ToLower().Equals(sTry))
                 {
                     MessageBox.Show("The physical path is the same as another site that is already in use.",
                         Program.ApplicationTitle,
                         MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
+                        MessageBoxIcon.Exclamation);
                     txtPhysicalPath.Focus();
                     txtPhysicalPath.SelectAll();
                     return false;
@@ -241,10 +259,15 @@ namespace Ict.Tools.OpenPetraWebServer
         private void btnBrowse_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
+
             dlg.RootFolder = Environment.SpecialFolder.MyComputer;
             dlg.Description = "Select the physical location for the " + txtVirtualPath.Text + " website.";
             dlg.ShowNewFolderButton = false;
-            if (dlg.ShowDialog() == DialogResult.Cancel) return;
+
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+            {
+                return;
+            }
 
             txtPhysicalPath.Text = dlg.SelectedPath;
             btnPageBrowse.Enabled = txtPhysicalPath.Text != "";
@@ -253,16 +276,29 @@ namespace Ict.Tools.OpenPetraWebServer
         private void btnPageBrowse_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
+
             dlg.CheckFileExists = true;
             dlg.InitialDirectory = txtPhysicalPath.Text;
             dlg.Title = "Select the Default Page for the Site";
-            if (txtDefaultPage.Text != "") dlg.FileName = txtPhysicalPath.Text + "\\" + txtDefaultPage.Text;
-            if (dlg.ShowDialog() == DialogResult.Cancel) return;
+
+            if (txtDefaultPage.Text != "")
+            {
+                dlg.FileName = txtPhysicalPath.Text + "\\" + txtDefaultPage.Text;
+            }
+
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+            {
+                return;
+            }
 
             if (Path.GetDirectoryName(dlg.FileName).ToLower() != txtPhysicalPath.Text.ToLower())
+            {
                 MessageBox.Show("You must choose a file that is in the directory specified above.", Program.ApplicationTitle, MessageBoxButtons.OK);
+            }
             else
+            {
                 txtDefaultPage.Text = Path.GetFileName(dlg.FileName);
+            }
         }
 
         private void txtPhysicalPath_TextChanged(object sender, EventArgs e)
@@ -272,7 +308,7 @@ namespace Ict.Tools.OpenPetraWebServer
 
         private void btnHelp_Click(object sender, EventArgs e)
         {
-            ((MainForm)this.Owner).ShowHelpWindow(this, null);
+            ((MainForm) this.Owner).ShowHelpWindow(this, null);
         }
     }
 }

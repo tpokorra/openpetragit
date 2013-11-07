@@ -1,14 +1,14 @@
 /* **********************************************************************************
- *
- * Copyright (c) Microsoft Corporation. All rights reserved.
- *
- * This source code is subject to terms and conditions of the Microsoft Public
- * License (Ms-PL). A copy of the license can be found in the license.htm file
- * included in this distribution.
- *
- * You must not remove this notice, or any other, from this software.
- *
- * **********************************************************************************/
+*
+* Copyright (c) Microsoft Corporation. All rights reserved.
+*
+* This source code is subject to terms and conditions of the Microsoft Public
+* License (Ms-PL). A copy of the license can be found in the license.htm file
+* included in this distribution.
+*
+* You must not remove this notice, or any other, from this software.
+*
+* **********************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,8 @@ namespace Ict.Tools.OpenPetraRuntimeHost
     /// <summary>
     /// Host class
     /// </summary>
-    public class Host : MarshalByRefObject, IRegisteredObject {
+    public class Host : MarshalByRefObject, IRegisteredObject
+    {
         Server _server;
 
         int _port;
@@ -43,22 +44,33 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         string _installPath;
         string _physicalClientScriptPath;
         string _lowerCasedClientScriptPathWithTrailingSlash;
-        
+
         /// <summary>
         /// Returns true if remote connection is allowed
         /// </summary>
-        public bool AllowRemoteConnection { get { return _allowRemoteConnection; } }
+        public bool AllowRemoteConnection {
+            get
+            {
+                return _allowRemoteConnection;
+            }
+        }
 
         /// <summary>
         /// Returns the default page, if any
         /// </summary>
-        public string DefaultPage { get { return _defaultPage; } }
+        public string DefaultPage {
+            get
+            {
+                return _defaultPage;
+            }
+        }
 
         /// <summary>
         /// Public override
         /// </summary>
         /// <returns></returns>
-        public override object InitializeLifetimeService() {
+        public override object InitializeLifetimeService()
+        {
             // never expire the license
             return null;
         }
@@ -66,7 +78,8 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         /// <summary>
         /// Main constructor for host
         /// </summary>
-        public Host() {
+        public Host()
+        {
             HostingEnvironment.RegisterObject(this);
         }
 
@@ -94,35 +107,44 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         /// <summary>
         /// Main method to process a request
         /// </summary>
-        public void ProcessRequest(Connection conn) {
+        public void ProcessRequest(Connection conn)
+        {
             // Add a pending call to make sure our thread doesn't get killed
             AddPendingCall();
 
-            try {
+            try
+            {
                 Request request = new Request(_server, this, conn);
                 request.Process();
             }
-            finally {
+            finally
+            {
                 RemovePendingCall();
             }
         }
 
-        void WaitForPendingCallsToFinish() {
-            for (; ; ) {
+        void WaitForPendingCallsToFinish()
+        {
+            for (;; )
+            {
                 if (_pendingCallsCount <= 0)
+                {
                     break;
+                }
 
                 Thread.Sleep(250);
             }
         }
 
-        void AddPendingCall() {
+        void AddPendingCall()
+        {
 #pragma warning disable 0420
             Interlocked.Increment(ref _pendingCallsCount);
 #pragma warning restore 0420
         }
 
-        void RemovePendingCall() {
+        void RemovePendingCall()
+        {
 #pragma warning disable 0420
             Interlocked.Decrement(ref _pendingCallsCount);
 #pragma warning restore 0420
@@ -131,13 +153,16 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         /// <summary>
         /// Shuts down the hosting environment
         /// </summary>
-        public void Shutdown() {
+        public void Shutdown()
+        {
             HostingEnvironment.InitiateShutdown();
         }
 
-        void IRegisteredObject.Stop(bool immediate) {
+        void IRegisteredObject.Stop(bool immediate)
+        {
             // Unhook the Host so Server will process the requests in the new appdomain.
-            if (_server != null) {
+            if (_server != null)
+            {
                 _server.HostStopped();
             }
 
@@ -150,71 +175,119 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         /// <summary>
         /// Returns the install path of the application
         /// </summary>
-        public string InstallPath { get { return _installPath; } }
+        public string InstallPath {
+            get
+            {
+                return _installPath;
+            }
+        }
 
         /// <summary>
         /// Returns the lower case script path with trailing slash
         /// </summary>
-        public string NormalizedClientScriptPath { get { return _lowerCasedClientScriptPathWithTrailingSlash; } }
+        public string NormalizedClientScriptPath {
+            get
+            {
+                return _lowerCasedClientScriptPathWithTrailingSlash;
+            }
+        }
 
         /// <summary>
         /// Returns the lower case virtual path with trailing slash
         /// </summary>
-        public string NormalizedVirtualPath { get { return _lowerCasedVirtualPathWithTrailingSlash; } }
+        public string NormalizedVirtualPath {
+            get
+            {
+                return _lowerCasedVirtualPathWithTrailingSlash;
+            }
+        }
 
         /// <summary>
         /// returns the physical client script path
         /// </summary>
-        public string PhysicalClientScriptPath { get { return _physicalClientScriptPath; } }
+        public string PhysicalClientScriptPath {
+            get
+            {
+                return _physicalClientScriptPath;
+            }
+        }
 
         /// <summary>
         /// returns the physical path
         /// </summary>
-        public string PhysicalPath { get { return _physicalPath; } }
+        public string PhysicalPath {
+            get
+            {
+                return _physicalPath;
+            }
+        }
 
         /// <summary>
         /// Returns the port number
         /// </summary>
-        public int Port { get { return _port; } }
+        public int Port {
+            get
+            {
+                return _port;
+            }
+        }
 
         /// <summary>
         /// Returns the virtual path
         /// </summary>
-        public string VirtualPath { get { return _virtualPath; } }
+        public string VirtualPath {
+            get
+            {
+                return _virtualPath;
+            }
+        }
 
         /// <summary>
         /// True if the virtual path is in the app path
         /// </summary>
-        public bool IsVirtualPathInApp(String path) {
+        public bool IsVirtualPathInApp(String path)
+        {
             bool isClientScriptPath;
+
             return IsVirtualPathInApp(path, out isClientScriptPath);
         }
 
         /// <summary>
         /// Returns true if path is in app and also returns true/false if path is client script path
         /// </summary>
-        public bool IsVirtualPathInApp(string path, out bool isClientScriptPath) {
+        public bool IsVirtualPathInApp(string path, out bool isClientScriptPath)
+        {
             isClientScriptPath = false;
 
-            if (path == null) {
+            if (path == null)
+            {
                 return false;
             }
 
-            if (_virtualPath == "/" && path.StartsWith("/", StringComparison.Ordinal)) {
+            if ((_virtualPath == "/") && path.StartsWith("/", StringComparison.Ordinal))
+            {
                 if (path.StartsWith(_lowerCasedClientScriptPathWithTrailingSlash, StringComparison.Ordinal))
+                {
                     isClientScriptPath = true;
+                }
+
                 return true;
             }
 
             path = CultureInfo.InvariantCulture.TextInfo.ToLower(path);
 
             if (path.StartsWith(_lowerCasedVirtualPathWithTrailingSlash, StringComparison.Ordinal))
+            {
                 return true;
+            }
 
             if (path == _lowerCasedVirtualPath)
+            {
                 return true;
+            }
 
-            if (path.StartsWith(_lowerCasedClientScriptPathWithTrailingSlash, StringComparison.Ordinal)) {
+            if (path.StartsWith(_lowerCasedClientScriptPathWithTrailingSlash, StringComparison.Ordinal))
+            {
                 isClientScriptPath = true;
                 return true;
             }
@@ -225,10 +298,15 @@ namespace Ict.Tools.OpenPetraRuntimeHost
         /// <summary>
         /// Returns true if the path is the app path
         /// </summary>
-        public bool IsVirtualPathAppPath(string path) {
-            if (path == null) return false;
+        public bool IsVirtualPathAppPath(string path)
+        {
+            if (path == null)
+            {
+                return false;
+            }
+
             path = CultureInfo.InvariantCulture.TextInfo.ToLower(path);
-            return (path == _lowerCasedVirtualPath || path == _lowerCasedVirtualPathWithTrailingSlash);
+            return path == _lowerCasedVirtualPath || path == _lowerCasedVirtualPathWithTrailingSlash;
         }
     }
 }

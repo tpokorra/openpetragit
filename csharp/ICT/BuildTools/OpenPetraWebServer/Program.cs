@@ -63,10 +63,30 @@ namespace Ict.Tools.OpenPetraWebServer
         private static string _ApplicationTitleAndVersion = APPLICATION_TITLE;
         private static string _ConfigFilePath = System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-        public static string ApplicationTitle { get { return APPLICATION_TITLE; } }
-        public static string ApplicationTitleAndVersion { get { return _ApplicationTitleAndVersion; } }
-        public static string FileVersion { get { return _Version; } }
-        public static string ConfigurationFilePath { get { return _ConfigFilePath; } }
+        public static string ApplicationTitle {
+            get
+            {
+                return APPLICATION_TITLE;
+            }
+        }
+        public static string ApplicationTitleAndVersion {
+            get
+            {
+                return _ApplicationTitleAndVersion;
+            }
+        }
+        public static string FileVersion {
+            get
+            {
+                return _Version;
+            }
+        }
+        public static string ConfigurationFilePath {
+            get
+            {
+                return _ConfigFilePath;
+            }
+        }
 
         public static uint UM_ACTIVATE_APP = 0x2123;
         public static uint UM_CLOSE_APP = 0x2124;
@@ -105,6 +125,7 @@ namespace Ict.Tools.OpenPetraWebServer
                 {
                     // There must be another window in the tray
                     IntPtr hWnd = FindWindow(null, APPLICATION_TITLE);
+
                     if (hWnd != null)
                     {
                         // We need to activate the other app
@@ -116,6 +137,7 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 // We use a command line driven option
                 CommandLineArgs commandLineArgs = new CommandLineArgs(args);
+
                 if (commandLineArgs.IsValid)
                 {
                     // Command line is valid so we will use the Small UI
@@ -125,11 +147,13 @@ namespace Ict.Tools.OpenPetraWebServer
                         // Show a message box unless /q
                         if (!commandLineArgs.SuppressStartupMessages)
                         {
-                            System.Windows.Forms.MessageBox.Show("The port you have specified is in use.  Check the System Tray to see if an instance of the web server is already running.",
+                            System.Windows.Forms.MessageBox.Show(
+                                "The port you have specified is in use.  Check the System Tray to see if an instance of the web server is already running.",
                                 APPLICATION_TITLE,
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Exclamation);
                         }
+
                         // Now we just quit without starting anything
                     }
                     else
@@ -137,10 +161,10 @@ namespace Ict.Tools.OpenPetraWebServer
                         Application.EnableVisualStyles();
                         Application.SetCompatibleTextRenderingDefault(false);
                         Application.Run(new SmallUIForm(commandLineArgs.PhysicalPath,
-                                                        commandLineArgs.VirtualPath,
-                                                        commandLineArgs.Port,
-                                                        commandLineArgs.DefaultPage,
-                                                        commandLineArgs.AcceptRemoteConnection));
+                                commandLineArgs.VirtualPath,
+                                commandLineArgs.Port,
+                                commandLineArgs.DefaultPage,
+                                commandLineArgs.AcceptRemoteConnection));
                     }
                 }
                 else
@@ -189,6 +213,7 @@ namespace Ict.Tools.OpenPetraWebServer
 
             // At runtime the help will be in the folder beneath the runtime
             string tryFolder = Path.Combine(myFolder, "ServerHelp");
+
             if (Directory.Exists(tryFolder))
             {
                 physicalPath = tryFolder;
@@ -201,6 +226,7 @@ namespace Ict.Tools.OpenPetraWebServer
                 {
                     tryFolder = myFolder;
                     int pos = tryFolder.LastIndexOf('\\');
+
                     for (int i = 0; i < 1 && pos >= 0; i++)
                     {
                         tryFolder = tryFolder.Substring(0, pos);
@@ -208,6 +234,7 @@ namespace Ict.Tools.OpenPetraWebServer
                     }
 
                     tryFolder = Path.Combine(tryFolder, "ServerHelp");
+
                     if (Directory.Exists(tryFolder))
                     {
                         physicalPath = tryFolder;

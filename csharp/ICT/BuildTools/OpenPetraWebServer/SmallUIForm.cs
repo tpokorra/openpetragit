@@ -89,7 +89,7 @@ namespace Ict.Tools.OpenPetraWebServer
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
-        // Message handlers for the GUI 
+        // Message handlers for the GUI
 
         private void SmallUIForm_Shown(object sender, EventArgs e)
         {
@@ -117,10 +117,10 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             if (_exitMenuWasSelected)
             {
-                if (_started && MessageBox.Show(Program.SHUTDOWN_MESSAGE,
-                                Program.ApplicationTitle,
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) == DialogResult.No)
+                if (_started && (MessageBox.Show(Program.SHUTDOWN_MESSAGE,
+                                     Program.ApplicationTitle,
+                                     MessageBoxButtons.YesNo,
+                                     MessageBoxIcon.Question) == DialogResult.No))
                 {
                     e.Cancel = true;
                     _exitMenuWasSelected = false;
@@ -150,6 +150,7 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 linkLabel.Text = _webSite.Url;
             }
+
             linkLabel.Enabled = _webSite != null && _webSite.Url != String.Empty && _started;
 
             lblServerStatus.Text = _started ? "The server is running" : "The server has been stopped";
@@ -168,7 +169,7 @@ namespace Ict.Tools.OpenPetraWebServer
 
         private void btnHelp_Click(object sender, EventArgs e)
         {
-            if (!_helpServerStarted && _helpSite != null && _helpSite.WebServer != null)
+            if (!_helpServerStarted && (_helpSite != null) && (_helpSite.WebServer != null))
             {
                 _helpSite.WebServer.Start();
                 _helpServerStarted = true;
@@ -237,6 +238,7 @@ namespace Ict.Tools.OpenPetraWebServer
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AboutMe dlg = new AboutMe(this.WindowState == FormWindowState.Normal);
+
             dlg.ShowDialog(this);
         }
 
@@ -251,7 +253,11 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 try
                 {
-                    _webSite.WebServer = new Server(_webSite.Port, _webSite.VirtualPath, _webSite.PhysicalPath, _webSite.DefaultPage, _allowRemoteConnection);
+                    _webSite.WebServer = new Server(_webSite.Port,
+                        _webSite.VirtualPath,
+                        _webSite.PhysicalPath,
+                        _webSite.DefaultPage,
+                        _allowRemoteConnection);
                     _webSite.WebServer.Start();
                 }
                 catch (Exception)

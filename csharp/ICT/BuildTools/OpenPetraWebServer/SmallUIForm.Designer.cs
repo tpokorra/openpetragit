@@ -1,4 +1,27 @@
-﻿namespace Ict.Tools.OpenPetraWebServer
+﻿//
+// DO NOT REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+//
+// @Authors:
+//       >>>> Put your full name or just a shortname here <<<<
+//
+// Copyright 2004-2013 by OM International
+//
+// This file is part of OpenPetra.org.
+//
+// OpenPetra.org is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenPetra.org is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenPetra.org.  If not, see <http://www.gnu.org/licenses/>.
+//
+namespace Ict.Tools.OpenPetraWebServer
 {
     partial class SmallUIForm
     {
@@ -17,6 +40,7 @@
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -60,78 +84,78 @@
             label1 = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
+            //
             // label3
-            // 
+            //
             label3.AutoSize = true;
             label3.Location = new System.Drawing.Point(245, 63);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(170, 13);
             label3.TabIndex = 6;
             label3.Text = "Port number ( this must be unique )";
-            // 
+            //
             // label2
-            // 
+            //
             label2.AutoSize = true;
             label2.Location = new System.Drawing.Point(13, 15);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(179, 13);
             label2.TabIndex = 2;
             label2.Text = "Physical path on the local file system";
-            // 
+            //
             // label1
-            // 
+            //
             label1.AutoSize = true;
             label1.Location = new System.Drawing.Point(13, 63);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(185, 13);
             label1.TabIndex = 4;
             label1.Text = "Optional virtual path ( e.g.OpenPetra )";
-            // 
+            //
             // txtDefaultPage
-            // 
+            //
             this.txtDefaultPage.Location = new System.Drawing.Point(13, 127);
             this.txtDefaultPage.Name = "txtDefaultPage";
             this.txtDefaultPage.ReadOnly = true;
             this.txtDefaultPage.Size = new System.Drawing.Size(202, 20);
             this.txtDefaultPage.TabIndex = 9;
-            // 
+            //
             // label4
-            // 
+            //
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(13, 111);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(479, 13);
             this.label4.TabIndex = 8;
             this.label4.Text = "Default page ( you can leave this blank if it is a standard page name like defaul" +
-    "t.htm or default.aspx )";
-            // 
+                               "t.htm or default.aspx )";
+            //
             // txtPortNumber
-            // 
+            //
             this.txtPortNumber.Location = new System.Drawing.Point(248, 79);
             this.txtPortNumber.Name = "txtPortNumber";
             this.txtPortNumber.ReadOnly = true;
             this.txtPortNumber.Size = new System.Drawing.Size(58, 20);
             this.txtPortNumber.TabIndex = 7;
-            // 
+            //
             // txtPhysicalPath
-            // 
+            //
             this.txtPhysicalPath.Location = new System.Drawing.Point(13, 31);
             this.txtPhysicalPath.Name = "txtPhysicalPath";
             this.txtPhysicalPath.ReadOnly = true;
             this.txtPhysicalPath.Size = new System.Drawing.Size(565, 20);
             this.txtPhysicalPath.TabIndex = 3;
-            // 
+            //
             // txtVirtualPath
-            // 
+            //
             this.txtVirtualPath.Location = new System.Drawing.Point(13, 79);
             this.txtVirtualPath.Name = "txtVirtualPath";
             this.txtVirtualPath.ReadOnly = true;
             this.txtVirtualPath.Size = new System.Drawing.Size(164, 20);
             this.txtVirtualPath.TabIndex = 5;
-            // 
+            //
             // btnHide
-            // 
+            //
             this.btnHide.Location = new System.Drawing.Point(503, 196);
             this.btnHide.Name = "btnHide";
             this.btnHide.Size = new System.Drawing.Size(75, 23);
@@ -139,9 +163,9 @@
             this.btnHide.Text = "&Hide";
             this.btnHide.UseVisualStyleBackColor = true;
             this.btnHide.Click += new System.EventHandler(this.btnHide_Click);
-            // 
+            //
             // btnHelp
-            // 
+            //
             this.btnHelp.Location = new System.Drawing.Point(12, 196);
             this.btnHelp.Name = "btnHelp";
             this.btnHelp.Size = new System.Drawing.Size(75, 23);
@@ -149,104 +173,106 @@
             this.btnHelp.Text = "&Help";
             this.btnHelp.UseVisualStyleBackColor = true;
             this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
-            // 
+            //
             // notifyIcon
-            // 
+            //
             this.notifyIcon.ContextMenuStrip = this.contextMenuStrip;
             this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
             this.notifyIcon.DoubleClick += new System.EventHandler(this.notifyIcon_DoubleClick);
-            // 
+            //
             // contextMenuStrip
-            // 
+            //
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem,
-            this.closeToolStripMenuItem,
-            this.startToolStripMenuItem,
-            this.browseToolStripMenuItem,
-            this.helpToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.exitToolStripMenuItem});
+                    this.openToolStripMenuItem,
+                    this.closeToolStripMenuItem,
+                    this.startToolStripMenuItem,
+                    this.browseToolStripMenuItem,
+                    this.helpToolStripMenuItem,
+                    this.toolStripMenuItem1,
+                    this.exitToolStripMenuItem
+                });
             this.contextMenuStrip.Name = "contextMenuStrip1";
             this.contextMenuStrip.Size = new System.Drawing.Size(113, 142);
             this.contextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_Opening);
-            // 
+            //
             // openToolStripMenuItem
-            // 
+            //
             this.openToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
-            // 
+            //
             // closeToolStripMenuItem
-            // 
+            //
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
-            // 
+            //
             // startToolStripMenuItem
-            // 
+            //
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
             this.startToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.startToolStripMenuItem_Click);
-            // 
+            //
             // browseToolStripMenuItem
-            // 
+            //
             this.browseToolStripMenuItem.Name = "browseToolStripMenuItem";
             this.browseToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.browseToolStripMenuItem.Text = "Browse";
             this.browseToolStripMenuItem.Click += new System.EventHandler(this.browseToolStripMenuItem_Click);
-            // 
+            //
             // helpToolStripMenuItem
-            // 
+            //
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contentsToolStripMenuItem,
-            this.aboutToolStripMenuItem});
+                    this.contentsToolStripMenuItem,
+                    this.aboutToolStripMenuItem
+                });
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.helpToolStripMenuItem.Text = "Help";
-            // 
+            //
             // contentsToolStripMenuItem
-            // 
+            //
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
             this.contentsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.contentsToolStripMenuItem.Text = "Contents";
             this.contentsToolStripMenuItem.Click += new System.EventHandler(this.contentsToolStripMenuItem_Click);
-            // 
+            //
             // aboutToolStripMenuItem
-            // 
+            //
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
             this.aboutToolStripMenuItem.Text = "About ...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-            // 
+            //
             // toolStripMenuItem1
-            // 
+            //
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(109, 6);
-            // 
+            //
             // exitToolStripMenuItem
-            // 
+            //
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
+            //
             // lblServerStatus
-            // 
+            //
             this.lblServerStatus.AutoSize = true;
             this.lblServerStatus.Location = new System.Drawing.Point(48, 164);
             this.lblServerStatus.Name = "lblServerStatus";
             this.lblServerStatus.Size = new System.Drawing.Size(168, 13);
             this.lblServerStatus.TabIndex = 10;
             this.lblServerStatus.Text = "Starting the server.  Please wait ...";
-            // 
+            //
             // linkLabel
-            // 
+            //
             this.linkLabel.AutoSize = true;
             this.linkLabel.Location = new System.Drawing.Point(245, 164);
             this.linkLabel.Name = "linkLabel";
@@ -255,14 +281,14 @@
             this.linkLabel.TabStop = true;
             this.linkLabel.Text = "linkLabel";
             this.linkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel_LinkClicked);
-            // 
+            //
             // timer
-            // 
+            //
             this.timer.Interval = 2000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
-            // 
+            //
             // chkAllowRemoteConnection
-            // 
+            //
             this.chkAllowRemoteConnection.AutoSize = true;
             this.chkAllowRemoteConnection.Enabled = false;
             this.chkAllowRemoteConnection.Location = new System.Drawing.Point(436, 79);
@@ -271,9 +297,9 @@
             this.chkAllowRemoteConnection.TabIndex = 12;
             this.chkAllowRemoteConnection.Text = "Allow remote connection";
             this.chkAllowRemoteConnection.UseVisualStyleBackColor = true;
-            // 
+            //
             // SmallUIForm
-            // 
+            //
             this.AcceptButton = this.btnHide;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -304,7 +330,6 @@
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

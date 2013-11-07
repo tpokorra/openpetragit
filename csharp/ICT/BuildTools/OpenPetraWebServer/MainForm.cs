@@ -31,18 +31,18 @@ using System.Windows.Forms;
 using Ict.Tools.OpenPetraRuntimeHost;
 
 /********************************************************************************************
- * 
- * This class is the main multi-site UI for the Open Petra Web Server application.
- * 
- * The application as a whole integrates with the Microsoft Cassini web server code
- * which is preserved more or less in tact with the exception that 'cosmetic' options
- * to allow remote connections and to specify a default page have been added.
- * 
- * 
- * Unlike IIS, multiple web sites must be on different ports - a separate instance of the 
- * Cassini web server is created for each site.
- * 
- * ******************************************************************************************/
+*
+* This class is the main multi-site UI for the Open Petra Web Server application.
+*
+* The application as a whole integrates with the Microsoft Cassini web server code
+* which is preserved more or less in tact with the exception that 'cosmetic' options
+* to allow remote connections and to specify a default page have been added.
+*
+*
+* Unlike IIS, multiple web sites must be on different ports - a separate instance of the
+* Cassini web server is created for each site.
+*
+* ******************************************************************************************/
 namespace Ict.Tools.OpenPetraWebServer
 {
     /// <summary>
@@ -99,7 +99,11 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             Left = Screen.PrimaryScreen.Bounds.Width - Width - 50;
             Top = Screen.PrimaryScreen.Bounds.Height - Height - 50;
-            if (_hideAtStartup) startTimer.Enabled = true;
+
+            if (_hideAtStartup)
+            {
+                startTimer.Enabled = true;
+            }
         }
 
         private void startTimer_Tick(object sender, EventArgs e)
@@ -113,10 +117,10 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             if (_exitMenuWasSelected)
             {
-                if (_started && MessageBox.Show(Program.SHUTDOWN_MESSAGE,
-                                Program.ApplicationTitle,
-                                MessageBoxButtons.YesNo,
-                                MessageBoxIcon.Question) == DialogResult.No)
+                if (_started && (MessageBox.Show(Program.SHUTDOWN_MESSAGE,
+                                     Program.ApplicationTitle,
+                                     MessageBoxButtons.YesNo,
+                                     MessageBoxIcon.Question) == DialogResult.No))
                 {
                     e.Cancel = true;
                     _exitMenuWasSelected = false;
@@ -158,14 +162,18 @@ namespace Ict.Tools.OpenPetraWebServer
 /**********************************************************************************
  * Server Code
  * *******************************************************************************/
-        
+
         private string StartOrStopAll(bool Start)
         {
             // The main function to start or stop the web site servers
 
             //Make a start on the return text and setting up the icon text
             string s = (Start ? "Started" : "Stopped");
-            if (_webSites.Count == 0) s = "Click 'Sites' and 'Add site...'";
+
+            if (_webSites.Count == 0)
+            {
+                s = "Click 'Sites' and 'Add site...'";
+            }
 
             // NB:  Only 64 characters allowed for this
             // AppTitle has 21, version adds 10
@@ -175,16 +183,24 @@ namespace Ict.Tools.OpenPetraWebServer
             try
             {
                 //Start or stop each site in turn
-                foreach (KeyValuePair<string, WebSite> kvp in _webSites)
+                foreach (KeyValuePair <string, WebSite>kvp in _webSites)
                 {
                     if (Start)
                     {
-                        kvp.Value.WebServer = new Server(kvp.Value.Port, kvp.Value.VirtualPath, kvp.Value.PhysicalPath, kvp.Value.DefaultPage, _allowRemoteConnections);
+                        kvp.Value.WebServer = new Server(kvp.Value.Port,
+                            kvp.Value.VirtualPath,
+                            kvp.Value.PhysicalPath,
+                            kvp.Value.DefaultPage,
+                            _allowRemoteConnections);
                         kvp.Value.WebServer.Start();
                     }
                     else
                     {
-                        if (kvp.Value.WebServer != null) kvp.Value.WebServer.Stop();
+                        if (kvp.Value.WebServer != null)
+                        {
+                            kvp.Value.WebServer.Stop();
+                        }
+
                         kvp.Value.WebServer = null;
                     }
                 }
@@ -193,9 +209,18 @@ namespace Ict.Tools.OpenPetraWebServer
                 _started = Start && (_webSites.Count > 0);
 
                 //complete the icon text for a successful outcome
-                if (_webSites.Count == 0) notifyIcon.Text += "No web sites specified";
-                else if (_started) notifyIcon.Text += "Running";
-                else notifyIcon.Text += "Stopped";
+                if (_webSites.Count == 0)
+                {
+                    notifyIcon.Text += "No web sites specified";
+                }
+                else if (_started)
+                {
+                    notifyIcon.Text += "Running";
+                }
+                else
+                {
+                    notifyIcon.Text += "Stopped";
+                }
             }
             catch (Exception)
             {
@@ -208,6 +233,7 @@ namespace Ict.Tools.OpenPetraWebServer
                 {
                     s = "Error closing all sites.";
                 }
+
                 notifyIcon.Text += s;
 
                 // We will say that we have started then the menu options will be 'stop'
@@ -215,11 +241,23 @@ namespace Ict.Tools.OpenPetraWebServer
             }
 
             //Update the menu options
-            if (_started) startStopAllMenuItem.Text = "&Stop All";
-            else startStopAllMenuItem.Text = "&Start All";
+            if (_started)
+            {
+                startStopAllMenuItem.Text = "&Stop All";
+            }
+            else
+            {
+                startStopAllMenuItem.Text = "&Start All";
+            }
 
-            if (_started) startStopNotifyMenuItem.Text = "Stop All";
-            else startStopNotifyMenuItem.Text = "Start All";
+            if (_started)
+            {
+                startStopNotifyMenuItem.Text = "Stop All";
+            }
+            else
+            {
+                startStopNotifyMenuItem.Text = "Start All";
+            }
 
             UpdateUI();
 
@@ -302,6 +340,7 @@ namespace Ict.Tools.OpenPetraWebServer
         private void propertiesNotifyMenuItem_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem item = (ToolStripMenuItem)sender;
+
             ShowSiteProperties(item.Text);
         }
 
@@ -320,7 +359,10 @@ namespace Ict.Tools.OpenPetraWebServer
 
         private void listSites_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listSites.SelectedIndex<0) return;
+            if (listSites.SelectedIndex < 0)
+            {
+                return;
+            }
 
             string sKey = GetKeyForListEntry();
             linkLabel.Text = _webSites[sKey].Url;
@@ -331,12 +373,16 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             string sKey = GetKeyForListEntry();
             string s = "Are you sure that you want to remove the " +
-                    sKey +
-                    " site?";
+                       sKey +
+                       " site?";
+
             if (MessageBox.Show(s,
-                            Program.ApplicationTitle,
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question) == DialogResult.No) return;
+                    Program.ApplicationTitle,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == DialogResult.No)
+            {
+                return;
+            }
 
             _webSites.Remove(sKey);
             _webSites.Save(_allowRemoteConnections, _hideAtStartup, _startAutomatically);
@@ -361,12 +407,17 @@ namespace Ict.Tools.OpenPetraWebServer
 
             browseNotifyMenuItemPopup.Visible = _webSites.Count > 0;
             propertiesNotifyMenuItemPopup.Visible = _webSites.Count > 0;
-            if (_webSites.Count == 0) return;
+
+            if (_webSites.Count == 0)
+            {
+                return;
+            }
 
             browseNotifyMenuItemPopup.DropDownItems.Clear();
             propertiesNotifyMenuItemPopup.DropDownItems.Clear();
             int i = 0;
-            foreach (KeyValuePair<string, WebSite> kvp in _webSites)
+
+            foreach (KeyValuePair <string, WebSite>kvp in _webSites)
             {
                 i++;
                 ToolStripMenuItem item = new ToolStripMenuItem();
@@ -390,6 +441,7 @@ namespace Ict.Tools.OpenPetraWebServer
         private void sitesToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
             bool bEnable = (listSites.SelectedIndex >= 0);
+
             propertiesToolStripMenuItem.Enabled = bEnable;
             removeToolStripMenuItem.Enabled = bEnable && !_started;
             startAutomaticallyToolStripMenuItem.Checked = _startAutomatically;
@@ -408,17 +460,23 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             //populate the list box
             listSites.Items.Clear();
-            foreach (KeyValuePair<string, WebSite> kvp in _webSites)
+
+            foreach (KeyValuePair <string, WebSite>kvp in _webSites)
             {
                 string s = String.Format("{0} ( on port {1} )", kvp.Key, kvp.Value.Port.ToString());
                 listSites.Items.Add(s);
             }
+
             bool bHaveSites = listSites.Items.Count > 0;
 
             //update the link label
             linkLabel.Visible = bHaveSites;
             linkLabel.Enabled = _started;
-            if (bHaveSites) listSites.SelectedIndex = 0;
+
+            if (bHaveSites)
+            {
+                listSites.SelectedIndex = 0;
+            }
 
             startButton.Enabled = bHaveSites && !_started;
             stopButton.Enabled = bHaveSites && _started;
@@ -431,6 +489,7 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             return EntryText.Split(new char[] { '(' })[0].Trim();
         }
+
         private string GetKeyForListEntry()
         {
             Trace.Assert(listSites.SelectedIndex >= 0);
@@ -442,7 +501,7 @@ namespace Ict.Tools.OpenPetraWebServer
         /// </summary>
         public void ShowHelpWindow(object sender, EventArgs e)
         {
-            if (!_helpServerStarted && _helpSite != null && _helpSite.WebServer != null)
+            if (!_helpServerStarted && (_helpSite != null) && (_helpSite.WebServer != null))
             {
                 _helpSite.WebServer.Start();
                 _helpServerStarted = true;
@@ -467,21 +526,27 @@ namespace Ict.Tools.OpenPetraWebServer
         private void aboutOpenPetraWebServerMenuItem_Click(object sender, EventArgs e)
         {
             AboutMe dlg = new AboutMe(true);
+
             dlg.ShowDialog(this);
         }
 
         private void aboutNotifyMenuItem_Click(object sender, EventArgs e)
         {
             AboutMe dlg = new AboutMe(this.WindowState == FormWindowState.Normal);
+
             dlg.ShowDialog(this);
         }
 
         private void addSiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SitePropertiesDialog dlg = new SitePropertiesDialog(SitePropertiesDialog.OpenMode.MODE_ADD,
-                                _webSites,
-                                null);
-            if (dlg.ShowDialog() == DialogResult.Cancel) return;
+                _webSites,
+                null);
+
+            if (dlg.ShowDialog() == DialogResult.Cancel)
+            {
+                return;
+            }
 
             WebSite ws = new WebSite();
             ws.DefaultPage = dlg.txtDefaultPage.Text;
@@ -498,6 +563,7 @@ namespace Ict.Tools.OpenPetraWebServer
         private void propertiesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string sKey = GetKeyForListEntry();
+
             ShowSiteProperties(sKey);
         }
 
@@ -520,7 +586,10 @@ namespace Ict.Tools.OpenPetraWebServer
             dlg.txtVirtualPath.Enabled = !_started;
             dlg.btnOk.Enabled = !_started;
 
-            if (dlg.ShowDialog(this) == DialogResult.Cancel) return;
+            if (dlg.ShowDialog(this) == DialogResult.Cancel)
+            {
+                return;
+            }
 
             _webSites.Remove(sKey);
 

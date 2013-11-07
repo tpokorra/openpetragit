@@ -34,7 +34,7 @@ namespace Ict.Tools.OpenPetraWebServer
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// The command line can be blank - in which case the full UI is used
         /// or it can have parameters as follows - in which case the simplified UI is shown with one instance per port
-        /// 
+        ///
         /// "path-to-exe" "fully-qualified-physical-path" /p portNumber [/v virtualPath] [/d defaultPage] [/r] [/q]
 
 
@@ -45,12 +45,42 @@ namespace Ict.Tools.OpenPetraWebServer
         private string _defaultPage = string.Empty;
         private bool _suppressStartUpMessages = false;
 
-        public string PhysicalPath { get { return _physicalPath; } }
-        public string VirtualPath { get { return _virtualPath; } }
-        public int Port { get { return _port; } }
-        public bool AcceptRemoteConnection { get { return _acceptRemoteConnection; } }
-        public string DefaultPage { get { return _defaultPage; } }
-        public bool SuppressStartupMessages { get { return _suppressStartUpMessages; } }
+        public string PhysicalPath {
+            get
+            {
+                return _physicalPath;
+            }
+        }
+        public string VirtualPath {
+            get
+            {
+                return _virtualPath;
+            }
+        }
+        public int Port {
+            get
+            {
+                return _port;
+            }
+        }
+        public bool AcceptRemoteConnection {
+            get
+            {
+                return _acceptRemoteConnection;
+            }
+        }
+        public string DefaultPage {
+            get
+            {
+                return _defaultPage;
+            }
+        }
+        public bool SuppressStartupMessages {
+            get
+            {
+                return _suppressStartUpMessages;
+            }
+        }
 
 
         public CommandLineArgs(string[] args)
@@ -68,18 +98,24 @@ namespace Ict.Tools.OpenPetraWebServer
                         _virtualPath = arg;
                         nextArg = ' ';
                         break;
+
                     case 'd':
                         _defaultPage = arg;
                         nextArg = ' ';
                         break;
+
                     case 'p':
-                        if (Int32.TryParse(arg, out tryInt) && tryInt >= 80 && tryInt <= 65535)
+
+                        if (Int32.TryParse(arg, out tryInt) && (tryInt >= 80) && (tryInt <= 65535))
                         {
                             _port = tryInt;
                         }
+
                         nextArg = ' ';
                         break;
+
                     default:
+
                         if (arg.StartsWith("/"))
                         {
                             if (arg[1] == 'r')
@@ -100,6 +136,7 @@ namespace Ict.Tools.OpenPetraWebServer
                             // this must be the physical path
                             _physicalPath = arg;
                         }
+
                         break;
                 }
             }
@@ -110,7 +147,7 @@ namespace Ict.Tools.OpenPetraWebServer
             get
             {
                 bool isValid = (_physicalPath != string.Empty && _port >= 80);
-                
+
                 if (isValid)
                 {
                     if (!Directory.Exists(_physicalPath))

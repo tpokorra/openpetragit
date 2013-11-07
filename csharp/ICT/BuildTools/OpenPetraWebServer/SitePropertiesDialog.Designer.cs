@@ -1,3 +1,26 @@
+//
+// DO NOT REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+//
+// @Authors:
+//       >>>> Put your full name or just a shortname here <<<<
+//
+// Copyright 2004-2013 by OM International
+//
+// This file is part of OpenPetra.org.
+//
+// OpenPetra.org is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenPetra.org is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenPetra.org.  If not, see <http://www.gnu.org/licenses/>.
+//
 namespace Ict.Tools.OpenPetraWebServer
 {
     /// <summary>
@@ -20,6 +43,7 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -51,36 +75,36 @@ namespace Ict.Tools.OpenPetraWebServer
             label2 = new System.Windows.Forms.Label();
             label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            // 
+            //
             // label1
-            // 
+            //
             label1.AutoSize = true;
             label1.Location = new System.Drawing.Point(12, 148);
             label1.Name = "label1";
             label1.Size = new System.Drawing.Size(185, 13);
             label1.TabIndex = 6;
             label1.Text = "Optional virtual path ( e.g.OpenPetra )";
-            // 
+            //
             // label2
-            // 
+            //
             label2.AutoSize = true;
             label2.Location = new System.Drawing.Point(12, 100);
             label2.Name = "label2";
             label2.Size = new System.Drawing.Size(179, 13);
             label2.TabIndex = 3;
             label2.Text = "Physical path on the local file system";
-            // 
+            //
             // label3
-            // 
+            //
             label3.AutoSize = true;
             label3.Location = new System.Drawing.Point(244, 148);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(170, 13);
             label3.TabIndex = 8;
             label3.Text = "Port number ( this must be unique )";
-            // 
+            //
             // btnBrowse
-            // 
+            //
             this.btnBrowse.Location = new System.Drawing.Point(505, 87);
             this.btnBrowse.Name = "btnBrowse";
             this.btnBrowse.Size = new System.Drawing.Size(75, 23);
@@ -88,31 +112,31 @@ namespace Ict.Tools.OpenPetraWebServer
             this.btnBrowse.Text = "Browse ...";
             this.btnBrowse.UseVisualStyleBackColor = true;
             this.btnBrowse.Click += new System.EventHandler(this.btnBrowse_Click);
-            // 
+            //
             // txtVirtualPath
-            // 
+            //
             this.txtVirtualPath.Location = new System.Drawing.Point(12, 164);
             this.txtVirtualPath.Name = "txtVirtualPath";
             this.txtVirtualPath.Size = new System.Drawing.Size(164, 20);
             this.txtVirtualPath.TabIndex = 7;
-            // 
+            //
             // txtPhysicalPath
-            // 
+            //
             this.txtPhysicalPath.Location = new System.Drawing.Point(12, 116);
             this.txtPhysicalPath.Name = "txtPhysicalPath";
             this.txtPhysicalPath.Size = new System.Drawing.Size(568, 20);
             this.txtPhysicalPath.TabIndex = 4;
             this.txtPhysicalPath.TextChanged += new System.EventHandler(this.txtPhysicalPath_TextChanged);
-            // 
+            //
             // txtPortNumber
-            // 
+            //
             this.txtPortNumber.Location = new System.Drawing.Point(247, 164);
             this.txtPortNumber.Name = "txtPortNumber";
             this.txtPortNumber.Size = new System.Drawing.Size(58, 20);
             this.txtPortNumber.TabIndex = 9;
-            // 
+            //
             // btnOk
-            // 
+            //
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOk.Location = new System.Drawing.Point(505, 246);
             this.btnOk.Name = "btnOk";
@@ -121,9 +145,9 @@ namespace Ict.Tools.OpenPetraWebServer
             this.btnOk.Text = "Add";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
-            // 
+            //
             // btnCancel
-            // 
+            //
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(402, 246);
             this.btnCancel.Name = "btnCancel";
@@ -131,35 +155,35 @@ namespace Ict.Tools.OpenPetraWebServer
             this.btnCancel.TabIndex = 15;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            // 
+            //
             // label4
-            // 
+            //
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(12, 196);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(479, 13);
             this.label4.TabIndex = 10;
             this.label4.Text = "Default page ( you can leave this blank if it is a standard page name like defaul" +
-    "t.htm or default.aspx )";
-            // 
+                               "t.htm or default.aspx )";
+            //
             // txtDefaultPage
-            // 
+            //
             this.txtDefaultPage.Location = new System.Drawing.Point(12, 212);
             this.txtDefaultPage.Name = "txtDefaultPage";
             this.txtDefaultPage.Size = new System.Drawing.Size(202, 20);
             this.txtDefaultPage.TabIndex = 11;
-            // 
+            //
             // lblInfo
-            // 
+            //
             this.lblInfo.AutoSize = true;
             this.lblInfo.Location = new System.Drawing.Point(12, 9);
             this.lblInfo.Name = "lblInfo";
             this.lblInfo.Size = new System.Drawing.Size(375, 13);
             this.lblInfo.TabIndex = 0;
             this.lblInfo.Text = "Note that the web server must be stopped in order to change these properties.";
-            // 
+            //
             // btnPageBrowse
-            // 
+            //
             this.btnPageBrowse.Location = new System.Drawing.Point(220, 213);
             this.btnPageBrowse.Name = "btnPageBrowse";
             this.btnPageBrowse.Size = new System.Drawing.Size(75, 23);
@@ -167,9 +191,9 @@ namespace Ict.Tools.OpenPetraWebServer
             this.btnPageBrowse.Text = "Browse";
             this.btnPageBrowse.UseVisualStyleBackColor = true;
             this.btnPageBrowse.Click += new System.EventHandler(this.btnPageBrowse_Click);
-            // 
+            //
             // btnHelp
-            // 
+            //
             this.btnHelp.Location = new System.Drawing.Point(13, 245);
             this.btnHelp.Name = "btnHelp";
             this.btnHelp.Size = new System.Drawing.Size(75, 23);
@@ -177,25 +201,25 @@ namespace Ict.Tools.OpenPetraWebServer
             this.btnHelp.Text = "Help";
             this.btnHelp.UseVisualStyleBackColor = true;
             this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
-            // 
+            //
             // label5
-            // 
+            //
             this.label5.Location = new System.Drawing.Point(12, 37);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(568, 28);
             this.label5.TabIndex = 1;
             this.label5.Text = "Unique \'Friendly Name\' for this web site.  The name does not form part of the web" +
-    " address, but is used to identify this site in the GUI and menus.";
-            // 
+                               " address, but is used to identify this site in the GUI and menus.";
+            //
             // txtKeyName
-            // 
+            //
             this.txtKeyName.Location = new System.Drawing.Point(15, 68);
             this.txtKeyName.Name = "txtKeyName";
             this.txtKeyName.Size = new System.Drawing.Size(164, 20);
             this.txtKeyName.TabIndex = 2;
-            // 
+            //
             // SitePropertiesDialog
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(592, 281);
@@ -221,7 +245,6 @@ namespace Ict.Tools.OpenPetraWebServer
             this.Load += new System.EventHandler(this.SitePropertiesDialog_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

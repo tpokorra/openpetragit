@@ -1,3 +1,26 @@
+//
+// DO NOT REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+//
+// @Authors:
+//       >>>> Put your full name or just a shortname here <<<<
+//
+// Copyright 2004-2013 by OM International
+//
+// This file is part of OpenPetra.org.
+//
+// OpenPetra.org is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenPetra.org is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with OpenPetra.org.  If not, see <http://www.gnu.org/licenses/>.
+//
 namespace Ict.Tools.OpenPetraWebServer
 {
     /// <summary>
@@ -20,6 +43,7 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 components.Dispose();
             }
+
             base.Dispose(disposing);
         }
 
@@ -37,19 +61,23 @@ namespace Ict.Tools.OpenPetraWebServer
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
-            // 
+            //
             // label1
-            // 
+            //
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif",
+                8.25F,
+                System.Drawing.FontStyle.Bold,
+                System.Drawing.GraphicsUnit.Point,
+                ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(31, 23);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(138, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "OpenPetra Web Server";
-            // 
+            //
             // CloseButton
-            // 
+            //
             this.CloseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.CloseButton.Location = new System.Drawing.Point(217, 134);
             this.CloseButton.Name = "CloseButton";
@@ -58,36 +86,36 @@ namespace Ict.Tools.OpenPetraWebServer
             this.CloseButton.Text = "Close";
             this.CloseButton.UseVisualStyleBackColor = true;
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
-            // 
+            //
             // VersionLabel
-            // 
+            //
             this.VersionLabel.AutoSize = true;
             this.VersionLabel.Location = new System.Drawing.Point(31, 45);
             this.VersionLabel.Name = "VersionLabel";
             this.VersionLabel.Size = new System.Drawing.Size(60, 13);
             this.VersionLabel.TabIndex = 1;
             this.VersionLabel.Text = "Version 1.0";
-            // 
+            //
             // label2
-            // 
+            //
             this.label2.Location = new System.Drawing.Point(9, 117);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(202, 50);
             this.label2.TabIndex = 4;
             this.label2.Text = "Portions of this software are based on Microsoft-Cassini v3.5 released under Micr" +
-    "osoft Public License";
-            // 
+                               "osoft Public License";
+            //
             // label3
-            // 
+            //
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(34, 85);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(143, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "GNU General Public License";
-            // 
+            //
             // AboutMe
-            // 
+            //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.CloseButton;
@@ -105,7 +133,6 @@ namespace Ict.Tools.OpenPetraWebServer
             this.Load += new System.EventHandler(this.AboutMe_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion

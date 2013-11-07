@@ -49,22 +49,51 @@ namespace Ict.Tools.OpenPetraWebServer
         /// <summary>
         /// gets the port number
         /// </summary>
-        public int Port { get { return _port; } set { _port = value; MakeUrl(); } }
+        public int Port {
+            get
+            {
+                return _port;
+            } set
+            {
+                _port = value; MakeUrl();
+            }
+        }
 
         /// <summary>
         /// Gets the physical path
         /// </summary>
-        public string PhysicalPath { get { return _physicalPath; } set { _physicalPath = value; } }
+        public string PhysicalPath {
+            get
+            {
+                return _physicalPath;
+            } set
+            {
+                _physicalPath = value;
+            }
+        }
 
         /// <summary>
         /// Gets the default page, if any
         /// </summary>
-        public string DefaultPage { get { return _defaultPage; } set { _defaultPage = value; MakeUrl(); } }
+        public string DefaultPage {
+            get
+            {
+                return _defaultPage;
+            } set
+            {
+                _defaultPage = value; MakeUrl();
+            }
+        }
 
         /// <summary>
         /// Gets the url for the site
         /// </summary>
-        public string Url { get { return _url; } }
+        public string Url {
+            get
+            {
+                return _url;
+            }
+        }
 
         /// <summary>
         /// Gets the virtual path
@@ -78,8 +107,17 @@ namespace Ict.Tools.OpenPetraWebServer
             set
             {
                 _virtualPath = value;
-                if (!_virtualPath.StartsWith("/")) _virtualPath = "/" + _virtualPath;
-                if (!_virtualPath.EndsWith("/")) _virtualPath = _virtualPath + "/";
+
+                if (!_virtualPath.StartsWith("/"))
+                {
+                    _virtualPath = "/" + _virtualPath;
+                }
+
+                if (!_virtualPath.EndsWith("/"))
+                {
+                    _virtualPath = _virtualPath + "/";
+                }
+
                 MakeUrl();
             }
         }
@@ -90,17 +128,17 @@ namespace Ict.Tools.OpenPetraWebServer
         public WebSite()
         {
         }
-        
+
         private void MakeUrl()
         {
             _url = String.Empty;
 
-            if (_port >= 80 && _port <= 65535)
+            if ((_port >= 80) && (_port <= 65535))
             {
                 _url = String.Format("http://localhost{0}{1}{2}",
-                                    _port == 80 ? String.Empty : ":" + _port.ToString(),
-                                    _virtualPath,
-                                    _defaultPage);
+                    _port == 80 ? String.Empty : ":" + _port.ToString(),
+                    _virtualPath,
+                    _defaultPage);
             }
         }
     }
@@ -109,12 +147,14 @@ namespace Ict.Tools.OpenPetraWebServer
     /// This class, derived from a Dictionary contains the information about all the specified web sites
     /// It has methods for reading/writing the information to a settings file.
     /// </summary>
-    public class WebSites : Dictionary<string, WebSite>
+    public class WebSites : Dictionary <string, WebSite>
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public WebSites() { }
+        public WebSites()
+        {
+        }
 
         /// <summary>
         /// Method to read the settings from an Xml file
@@ -140,44 +180,91 @@ namespace Ict.Tools.OpenPetraWebServer
             }
 
             XmlAttributeCollection cfgAtt = xmlDoc.DocumentElement.Attributes;
+
             if (cfgAtt["allowremoteconnections"] != null)
+            {
                 AllowRemoteConnections = !cfgAtt["allowremoteconnections"].Value.Equals("0");
+            }
+
             if (cfgAtt["hideatstartup"] != null)
+            {
                 HideAtStartup = !cfgAtt["hideatstartup"].Value.Equals("0");
+            }
+
             if (cfgAtt["startautomatically"] != null)
+            {
                 StartAutomatically = !cfgAtt["startautomatically"].Value.Equals("0");
+            }
 
             XmlNodeList nodes = xmlDoc.SelectNodes("//configuration/site");
-            if (nodes == null) return;
+
+            if (nodes == null)
+            {
+                return;
+            }
 
             foreach (XmlNode n in nodes)
             {
                 WebSite ws = new WebSite();
                 XmlAttribute a = n.Attributes["key"];
-                if (a == null) continue;
+
+                if (a == null)
+                {
+                    continue;
+                }
+
                 string siteKey = a.Value.Trim();
 
                 a = n.Attributes["port"];
-                if (a == null) continue;
+
+                if (a == null)
+                {
+                    continue;
+                }
+
                 ws.Port = Convert.ToInt32(a.Value);
 
                 XmlNode np = n.SelectSingleNode("physicalpath");
-                if (np == null) continue;
+
+                if (np == null)
+                {
+                    continue;
+                }
+
                 ws.PhysicalPath = np.InnerText;
-                char[] trim = { '\t','\r','\n',' ' };
+                char[] trim =
+                {
+                    '\t', '\r', '\n', ' '
+                };
                 ws.PhysicalPath = ws.PhysicalPath.Trim(trim);
                 ws.PhysicalPath = ws.PhysicalPath.Replace('/', '\\');
 
                 // These next two are optional
                 ws.VirtualPath = String.Empty;
                 a = n.Attributes["virtualpath"];
-                if (a != null) ws.VirtualPath = a.Value;
-                if (!ws.VirtualPath.StartsWith("/")) ws.VirtualPath = "/" + ws.VirtualPath;
-                if (!ws.VirtualPath.EndsWith("/")) ws.VirtualPath = ws.VirtualPath + "/";
+
+                if (a != null)
+                {
+                    ws.VirtualPath = a.Value;
+                }
+
+                if (!ws.VirtualPath.StartsWith("/"))
+                {
+                    ws.VirtualPath = "/" + ws.VirtualPath;
+                }
+
+                if (!ws.VirtualPath.EndsWith("/"))
+                {
+                    ws.VirtualPath = ws.VirtualPath + "/";
+                }
 
                 ws.DefaultPage = String.Empty;
                 a = n.Attributes["defaultpage"];
-                if (a != null) ws.DefaultPage = a.Value;
+
+                if (a != null)
+                {
+                    ws.DefaultPage = a.Value;
+                }
 
                 Add(siteKey, ws);
             }
@@ -190,21 +277,25 @@ namespace Ict.Tools.OpenPetraWebServer
         {
             XmlDocument xmlDoc = new XmlDocument();
             string sXml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<configuration/>";
+
             xmlDoc.LoadXml(sXml);
 
             XmlElement root = xmlDoc.DocumentElement;
+
             if (AllowRemoteConnections)
             {
                 XmlAttribute a = xmlDoc.CreateAttribute("allowremoteconnections");
                 a.Value = "1";
                 root.Attributes.Append(a);
             }
+
             if (!HideAtStartup)
             {
                 XmlAttribute a = xmlDoc.CreateAttribute("hideatstartup");
                 a.Value = "0";
                 root.Attributes.Append(a);
             }
+
             if (!StartAutomatically)
             {
                 XmlAttribute a = xmlDoc.CreateAttribute("startautomatically");
@@ -212,10 +303,10 @@ namespace Ict.Tools.OpenPetraWebServer
                 root.Attributes.Append(a);
             }
 
-            foreach (KeyValuePair<string, WebSite> kvp in this)
+            foreach (KeyValuePair <string, WebSite>kvp in this)
             {
                 XmlElement nextSite = xmlDoc.CreateElement("site");
-                
+
                 XmlAttribute a = xmlDoc.CreateAttribute("key");
                 a.Value = kvp.Key;
                 nextSite.Attributes.Append(a);
@@ -246,7 +337,7 @@ namespace Ict.Tools.OpenPetraWebServer
             {
                 xmlDoc.Save(Program.ConfigurationFilePath);
             }
-            catch(System.Xml.XmlException e)
+            catch (System.Xml.XmlException e)
             {
                 System.Windows.Forms.MessageBox.Show(
                     "Error in Xml document when saving configuration file: " + e.Message,
@@ -254,7 +345,7 @@ namespace Ict.Tools.OpenPetraWebServer
                     System.Windows.Forms.MessageBoxButtons.OK,
                     System.Windows.Forms.MessageBoxIcon.Exclamation);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 System.Windows.Forms.MessageBox.Show(
                     "General error when saving configuration file: " + e.Message,
