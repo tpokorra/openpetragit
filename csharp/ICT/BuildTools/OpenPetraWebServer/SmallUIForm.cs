@@ -79,7 +79,7 @@ namespace Ict.Tools.OpenPetraWebServer
             // Create the help site and start the server unless another instance of the app has already done it
             _helpSite = Program.CreateHelpWebSite();
 
-            if (!Program.PortIsInUse(_helpSite.Port, false))
+            if (!Program.PortIsInUse(_helpSite.Port, false) && (_helpSite.PhysicalPath != String.Empty))
             {
                 _helpSite.WebServer = new Server(_helpSite.Port, _helpSite.VirtualPath, _helpSite.PhysicalPath, _helpSite.DefaultPage, false);
             }
@@ -175,8 +175,16 @@ namespace Ict.Tools.OpenPetraWebServer
                 _helpServerStarted = true;
             }
 
-            _helpSite.DefaultPage = "SimpleGUI.htm";
-            System.Diagnostics.Process.Start(_helpSite.Url);
+            if (_helpSite.PhysicalPath == String.Empty)
+            {
+                MessageBox.Show("Could not find the help files in the ServerHelp folder.",
+                    Program.ApplicationTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                _helpSite.DefaultPage = "SimpleGUI.htm";
+                System.Diagnostics.Process.Start(_helpSite.Url);
+            }
         }
 
         private void timer_Tick(object sender, EventArgs e)

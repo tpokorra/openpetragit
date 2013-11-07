@@ -74,7 +74,7 @@ namespace Ict.Tools.OpenPetraWebServer
             // Create the help site and start the server unless another instance of the app has already done it
             _helpSite = Program.CreateHelpWebSite();
 
-            if (!Program.PortIsInUse(_helpSite.Port, false))
+            if (!Program.PortIsInUse(_helpSite.Port, false) && (_helpSite.PhysicalPath != String.Empty))
             {
                 _helpSite.WebServer = new Server(_helpSite.Port, _helpSite.VirtualPath, _helpSite.PhysicalPath, _helpSite.DefaultPage, false);
             }
@@ -507,16 +507,24 @@ namespace Ict.Tools.OpenPetraWebServer
                 _helpServerStarted = true;
             }
 
-            if (sender is SitePropertiesDialog)
+            if (_helpSite.PhysicalPath == String.Empty)
             {
-                _helpSite.DefaultPage = "EditSiteProperties.htm";
+                MessageBox.Show("Could not find the help files in the ServerHelp folder.",
+                    Program.ApplicationTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                _helpSite.DefaultPage = "FullGUI.htm";
-            }
+                if (sender is SitePropertiesDialog)
+                {
+                    _helpSite.DefaultPage = "EditSiteProperties.htm";
+                }
+                else
+                {
+                    _helpSite.DefaultPage = "FullGUI.htm";
+                }
 
-            System.Diagnostics.Process.Start(_helpSite.Url);
+                System.Diagnostics.Process.Start(_helpSite.Url);
+            }
         }
 
 /*******************************************************************************************
