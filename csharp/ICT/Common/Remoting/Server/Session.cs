@@ -52,6 +52,12 @@ namespace Ict.Common.Remoting.Server
         {
             string sessionID = GetSessionID();
 
+            if (sessionID != string.Empty && !FSessionObjects.ContainsKey(sessionID))
+            {
+                HttpContext.Current.Request.Cookies.Remove("OpenPetraSessionID");
+                sessionID = GetSessionID();
+            }
+
             if (sessionID == string.Empty)
             {
                 sessionID = Guid.NewGuid().ToString();
