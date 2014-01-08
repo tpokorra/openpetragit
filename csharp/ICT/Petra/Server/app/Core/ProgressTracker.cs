@@ -109,7 +109,8 @@ namespace Ict.Petra.Server.App.Core
 
                 if (TLogging.DebugLevel >= DEBUG_PROGRESS)
                 {
-                    TLogging.Log(state.PercentageDone.ToString() + "%: " + state.StatusMessage);
+                    // avoid recursive calls, especially during report calculation
+                    Console.WriteLine(state.PercentageDone.ToString() + "%: " + state.StatusMessage);
                 }
             }
         }
