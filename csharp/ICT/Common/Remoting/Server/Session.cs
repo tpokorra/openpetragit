@@ -4,7 +4,7 @@
 // @Authors:
 //       timop
 //
-// Copyright 2004-2013 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -52,7 +52,7 @@ namespace Ict.Common.Remoting.Server
         {
             string sessionID = GetSessionID();
 
-            if (sessionID != string.Empty && !FSessionObjects.ContainsKey(sessionID))
+            if ((sessionID != string.Empty) && !FSessionObjects.ContainsKey(sessionID))
             {
                 HttpContext.Current.Request.Cookies.Remove("OpenPetraSessionID");
                 sessionID = GetSessionID();

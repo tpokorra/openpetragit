@@ -4,7 +4,7 @@
 // @Authors:
 //       timop
 //
-// Copyright 2004-2013 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -55,6 +55,8 @@ namespace Ict.Petra.Server.App.WebService
     [ScriptService]
     public class TOpenPetraOrgSessionManager : System.Web.Services.WebService
     {
+        private static string ConfigFileName = string.Empty;
+
         /// <summary>
         /// constructor, which is called for each http request
         /// </summary>
@@ -73,33 +75,41 @@ namespace Ict.Petra.Server.App.WebService
         /// </summary>
         public static bool Init()
         {
-            if (TServerManager.TheServerManager == null)
+            if (ConfigFileName == string.Empty)
             {
-                string configfilename = string.Empty;
-
                 // make sure the correct config file is used
                 if (Environment.CommandLine.Contains("/appconfigfile="))
                 {
                     // this happens when we use fastcgi-mono-server4
-                    configfilename = Environment.CommandLine.Substring(
+                    ConfigFileName = Environment.CommandLine.Substring(
                         Environment.CommandLine.IndexOf("/appconfigfile=") + "/appconfigfile=".Length);
 
-                    if (configfilename.IndexOf(" ") != -1)
+                    if (ConfigFileName.IndexOf(" ") != -1)
                     {
-                        configfilename = configfilename.Substring(0, configfilename.IndexOf(" "));
+                        ConfigFileName = ConfigFileName.Substring(0, ConfigFileName.IndexOf(" "));
                     }
                 }
                 else
                 {
                     // this is the normal behaviour when running with local http server
-                    configfilename = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "web.config";
+                    ConfigFileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "web.config";
                 }
+            }
 
-                new TAppSettingsManager(configfilename);
-                new TSrvSetting();
-                new TLogging(TSrvSetting.ServerLogFile);
-                TLogging.DebugLevel = TAppSettingsManager.GetInt16("Server.DebugLevel", 0);
+            new TAppSettingsManager(ConfigFileName);
+            new TSrvSetting();
+            new TLogging(TSrvSetting.ServerLogFile);
+            TLogging.DebugLevel = TAppSettingsManager.GetInt16("Server.DebugLevel", 0);
 
+            if (HttpContext.Current != null)
+            {
+                HttpContext.Current.Server.ScriptTimeout = Convert.ToInt32(
+                    TimeSpan.FromMinutes(TAppSettingsManager.GetInt32("WebRequestTimeOutInMinutes", 15)).
+                    TotalSeconds);
+            }
+
+            if (TServerManager.TheServerManager == null)
+            {
                 DBAccess.SetFunctionForRetrievingCurrentObjectFromWebSession(SetDatabaseForSession,
                     GetDatabaseFromSession);
 

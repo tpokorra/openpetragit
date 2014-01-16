@@ -4,7 +4,7 @@
 // @Authors:
 //       christiank, timop
 //
-// Copyright 2004-2013 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -188,13 +188,6 @@ namespace Ict.Common.Remoting.Server
 
             FFirstInstance = (FNumberServerManagerInstances == 0);
             FNumberServerManagerInstances++;
-
-            if (HttpContext.Current != null)
-            {
-                HttpContext.Current.Server.ScriptTimeout = Convert.ToInt32(
-                    TimeSpan.FromMinutes(TAppSettingsManager.GetInt32("WebRequestTimeOutInMinutes", 15)).
-                    TotalSeconds);
-            }
         }
 
         /// <summary>
