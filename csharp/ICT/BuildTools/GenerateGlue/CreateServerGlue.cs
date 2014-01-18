@@ -4,7 +4,7 @@
 // @Authors:
 //       timop
 //
-// Copyright 2004-2013 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -188,6 +188,16 @@ public class GenerateServerGlue
                 {
                     ParameterDefinition += "string " + p.ParameterName;
                 }
+            }
+
+            // for string parameters, check if they have been encoded binary due to special characters in the string;
+            // this obviously does not apply to out parameters
+            if ((parametertype == "System.String") && ((ParameterModifiers.Out & p.ParamModifier) == 0))
+            {
+                snippet.AddToCodelet(
+                    "LOCALVARIABLES",
+                    p.ParameterName + " = (string) THttpBinarySerializer.DeserializeObject(" + p.ParameterName + ",\"System.String\");" +
+                    Environment.NewLine);
             }
 
             if ((ParameterModifiers.Out & p.ParamModifier) != 0)

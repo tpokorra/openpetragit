@@ -4,7 +4,7 @@
 // @Authors:
 //       timop
 //
-// Copyright 2004-2013 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -72,7 +72,7 @@ namespace Ict.Common.Remoting.Shared
 
                 TLogging.Log(e.ToString());
             }
-            string encoded = Convert.ToBase64String(memoryStream.ToArray());
+            string encoded = Convert.ToBase64String(memoryStream.ToArray()) + ":binary";
 
             if (encoded.Length > 1024 * 1024 * 4)
             {
@@ -80,6 +80,29 @@ namespace Ict.Common.Remoting.Shared
             }
 
             return encoded;
+        }
+
+        static private bool ShouldParameterEncodeBinary(object o)
+        {
+            if (o.GetType() == typeof(string))
+            {
+                if (((string)o).IndexOfAny(new char[] { ',', ':', '<', '>' }) > -1)
+                {
+                    // Avoid System.Web.HttpRequestValidationException: A potentially dangerous Request.Form value was detected from the client
+                    // when sending for example an html template.
+                    // see also http://stackoverflow.com/questions/81991/a-potentially-dangerous-request-form-value-was-detected-from-the-client
+                    return true;
+                }
+
+                return false;
+            }
+
+            return !(
+                       o.GetType() == typeof(Int16)
+                       || o.GetType() == typeof(Int32)
+                       || o.GetType() == typeof(Int64)
+                       || o.GetType() == typeof(bool)
+                       );
         }
 
         /// serialize any object. depending on the type of the object, it will be serialized in binary format
@@ -90,12 +113,7 @@ namespace Ict.Common.Remoting.Shared
                 return "null";
             }
 
-            return SerializeObject(o, !(o.GetType() == typeof(string)
-                                        || o.GetType() == typeof(Int16)
-                                        || o.GetType() == typeof(Int32)
-                                        || o.GetType() == typeof(Int64)
-                                        || o.GetType() == typeof(bool)
-                                        ));
+            return SerializeObject(o, ShouldParameterEncodeBinary(o));
         }
 
         /// serialize any object. depending on the type of the object, it will be serialized in binary format
@@ -106,21 +124,18 @@ namespace Ict.Common.Remoting.Shared
                 return "null:void";
             }
 
-            bool binary =
-                !(o.GetType() == typeof(string)
-                  || o.GetType() == typeof(Int16)
-                  || o.GetType() == typeof(Int32)
-                  || o.GetType() == typeof(Int64)
-                  || o.GetType() == typeof(bool));
-
-            if ((o.GetType() == typeof(string)) && (((string)o).IndexOfAny(new char[] { ',', ':' }) > -1))
-            {
-                binary = true;
-            }
+            bool binary = ShouldParameterEncodeBinary(o);
 
             string result = SerializeObject(o, binary);
 
-            return result + ":" + (binary ? "binary" : o.GetType().ToString());
+            if (result.EndsWith(":binary"))
+            {
+                return result;
+            }
+            else
+            {
+                return result + ":" + (binary ? "binary" : o.GetType().ToString());
+            }
         }
 
         /// <summary>
