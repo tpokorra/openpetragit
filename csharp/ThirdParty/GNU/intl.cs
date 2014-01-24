@@ -63,6 +63,7 @@ namespace GNU.Gettext {
   /// </summary>
   public class GettextResourceManager : ResourceManager {
 
+    private static string FApplicationBinPath = string.Empty;
     // ======================== Public Constructors ========================
 
     /// <summary>
@@ -70,8 +71,9 @@ namespace GNU.Gettext {
     /// </summary>
     /// <param name="baseName">the resource name, also the assembly base
     ///                        name</param>
-    public GettextResourceManager (String baseName)
+    public GettextResourceManager (String baseName, string AApplicationBinPath = "")
       : base (baseName, Assembly.GetCallingAssembly(), typeof (GettextResourceSet)) {
+        FApplicationBinPath = AApplicationBinPath;
     }
 
     /// <summary>
@@ -96,6 +98,17 @@ namespace GNU.Gettext {
         Path.GetDirectoryName(assembly.Location)
         + Path.DirectorySeparatorChar + culture.Name
         + Path.DirectorySeparatorChar + resourceName + ".resources.dll";
+
+      // resolve problem when running the application as ASP.net app,
+      // since then the current assembly will be in the temp directory
+      if (!File.Exists(satelliteExpectedLocation))
+      {
+          satelliteExpectedLocation =
+            FApplicationBinPath
+            + Path.DirectorySeparatorChar + culture.Name
+            + Path.DirectorySeparatorChar + resourceName + ".resources.dll";
+      }
+
       return Assembly.LoadFrom(satelliteExpectedLocation);
     }
 
