@@ -307,7 +307,8 @@ namespace Ict.Tools.NAntTasks
 
                             if (Namespace.StartsWith("System.Web")
                                 && !Path.GetDirectoryName(filename).EndsWith("WebService")
-                                && !Path.GetDirectoryName(filename).EndsWith("Server"))
+                                && !Path.GetDirectoryName(filename).EndsWith("Server")
+                                && !Path.GetDirectoryName(filename).EndsWith("RuntimeHost"))
                             {
                                 Console.WriteLine(
                                     "Warning: we should not reference System.Web since that is not part of the client profile of .net 4.0! in " +
@@ -361,7 +362,17 @@ namespace Ict.Tools.NAntTasks
 
                             if (!DetailsOfDll.UsedNamespaces.Contains(Namespace))
                             {
-                                DetailsOfDll.UsedNamespaces.Add(Namespace);
+                                if (Namespace.StartsWith("Microsoft.Win32")
+                                    && Path.GetDirectoryName(filename).EndsWith("RuntimeHost"))
+                                {
+                                    // we can ignore special Microsoft features on this project because it is for Windows developers only
+                                    Console.WriteLine(
+                                        "Info: ignoring Microsoft.Win32 reference when building namespace map in " + filename);
+                                }
+                                else
+                                {
+                                    DetailsOfDll.UsedNamespaces.Add(Namespace);
+                                }
                             }
                         }
                     }

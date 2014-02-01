@@ -131,11 +131,23 @@
           tofile="${path::combine(dir.bin, 'Mono.Security.dll')}"
           overwrite="false"/>
 
-      <copy file="${path::combine(dir.delivery, 'bin/Ict.Tools.TinyWebServer.exe')}"
-          tofile="${path::combine(dir.delivery, 'Ict.Tools.TinyWebServer.exe')}" 
+      <!-- Copy the two web server files but do not overwrite because they may be running -->
+      <copy file="${path::combine(dir.delivery, 'bin/Ict.Tools.OpenPetraWebServer.exe')}"
+          tofile="${path::combine(dir.delivery, 'Ict.Tools.OpenPetraWebServer.exe')}" 
           overwrite="false"/>
 
-<echo file="${dir.delivery}/Ict.Tools.TinyWebServer.exe.config">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+      <copy file="${path::combine(dir.delivery, 'bin/Ict.Tools.OpenPetraRuntimeHost.dll')}"
+          tofile="${path::combine(dir.delivery, 'Ict.Tools.OpenPetraRuntimeHost.dll')}" 
+          overwrite="false"/>
+
+      <!-- Copy the web server help.  These files can be overwritten -->
+      <copy todir="${path::combine(dir.delivery, 'ServerHelp')}" overwrite="true">
+        <fileset basedir="${dir.csharp}/ICT/BuildTools/OpenPetraWebServer/ServerHelp/">
+          <include name="*.*" />
+        </fileset>
+      </copy>
+
+      <echo file="${dir.delivery}/Ict.Tools.OpenPetraWebServer.exe.config">&lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;configuration>
     &lt;startup>
         &lt;supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0" />
@@ -149,8 +161,7 @@
               workingdir="${dir.delivery}"
               spawn="true">
            <arg value="/c" />
-           <arg value="start" />
-           <arg value="Ict.Tools.TinyWebServer.exe ${Server.Port} &quot;${dir.log}\Ict.Tools.WebServer.log&quot; ${TinyServer.MaximumRuntime.InMinutes}" />
+           <arg value="start Ict.Tools.OpenPetraWebServer.exe  ${dir.delivery}  /p  ${Server.Port}  /q" />
       </exec>
     </if>
   </if>
@@ -174,6 +185,7 @@
 </target>
 <target name="startClient" depends="initConfigFiles-client" description="start the OpenPetra Client">
   <if test="${platform::is-windows()}">
+    <call target="startServer-internal" />
     <exec program="cmd.exe" 
           workingdir="${dir.bin}"
           spawn="true">
@@ -183,7 +195,7 @@
        <arg value="/c" />
        <arg value="start" />
        <arg value="PetraClient.exe" />
-        <arg value="-C:${ClientConfigFile}" />
+       <arg value="-C:${ClientConfigFile}" />
     </exec>
   </if>
 
@@ -206,6 +218,7 @@
 
 <target name="stopServer" depends="initConfigFiles-admin" description="stop the local OpenPetra Server">
   <if test="${platform::is-windows()}" >
+    <!-- This doesn't really do anything now with web services and web server-->
       <exec program="PetraServerAdminConsole.exe" 
             basedir="${dir.bin}" 
             workingdir="${dir.bin}"
