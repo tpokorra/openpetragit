@@ -670,7 +670,9 @@ namespace Ict.Tools.OpenPetraRuntimeHost
                     else
                     {
                         expandedBytes[pos++] = (byte)'%';
-                        expandedBytes[pos++] = (byte)IntToHex[(b >> 4) & 0xf];
+                        // uncrustify has problems with right shift bit operator b >> 4
+                        // therefore using division instead (2^4=16)
+                        expandedBytes[pos++] = (byte)IntToHex[(b / 16) & 0xf];
                         expandedBytes[pos++] = (byte)IntToHex[b & 0xf];
                     }
                 }
