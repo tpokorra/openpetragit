@@ -280,10 +280,10 @@ namespace Ict.Petra.Client.App.Core
                     string CacheableTableName = Enum.GetName(typeof(TCacheableFinanceTablesEnum), ACacheableTable);
                     return TDataCache.GetCacheableDataTableFromCache(CacheableTableName);
                 }
-                catch (System.Runtime.Remoting.RemotingException)
+                catch (System.Runtime.Remoting.RemotingException Exc)
                 {
                     // most probably a permission problem: System.Runtime.Remoting.RemotingException: Requested Service not found
-                    throw new Exception(Catalog.GetString("You do not have enough permissions to access the Finance module"));
+                    throw new Exception(Catalog.GetString("You do not have enough permissions to access the Finance module:") + "\n" + Exc.ToString());
                 }
             }
 
@@ -439,10 +439,14 @@ namespace Ict.Petra.Client.App.Core
                     String FilterCriteria = ALedgerColumnDBName + " = " + ALedgerNumber.ToString();
                     return TDataCache.GetCacheableDataTableFromCache(CacheableTableName, FilterCriteria, (object)ALedgerNumber, out ADataTableType);
                 }
-                catch (Exception ex)
+                catch (System.Runtime.Remoting.RemotingException Exc)
                 {
                     // most probably a permission problem: System.Runtime.Remoting.RemotingException: Requested Service not found
-                    throw new Exception(Catalog.GetString("You do not have enough permissions to access the Finance module:") + "\n" + ex);
+                    throw new Exception(Catalog.GetString("You do not have enough permissions to access the Finance module:") + "\n" + Exc.ToString());
+                }
+                catch (Exception)
+                {
+                    throw;
                 }
             }
         }
@@ -598,14 +602,15 @@ namespace Ict.Petra.Client.App.Core
             }
             catch (ECacheableTablesMgrException)
             {
+                // Ignore that Exception; it just means that the Cacheable DataTable
+                // hasn't been loaded into the local CacheManager yet  so no updating is necessary.
+
+                /* TLogging.Log('TDataCache.ReloadCacheTable: Should refresh Cacheable DataTable ''' + ACacheableTableName + ''', but the DataTable isn''t cached yet > not doing anything (this is expected behaviour and doesn''t mean an error
+                 *happened!).'); */
             }
-            // Ignore that Exception; it just means that the Cacheable DataTable
-            // hasn't been loaded into the local CacheManager yet  so no updating is necessary.
-            /* TLogging.Log('TDataCache.ReloadCacheTable: Should refresh Cacheable DataTable ''' + ACacheableTableName + ''', but the DataTable isn''t cached yet > not doing anything (this is expected behaviour and doesn''t mean an error
-             *happened!).'); */
-            catch (Exception Exp)
+            catch (Exception Exc)
             {
-                TLogging.Log("TDataCache.ReloadCacheTable: Exception occured while calling 'MarkCachedTableNeedsRefreshing': " + Exp.ToString());
+                TLogging.Log("TDataCache.ReloadCacheTable: Exception occured while calling 'MarkCachedTableNeedsRefreshing': " + Exc.ToString());
                 throw;
             }
         }
@@ -628,31 +633,39 @@ namespace Ict.Petra.Client.App.Core
             try
             {
                 UCacheableTablesManager.MarkCachedTableNeedsRefreshing(ACacheableTableName);
-
-                if (System.Array.IndexOf(Enum.GetNames(typeof(TCacheableFinanceTablesEnum)), ACacheableTableName) != -1)
-                {
-                    // MFinance Namespace
-                    CacheableMFinanceTable = (TCacheableFinanceTablesEnum)Enum.Parse(typeof(TCacheableFinanceTablesEnum), ACacheableTableName);
-
-                    TMFinance.GetCacheableFinanceTable(CacheableMFinanceTable, Convert.ToInt32(AFilterCriteria));
-
-                    // AFilterCriteria will be the LedgerNumber
-                }
-                else
-                {
-                }
             }
             catch (ECacheableTablesMgrException)
             {
+                // Ignore that Exception; it just means that the Cacheable DataTable
+                // hasn't been loaded into the local CacheManager yet  so no updating is necessary.
+
+                /* TLogging.Log('TDataCache.ReloadCacheTable: Should refresh Cacheable DataTable ''' + ACacheableTableName + ''', but the DataTable isn''t cached yet > not doing anything (this is expected behaviour and doesn''t mean an error
+                 *happened!).'); */
             }
-            // Ignore that Exception; it just means that the Cacheable DataTable
-            // hasn't been loaded into the local CacheManager yet  so no updating is necessary.
-            /* TLogging.Log('TDataCache.ReloadCacheTable: Should refresh Cacheable DataTable ''' + ACacheableTableName + ''', but the DataTable isn''t cached yet > not doing anything (this is expected behaviour and doesn''t mean an error
-             *happened!).'); */
-            catch (Exception Exp)
+            catch (Exception Exc)
             {
-                TLogging.Log("TDataCache.ReloadCacheTable: Exception occured while calling 'MarkCachedTableNeedsRefreshing': " + Exp.ToString());
+                TLogging.Log("TDataCache.ReloadCacheTable: Exception occured while calling 'MarkCachedTableNeedsRefreshing': " + Exc.ToString());
                 throw;
+            }
+
+            if (System.Array.IndexOf(Enum.GetNames(typeof(TCacheableFinanceTablesEnum)), ACacheableTableName) != -1)
+            {
+                // MFinance Namespace
+                CacheableMFinanceTable = (TCacheableFinanceTablesEnum)Enum.Parse(typeof(TCacheableFinanceTablesEnum), ACacheableTableName);
+                try
+                {
+                    TMFinance.GetCacheableFinanceTable(CacheableMFinanceTable, Convert.ToInt32(AFilterCriteria));
+                }
+                catch (Exception Exc)
+                {
+                    TLogging.Log("TDataCache.ReloadCacheTable: Exception occured while calling 'GetCacheableFinanceTable': " + Exc.ToString());
+                    throw;
+                }
+
+                // AFilterCriteria will be the LedgerNumber
+            }
+            else
+            {
             }
         }
 
@@ -1012,11 +1025,11 @@ namespace Ict.Petra.Client.App.Core
                 {
                     CacheableDataTableFromFile = LoadCacheableDataTableFromFile(ACacheableTableName);
                 }
-                catch (Exception Exp)
+                catch (Exception Exc)
                 {
                     if (TLogging.DebugLevel >= DEBUGLEVEL_CACHEMESSAGES)
                     {
-                        TLogging.Log("Cacheable DataTable '" + ACacheableTableName + "': loading from file failed!  Details: " + Exp.ToString());
+                        TLogging.Log("Cacheable DataTable '" + ACacheableTableName + "': loading from file failed!  Details: " + Exc.ToString());
                     }
                 }
 
