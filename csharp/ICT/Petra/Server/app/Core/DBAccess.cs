@@ -25,6 +25,7 @@ using System;
 using Ict.Common;
 using Ict.Common.DB;
 using Ict.Common.DB.DBCaching;
+using Ict.Common.Exceptions;
 using Ict.Common.Remoting.Shared;
 using Ict.Petra.Shared;
 using Ict.Petra.Shared.Security;
@@ -97,7 +98,7 @@ namespace Ict.Petra.Server.App.Core.Security
         /// <summary>
         /// This function checks if the current user has enough access rights to execute that query.
         /// </summary>
-        /// <returns>true if the user has access, false if access is denied
+        /// <returns>True if the user has access, false if access is denied.
         /// </returns>
         public new bool HasAccess(string ASQLStatement)
         {
@@ -266,6 +267,7 @@ namespace Ict.Petra.Server.App.Core.Security
             {
                 throw;
             }
+
             return ReturnValue;
         }
 
