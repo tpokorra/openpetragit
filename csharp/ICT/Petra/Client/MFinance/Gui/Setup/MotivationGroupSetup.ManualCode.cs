@@ -61,6 +61,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup.Gift
                 grdDetails.AutoSizeCells();
 
                 this.Text = this.Text + "   [Ledger = " + FLedgerNumber.ToString() + "]";
+
+                SelectRowInGrid(1);
+                UpdateRecordNumberDisplay();
             }
         }
 

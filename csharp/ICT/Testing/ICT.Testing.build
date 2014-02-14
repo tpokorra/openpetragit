@@ -45,6 +45,7 @@
     <NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MFinance.server.Reporting.dll" />
 
     <NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MPartner.server.PartnerExports.dll" />
+    <NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MPartner.server.Reporting.dll" />
     
     <!-- <NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MFinance.server.Gift.dll" /> -->
 </target>
@@ -80,6 +81,10 @@
     <call target="test-client"/>
 </target>
 
+<target name="test-main-navigation-screens-core">
+	<NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MainNavigationScreens.dll" />
+</target>
+
 <target name="test-main-navigation-screens">
     <property name="nant.onfailure" value="cleanup" />
 
@@ -87,7 +92,7 @@
     <nant inheritall="false" target="stopServer" buildfile="${path::combine(dir.root, 'OpenPetra.build')}" verbose="${verbose}"/>
     <nant inheritall="false" target="startServer" buildfile="${path::combine(dir.root, 'OpenPetra.build')}" verbose="${verbose}"/>
     
-    <NUnitConsole assemblyname="${dir.bin}/Ict.Testing.lib.MainNavigationScreens.dll" />
+    <call target="test-main-navigation-screens-core" />
     
     <nant inheritall="false" target="stopServer" buildfile="${path::combine(dir.root, 'OpenPetra.build')}" verbose="${verbose}"/>    
 </target>

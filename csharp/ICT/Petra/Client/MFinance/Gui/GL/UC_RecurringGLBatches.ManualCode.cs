@@ -53,10 +53,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         private Int32 FLedgerNumber = -1;
         private Int32 FSelectedBatchNumber = -1;
         private DateTime FDefaultDate = DateTime.Today;
-
+        private GLSetupTDS FCacheDS;
         private ACostCentreTable FCostCentreTable = null;
         private AAccountTable FAccountTable = null;
-
 
         /// <summary>
         /// load the batches into the grid
@@ -84,6 +83,12 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 ((TFrmRecurringGLBatch) this.ParentForm).DisableTransactions();
             }
 
+            //Load all analysis attribute values
+            if (FCacheDS == null)
+            {
+                FCacheDS = TRemote.MFinance.GL.WebConnectors.LoadAAnalysisAttributes(FLedgerNumber);
+            }
+
             ShowData();
 
             //Set sort order
@@ -92,8 +97,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 ARecurringBatchTable.GetBatchNumberDBName()
                 );
 
-            grdDetails.Focus();
-
+            UpdateRecordNumberDisplay();
             SetAccountCostCentreTableVariables();
         }
 
@@ -232,6 +236,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
         private void ShowDetailsManual(ARecurringBatchRow ARow)
         {
+            EnableTransactionTabForBatch();
+            grdDetails.TabStop = (ARow != null);
+
             if (ARow == null)
             {
                 return;
@@ -288,45 +295,33 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         /// <param name="e"></param>
         private void NewRow(System.Object sender, EventArgs e)
         {
-            Int32 yearNumber = 0;
-            Int32 periodNumber = 0;
-
             if (FPetraUtilsObject.HasChanges && !((TFrmRecurringGLBatch) this.ParentForm).SaveChanges())
             {
                 return;
             }
 
-            FPetraUtilsObject.VerificationResultCollection.Clear();
+            CreateNewARecurringBatch();
 
             pnlDetails.Enabled = true;
-
             EnableButtonControl(true);
 
-            FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.CreateARecurringBatch(FLedgerNumber));
-
-            ARecurringBatchRow newBatchRow = (ARecurringBatchRow)FMainDS.ARecurringBatch.Rows[FMainDS.ARecurringBatch.Rows.Count - 1];
-
-            newBatchRow.DateEffective = FDefaultDate;
+            ARecurringBatchRow newBatchRow = GetSelectedDetailRow();
+            Int32 yearNumber = 0;
+            Int32 periodNumber = 0;
 
             if (GetAccountingYearPeriodByDate(FLedgerNumber, FDefaultDate, out yearNumber, out periodNumber))
             {
                 newBatchRow.BatchPeriod = periodNumber;
             }
 
-            SelectDetailRowByDataTableIndex(FMainDS.ARecurringBatch.Rows.Count - 1);
+            newBatchRow.DateEffective = FDefaultDate;
 
-            FPreviouslySelectedDetailRow.DateEffective = FDefaultDate;
-
-
-            FSelectedBatchNumber = FPreviouslySelectedDetailRow.BatchNumber;
+            FSelectedBatchNumber = newBatchRow.BatchNumber;
 
             string enterMsg = Catalog.GetString("Please enter a batch description");
-            FPreviouslySelectedDetailRow.BatchDescription = enterMsg;
+            newBatchRow.BatchDescription = enterMsg;
             txtDetailBatchDescription.Text = enterMsg;
-            txtDetailBatchDescription.Focus();
-
-            //Not needed as recurring batches can be deleted
-            //((TFrmRecurringGLBatch)ParentForm).SaveChanges();
+            txtDetailBatchDescription.SelectAll();
 
             //Enable the Journals if not already enabled
             ((TFrmRecurringGLBatch)ParentForm).EnableJournals();
@@ -486,6 +481,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             // Delete the recurring batch row.
             ARowToDelete.Delete();
 
+            UpdateRecordNumberDisplay();
+
             return true;
         }
 
@@ -525,6 +522,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 ((TFrmRecurringGLBatch)ParentForm).GetJournalsControl().ClearCurrentSelection();
                 ((TFrmRecurringGLBatch)ParentForm).DisableJournals();
             }
+
+            SetInitialFocus();
         }
 
         private void ClearControls()
@@ -599,6 +598,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             FMainDS.ARecurringTransaction.DefaultView.RowFilter = String.Format("{0}={1}",
                 ARecurringTransactionTable.GetBatchNumberDBName(),
                 FSelectedBatchNumber);
+            FMainDS.ARecurringTransAnalAttrib.DefaultView.RowFilter = String.Format("{0}={1}",
+                ARecurringTransAnalAttribTable.GetBatchNumberDBName(),
+                FSelectedBatchNumber);
 
             if (FMainDS.ARecurringJournal.DefaultView.Count == 0)
             {
@@ -619,11 +621,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             //Reset row filter
             FMainDS.ARecurringJournal.DefaultView.RowFilter = string.Empty;
             FMainDS.ARecurringTransaction.DefaultView.RowFilter = string.Empty;
+            FMainDS.ARecurringTransAnalAttrib.DefaultView.RowFilter = string.Empty;
 
             bool inactiveCodefound = false;
 
             // check how many journals have currency different from base currency
             // check for inactive accounts or cost centres
+
             foreach (ARecurringJournalRow JournalRow in FMainDS.ARecurringJournal.Rows)
             {
                 if ((JournalRow.BatchNumber == FSelectedBatchNumber)
@@ -631,26 +635,40 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 {
                     NumberOfNonBaseCurrencyJournals++;
                 }
+            }
 
-                foreach (ARecurringTransactionRow transRow in FMainDS.ARecurringTransaction.Rows)
+            foreach (ARecurringTransactionRow transRow in FMainDS.ARecurringTransaction.Rows)
+            {
+                if (!AccountIsActive(transRow.AccountCode) || !CostCentreIsActive(transRow.CostCentreCode))
                 {
-                    if (!AccountIsActive(transRow.AccountCode) || !CostCentreIsActive(transRow.CostCentreCode))
-                    {
-                        inactiveCodefound = true;
+                    inactiveCodefound = true;
 
-                        MessageBox.Show(String.Format(Catalog.GetString(
-                                    "Recurring batch no. {0} cannot be submitted because transaction {1} in Journal {2} contains an inactive account or cost centre code"),
-                                FSelectedBatchNumber,
-                                JournalRow.JournalNumber,
-                                transRow.TransactionNumber),
-                            Catalog.GetString("Inactive Account/Cost Centre Code"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(String.Format(Catalog.GetString(
+                                "Recurring batch no. {0} cannot be submitted because transaction {1} in Journal {2} contains an inactive account or cost centre code"),
+                            FSelectedBatchNumber,
+                            transRow.JournalNumber,
+                            transRow.TransactionNumber),
+                        Catalog.GetString("Inactive Account/Cost Centre Code"), MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                        break;
-                    }
+                    break;
                 }
+            }
 
-                if (inactiveCodefound)
+            foreach (ARecurringTransAnalAttribRow analAttribRow in FMainDS.ARecurringTransAnalAttrib.Rows)
+            {
+                if (!AnalysisCodeIsActive(analAttribRow.AccountCode,
+                        analAttribRow.AnalysisTypeCode)
+                    || !AnalysisAttributeValueIsActive(analAttribRow.AnalysisTypeCode, analAttribRow.AnalysisAttributeValue))
                 {
+                    inactiveCodefound = true;
+
+                    MessageBox.Show(String.Format(Catalog.GetString(
+                                "Recurring batch no. {0} cannot be submitted because transaction {1} in Journal {2} contains an inactive analysis code|value"),
+                            FSelectedBatchNumber,
+                            analAttribRow.JournalNumber,
+                            analAttribRow.TransactionNumber),
+                        Catalog.GetString("Inactive Account/Cost Centre Code"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+
                     break;
                 }
             }
@@ -786,6 +804,60 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             FAccountTable = (AAccountTable)accountList;
         }
 
+        private bool AnalysisCodeIsActive(String AAccountCode, String AAnalysisCode = "")
+        {
+            bool retVal = true;
+
+            if ((AAnalysisCode == string.Empty) || (AAccountCode == string.Empty))
+            {
+                return retVal;
+            }
+
+            string originalRowFilter = FCacheDS.AAnalysisAttribute.DefaultView.RowFilter;
+            FCacheDS.AAnalysisAttribute.DefaultView.RowFilter = string.Empty;
+
+            FCacheDS.AAnalysisAttribute.DefaultView.RowFilter = String.Format("{0}={1} AND {2}='{3}' AND {4}='{5}' AND {6}=true",
+                AAnalysisAttributeTable.GetLedgerNumberDBName(),
+                FLedgerNumber,
+                AAnalysisAttributeTable.GetAccountCodeDBName(),
+                AAccountCode,
+                AAnalysisAttributeTable.GetAnalysisTypeCodeDBName(),
+                AAnalysisCode,
+                AAnalysisAttributeTable.GetActiveDBName());
+
+            retVal = (FCacheDS.AAnalysisAttribute.DefaultView.Count > 0);
+
+            FCacheDS.AAnalysisAttribute.DefaultView.RowFilter = originalRowFilter;
+
+            return retVal;
+        }
+
+        private bool AnalysisAttributeValueIsActive(String AAnalysisCode = "", String AAnalysisAttributeValue = "")
+        {
+            bool retVal = true;
+
+            if ((AAnalysisCode == string.Empty) || (AAnalysisAttributeValue == string.Empty))
+            {
+                return retVal;
+            }
+
+            string originalRowFilter = FCacheDS.AFreeformAnalysis.DefaultView.RowFilter;
+            FCacheDS.AFreeformAnalysis.DefaultView.RowFilter = string.Empty;
+
+            FCacheDS.AFreeformAnalysis.DefaultView.RowFilter = String.Format("{0}='{1}' AND {2}='{3}' AND {4}=true",
+                AFreeformAnalysisTable.GetAnalysisTypeCodeDBName(),
+                AAnalysisCode,
+                AFreeformAnalysisTable.GetAnalysisValueDBName(),
+                AAnalysisAttributeValue,
+                AFreeformAnalysisTable.GetActiveDBName());
+
+            retVal = (FCacheDS.AFreeformAnalysis.DefaultView.Count > 0);
+
+            FCacheDS.AFreeformAnalysis.DefaultView.RowFilter = originalRowFilter;
+
+            return retVal;
+        }
+
         private bool AccountIsActive(string AAccountCode)
         {
             bool retVal = true;
@@ -906,6 +978,95 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             {
                 grdDetails.Focus();
             }
+        }
+
+        /// <summary>
+        /// Shows the Filter/Find UserControl and switches to the Find Tab.
+        /// </summary>
+        public void ShowFindPanel()
+        {
+            if (FucoFilterAndFind == null)
+            {
+                ToggleFilter();
+            }
+
+            FucoFilterAndFind.DisplayFindTab();
+        }
+
+        /// <summary>
+        /// A simple flag used to indicate that the form has been shown for the first time
+        /// </summary>
+        private bool FInitialFocusActionComplete = false;
+
+        /// <summary>
+        /// Sets the initial focus to the grid or the New button depending on the row count
+        /// </summary>
+        public void SetInitialFocus()
+        {
+            if (FInitialFocusActionComplete)
+            {
+                return;
+            }
+
+            if (grdDetails.Rows.Count < 2)
+            {
+                btnNew.Focus();
+            }
+            else
+            {
+                grdDetails.Focus();
+            }
+
+            FInitialFocusActionComplete = true;
+        }
+
+        private void RunOnceOnParentActivationManual()
+        {
+            grdDetails.DoubleClickHeaderCell += new TDoubleClickHeaderCellEventHandler(grdDetails_DoubleClickHeaderCell);
+            grdDetails.DoubleClickCell += new TDoubleClickCellEventHandler(this.ShowJournalTab);
+
+            AutoSizeGrid();
+        }
+
+        /// <summary>
+        /// Fired when the user double clicks a header cell.  We use this to autoSize the specified column.
+        /// </summary>
+        /// <param name="Sender"></param>
+        /// <param name="e"></param>
+        protected void grdDetails_DoubleClickHeaderCell(object Sender, SourceGrid.ColumnEventArgs e)
+        {
+            if ((grdDetails.Columns[e.Column].AutoSizeMode & SourceGrid.AutoSizeMode.EnableAutoSize) == SourceGrid.AutoSizeMode.None)
+            {
+                grdDetails.Columns[e.Column].AutoSizeMode |= SourceGrid.AutoSizeMode.EnableAutoSize;
+                grdDetails.AutoSizeCells(new SourceGrid.Range(1, e.Column, grdDetails.Rows.Count - 1, e.Column));
+            }
+        }
+
+        private void FilterToggledManual(bool AFilterIsOff)
+        {
+            AutoSizeGrid();
+        }
+
+        /// <summary>
+        /// AutoSize the grid columns (call this after the window has been restored to normal size after being maximized)
+        /// </summary>
+        public void AutoSizeGrid()
+        {
+            //TODO: Using this manual code until we can do something better
+            //      Autosizing all the columns is very time consuming when there are many rows
+            foreach (SourceGrid.DataGridColumn column in grdDetails.Columns)
+            {
+                column.Width = 100;
+                column.AutoSizeMode = SourceGrid.AutoSizeMode.EnableStretch;
+            }
+
+            grdDetails.Columns[0].Width = 60;
+            grdDetails.Columns[4].AutoSizeMode = SourceGrid.AutoSizeMode.Default;
+
+            grdDetails.AutoStretchColumnsToFitWidth = true;
+            grdDetails.Rows.AutoSizeMode = SourceGrid.AutoSizeMode.None;
+            grdDetails.AutoSizeCells();
+            grdDetails.ShowCell(FPrevRowChangedRow);
         }
     }
 }

@@ -39,6 +39,7 @@ using Ict.Common.Remoting.Client;
 using Ict.Petra.Client.App.Core;
 using Ict.Petra.Client.App.Core.RemoteObjects;
 using Ict.Petra.Client.App.Gui;
+using Ict.Petra.Client.CommonControls.Logic;
 using Ict.Petra.Client.CommonForms;
 using Ict.Petra.Client.MCommon;
 using Ict.Petra.Client.MPartner.Logic;
@@ -136,6 +137,11 @@ namespace Ict.Petra.Client.MPartner.Gui
             "Either save the changes that you have made, or close this Partner Edit screen without saving the data " +
             "and then delete the Partner from the Partner Module screen.");
         private static readonly string StrCannotDeletePartnerTitle = Catalog.GetString("Cannot delete Partner that has unsaved changes");
+        private static readonly string StrCannotPrintPartner = Catalog.GetString(
+            "Cannot print a Partner with unsaved changes.\r\n\r\n" +
+            "Either save the changes that you have made, or close this Partner Edit screen without saving the data " +
+            "and reopen.");
+        private static readonly string StrCannotPrintPartnerTitle = Catalog.GetString("Cannot print a Partner with unsaved changes");
 // TODO        private static readonly string StrDownloadVideoTutorialTitle = Catalog.GetString("Download Video Tutorial");
 // TODO        private static readonly string StrDownloadVideoTutoriaManuallTitle = Catalog.GetString("Manual Download of Video Tutorial");
 // TODO        private static readonly string StrVideoTutorialTitle = Catalog.GetString("Video Tutorial for Partner Edit Screen");
@@ -1246,6 +1252,8 @@ namespace Ict.Petra.Client.MPartner.Gui
                             }
 #endif
 
+                            ucoUpperPart.UpdateStatusUpdatedDate();  // this is to refresh 'Status Updated' if it has been changed in the ComboBox and then saved...
+
                             ucoLowerPart.RefreshAddressesAfterMerge();
                             ucoLowerPart.RefreshPersonnelDataAfterMerge(AddressesOrRelationsChanged);
 
@@ -1474,6 +1482,9 @@ namespace Ict.Petra.Client.MPartner.Gui
         {
             FPetraUtilsObject.TFrmPetra_Load(sender, e);
 
+            this.Shown += new EventHandler(FPetraUtilsObject.OnFormShown);
+            this.Shown += new EventHandler(TFrmPartnerEdit_Shown);
+
             // Reduce Form height to fit the PartnerEdit screen fully only on 800x600 resolution
             if (System.Windows.Forms.Screen.GetBounds(ucoUpperPart).Height == 600)
             {
@@ -1621,6 +1632,18 @@ namespace Ict.Petra.Client.MPartner.Gui
             // Checks whether there any Tips to show to the User; if there are, they will be
             // shown.
 // TODO            ucoUpperPart.CheckForUserTips();
+        }
+
+        /// <summary>
+        /// We must switch to the selected TabPage only once the the 'Shown' Event of the Form has been run
+        /// to make sure that the TabControl does not show the selected TabPage leftmost, but at its' correct
+        /// place in the order of the Tabs. (See Bug https://tracker.openpetra.org/view.php?id=2392)
+        /// </summary>
+        /// <param name="sender">Not evaluated.</param>
+        /// <param name="e">Not evaluated.</param>
+        void TFrmPartnerEdit_Shown(object sender, EventArgs e)
+        {
+            ucoLowerPart.SelectTabPage(FInitiallySelectedTabPage);
         }
 
         private void UcoUpperPart_PartnerClassMainDataChanged(System.Object Sender, TPartnerClassMainDataChangedEventArgs e)
@@ -1796,7 +1819,31 @@ namespace Ict.Petra.Client.MPartner.Gui
 
         private void FilePrintPartner(System.Object sender, System.EventArgs e)
         {
-            throw new NotImplementedException();
+            /* Check for new Partner that wasn't saved yet */
+            if (IsNewPartner(FMainDS))
+            {
+                /* Tell user that he can't delete a new Partner that wasn't saved yet */
+                MessageBox.Show(MPartnerResourcestrings.StrErrorNeedToSavePartner1 + MPartnerResourcestrings.StrErrorPrintPartner2,
+                    MPartnerResourcestrings.StrErrorNeedToSavePartnerTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+            else
+            {
+                /* Check for unsaved changes */
+                if (CanClose())
+                {
+                    Form MainWindow = FPetraUtilsObject.GetCallerForm();
+                    TCommonScreensForwarding.OpenPrintPartnerDialog.Invoke(FPartnerKey, MainWindow);
+                }
+                else
+                {
+                    /* Tell user that he can't print a Partner that has changes that weren't saved yet */
+                    MessageBox.Show(StrCannotPrintPartner, StrCannotPrintPartnerTitle,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            }
         }
 
         private void FilePrintSection(System.Object sender, System.EventArgs e)
@@ -1839,24 +1886,7 @@ namespace Ict.Petra.Client.MPartner.Gui
 
         private void FileExportPartner(System.Object sender, System.EventArgs e)
         {
-            String FileName = TImportExportDialogs.GetExportFilename(Catalog.GetString("Save Partners into File"));
-
-            if (FileName.Length > 0)
-            {
-                if (FileName.EndsWith("ext"))
-                {
-                    StringCollection ASpecificBuildingInfo = null;
-                    String doc = TRemote.MPartner.ImportExport.WebConnectors.GetExtFileHeader();
-                    Int32 SiteKey = 0;
-                    Int32 LocationKey = 0;
-
-                    doc += TRemote.MPartner.ImportExport.WebConnectors.ExportPartnerExt(
-                        this.PartnerKey, SiteKey, LocationKey, false, ASpecificBuildingInfo);
-
-                    doc += TRemote.MPartner.ImportExport.WebConnectors.GetExtFileFooter();
-                    TImportExportDialogs.ExportTofile(doc, FileName);
-                }
-            }
+            TPartnerExportLogic.ExportSinglePartner(this.PartnerKey, 0, 0);
         }
 
         /// <summary>

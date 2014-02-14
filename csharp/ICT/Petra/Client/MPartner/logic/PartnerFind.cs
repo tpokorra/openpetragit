@@ -108,16 +108,23 @@ namespace Ict.Petra.Client.MPartner
         {
             get
             {
-                DataRowView[] TheDataRowViewArray = FDataGrid.SelectedDataRowsAsDataRowView;
-
-                if (TheDataRowViewArray.Length > 0)
+                if (FDataGrid != null) 
                 {
-                    return TheDataRowViewArray[0].Row;
+                    DataRowView[] TheDataRowViewArray = FDataGrid.SelectedDataRowsAsDataRowView;
+    
+                    if (TheDataRowViewArray.Length > 0)
+                    {
+                        return TheDataRowViewArray[0].Row;
+                    }
+                    else
+                    {
+                        return null;
+                    }                    
                 }
                 else
                 {
                     return null;
-                }
+                }                    
             }
         }
 
@@ -170,10 +177,6 @@ namespace Ict.Petra.Client.MPartner
  *              }
  *          };
  */
-
-
-            // First get rid of columns of previous searches...
-            FDataGrid.Columns.Clear();
             LocalisedStrings.GetLocStrCounty(out LocalisedCountyLabel, out dummy);
 
             // done this way in case it changes
@@ -182,6 +185,7 @@ namespace Ict.Petra.Client.MPartner
             if (ADetailedResults)
             {
                 FDataGrid.AddTextColumn("Class", ASourceTable.Columns["p_partner_class_c"], PARTNERCLASS_COLUMNWIDTH);
+                FDataGrid.AddTextColumn("Partner Key", ASourceTable.Columns["p_partner_key_n"]);
                 FDataGrid.AddTextColumn("Partner Name", ASourceTable.Columns["p_partner_short_name_c"]);
 
                 if (AVisibleFields.Contains("PreviousName"))
@@ -210,7 +214,6 @@ namespace Ict.Petra.Client.MPartner
                 }
 
                 FDataGrid.AddTextColumn("Country", ASourceTable.Columns["p_country_code_c"]);
-                FDataGrid.AddTextColumn("Partner Key", ASourceTable.Columns["p_partner_key_n"]);
 
                 if (ASourceTable.Columns.Contains("p_family_key_n"))
                 {
@@ -501,7 +504,7 @@ namespace Ict.Petra.Client.MPartner
         /// </summary>
         public static void PrintPartner()
         {
-// TODO            Logic.UCmdMPartner.RunPrintPartner(Logic.ULogic.ParentForm, Logic.ULogic.PartnerKey);
+// TODO           Logic.UCmdMPartner.RunPrintPartner(Logic.ULogic.ParentForm, Logic.ULogic.PartnerKey);
         }
 
         /// <summary>
@@ -546,6 +549,7 @@ namespace Ict.Petra.Client.MPartner
             }
             else
             {
+                throw new NotImplementedException();
 // TODO                Logic.UCmdMSysMan.SendEmail(EmailAddress);
             }
         }

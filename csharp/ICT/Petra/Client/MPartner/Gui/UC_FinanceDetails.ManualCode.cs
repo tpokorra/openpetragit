@@ -75,15 +75,18 @@ namespace Ict.Petra.Client.MPartner.Gui
 
             LoadDataOnDemand();
 
-            if (grdDetails.Rows.Count <= 1)
-            {
-                btnSetMainAccount.Enabled = false;
-                pnlDetails.Visible = false;
-            }
-
             // if partner is of class FAMILY or class UNIT, enable grpRecipientGiftReceipting
             grpRecipientGiftReceipting.Enabled = (FMainDS.PPartner[0].PartnerClass == MPartnerConstants.PARTNERCLASS_FAMILY
                                                   || FMainDS.PPartner[0].PartnerClass == MPartnerConstants.PARTNERCLASS_UNIT);
+        }
+
+        private void ShowDataManual()
+        {
+            if (grdDetails.Rows.Count > 1)
+            {
+                btnSetMainAccount.Enabled = true;
+                pnlDetails.Visible = true;
+            }
         }
 
         /// <summary>
@@ -102,7 +105,9 @@ namespace Ict.Petra.Client.MPartner.Gui
             ARow.BankingDetailsKey = (FMainDS.PBankingDetails.Rows.Count + 1) * -1;
             ARow.BankingType = MPartnerConstants.BANKINGTYPE_BANKACCOUNT;
             ARow.BankKey = 0;
-            ARow.MainAccount = (FMainDS.PBankingDetails.Rows.Count == 0);
+
+            // automatically set to main account if it is the only account
+            ARow.MainAccount = (grdDetails.Rows.Count == 1);
 
             PPartnerBankingDetailsRow partnerBankingDetails = FMainDS.PPartnerBankingDetails.NewRowTyped();
             partnerBankingDetails.BankingDetailsKey = ARow.BankingDetailsKey;
@@ -126,6 +131,20 @@ namespace Ict.Petra.Client.MPartner.Gui
         {
             ACompletionMessage = String.Empty;
 
+            // if there are 2 records in grid but one is deleted... set one remaining record as Main Account
+            if (ARowToDelete.MainAccount && (grdDetails.Rows.Count == 3))
+            {
+                foreach (DataRow Row in FMainDS.PBankingDetails.Rows)
+                {
+                    if ((Row.RowState != DataRowState.Deleted)
+                        && (((PartnerEditTDSPBankingDetailsRow)Row).BankingDetailsKey != ARowToDelete.BankingDetailsKey))
+                    {
+                        ((PartnerEditTDSPBankingDetailsRow)Row).MainAccount = true;
+                        break;
+                    }
+                }
+            }
+
             // TODO what if several people are using the same bank account?
             FMainDS.PPartnerBankingDetails.DefaultView.Sort = PPartnerBankingDetailsTable.GetBankingDetailsKeyDBName();
             FMainDS.PPartnerBankingDetails.DefaultView.FindRows(ARowToDelete.BankingDetailsKey)[0].Row.Delete();
@@ -142,8 +161,9 @@ namespace Ict.Petra.Client.MPartner.Gui
         {
             if (grdDetails.Rows.Count <= 1)
             {
-                // disable buttons if no record in grid (first row for headings)
+                // disable buttons and make details panel invisible if no record in grid (first row for headings)
                 btnSetMainAccount.Enabled = false;
+                pnlDetails.Visible = false;
             }
 
             if (ADeletionPerformed)
@@ -249,13 +269,30 @@ namespace Ict.Petra.Client.MPartner.Gui
                 FMainDS.PBankingDetails,
                 ref VerificationResultCollection,
                 FValidationControlsDict);
+        }
 
-            // GetDataFromControls for PPartner table
-            FMainDS.PPartner[0].ReceiptLetterFrequency = cmbReceiptLetterFrequency.GetSelectedString();
-            FMainDS.PPartner[0].ReceiptEachGift = chkReceiptEachGift.Checked;
-            FMainDS.PPartner[0].AnonymousDonor = chkAnonymousDonor.Checked;
-            FMainDS.PPartner[0].EmailGiftStatement = chkEmailGiftStatement.Checked;
-            FMainDS.PPartner[0].FinanceComment = txtFinanceComment.Text;
+        /// <summary>
+        /// GetDataFromControls for PPartner table.
+        /// </summary>
+        /// <remarks>This allows PPartner data to be saved even if the partner has no bank accounts.</remarks>
+        /// <returns>True if successful.</returns>
+        public bool GetPartnerDataFromControls()
+        {
+            try
+            {
+                // GetDataFromControls for PPartner table
+                FMainDS.PPartner[0].ReceiptLetterFrequency = cmbReceiptLetterFrequency.GetSelectedString();
+                FMainDS.PPartner[0].ReceiptEachGift = chkReceiptEachGift.Checked;
+                FMainDS.PPartner[0].AnonymousDonor = chkAnonymousDonor.Checked;
+                FMainDS.PPartner[0].EmailGiftStatement = chkEmailGiftStatement.Checked;
+                FMainDS.PPartner[0].FinanceComment = txtFinanceComment.Text;
+            }
+            catch (ConstraintException)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         // set the main account flag, remove that flag from the other accounts (p_banking_details_usage)

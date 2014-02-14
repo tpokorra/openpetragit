@@ -328,6 +328,16 @@ namespace Ict.Petra.Client.MPartner.Gui.Extracts
         }
 
         /// <summary>
+        /// Export partners in selected extract
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExportPartnersInExtract(System.Object sender, EventArgs e)
+        {
+            ucoExtractMasterList.ExportPartnersInExtract(sender, e);
+        }
+
+        /// <summary>
         /// Open screen to maintain contents of an extract
         /// </summary>
         /// <param name="sender"></param>
@@ -679,26 +689,12 @@ namespace Ict.Petra.Client.MPartner.Gui.Extracts
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CreatePartnerByConferenceExtract(System.Object sender, EventArgs e)
+        private void CreatePartnerByEventExtract(System.Object sender, EventArgs e)
         {
             TFrmPartnerByEvent frm = new TFrmPartnerByEvent(FindForm());
 
             frm.CalledFromExtracts = true;
             frm.CalledForConferences = true;
-            frm.Show();
-        }
-
-        /// <summary>
-        /// Create Partner By Outreach Extract
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CreatePartnerByOutreachExtract(System.Object sender, EventArgs e)
-        {
-            TFrmPartnerByEvent frm = new TFrmPartnerByEvent(FindForm());
-
-            frm.CalledFromExtracts = true;
-            frm.CalledForConferences = false;
             frm.Show();
         }
 
@@ -889,4 +885,19 @@ namespace Ict.Petra.Client.MPartner.Gui.Extracts
 
         #endregion
     }
+    
+    /// <summary>
+    /// Manages the opening of a new Instance of the Extract Master screen.
+    /// </summary>
+    public static class TExtractMasterScreenManager
+    {
+        /// <summary>
+        /// Opens an instance of the Extract Master screen.
+        /// </summary>
+        /// <param name="AParentForm"></param>
+        public static void OpenForm(Form AParentForm)
+        {
+            new TFrmExtractMaster(AParentForm).Show();
+        }
+    }   
 }

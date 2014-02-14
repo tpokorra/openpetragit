@@ -81,55 +81,56 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                         GetDetailsFromControls(GetSelectedDetailRow());
                     }
                 }
-
-                return;
-            }
-
-            FLedgerNumber = ALedgerNumber;
-            FBatchNumber = ABatchNumber;
-            FBatchStatus = ABatchStatus;
-
-            FPreviouslySelectedDetailRow = null;
-
-            if (batchChanged)
-            {
-                //Clear all previous data.
-                FMainDS.ARecurringTransAnalAttrib.Clear();
-                FMainDS.ARecurringTransaction.Clear();
-                FMainDS.ARecurringJournal.Clear();
-            }
-
-            grdDetails.DataSource = null;
-            grdDetails.DataSource = new DevAge.ComponentModel.BoundDataView(FMainDS.ARecurringJournal.DefaultView);
-
-            SetJournalDefaultView();
-
-            // only load from server if there are no journals loaded yet for this batch
-            // otherwise we would overwrite journals that have already been modified
-            if (FMainDS.ARecurringJournal.DefaultView.Count == 0)
-            {
-                FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.LoadARecurringJournalAndContent(ALedgerNumber, ABatchNumber));
-            }
-
-            ShowData();
-
-            if (grdDetails.Rows.Count < 2)
-            {
-                ShowDetails(null);
             }
             else
             {
-                SelectRowInGrid(1);
+                // a different journal
+                FLedgerNumber = ALedgerNumber;
+                FBatchNumber = ABatchNumber;
+                FBatchStatus = ABatchStatus;
+
+                FPreviouslySelectedDetailRow = null;
+
+                if (batchChanged)
+                {
+                    //Clear all previous data.
+                    FMainDS.ARecurringTransAnalAttrib.Clear();
+                    FMainDS.ARecurringTransaction.Clear();
+                    FMainDS.ARecurringJournal.Clear();
+                }
+
+                grdDetails.DataSource = null;
+                grdDetails.DataSource = new DevAge.ComponentModel.BoundDataView(FMainDS.ARecurringJournal.DefaultView);
+
+                SetJournalDefaultView();
+
+                // only load from server if there are no journals loaded yet for this batch
+                // otherwise we would overwrite journals that have already been modified
+                if (FMainDS.ARecurringJournal.DefaultView.Count == 0)
+                {
+                    FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.LoadARecurringJournalAndContent(ALedgerNumber, ABatchNumber));
+                }
+
+                ShowData();
             }
+
+            SelectRowInGrid(1);
+
+            UpdateRecordNumberDisplay();
+            SetRecordNumberDisplayProperties();
 
             txtBatchNumber.Text = FBatchNumber.ToString();
         }
 
         private void SetJournalDefaultView()
         {
-            FMainDS.ARecurringJournal.DefaultView.RowFilter = string.Format("{0} = {1}",
+            string rowFilter = string.Format("{0} = {1}",
                 ARecurringJournalTable.GetBatchNumberDBName(),
                 FBatchNumber);
+
+            FMainDS.ARecurringJournal.DefaultView.RowFilter = rowFilter;
+            FFilterPanelControls.SetBaseFilter(rowFilter, true);
+            FCurrentActiveFilter = rowFilter;
 
             FMainDS.ARecurringJournal.DefaultView.Sort = String.Format("{0} DESC",
                 ARecurringJournalTable.GetJournalNumberDBName()
@@ -228,6 +229,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
         private void ShowDetailsManual(ARecurringJournalRow ARow)
         {
+            grdDetails.TabStop = (ARow != null);
+
+            if (ARow == null)
+            {
+                btnAdd.Focus();
+            }
+
             if (ARow == null)
             {
                 ((TFrmRecurringGLBatch)ParentForm).DisableTransactions();
@@ -665,6 +673,24 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             {
                 grdDetails.Focus();
             }
+        }
+
+        /// <summary>
+        /// Shows the Filter/Find UserControl and switches to the Find Tab.
+        /// </summary>
+        public void ShowFindPanel()
+        {
+            if (FucoFilterAndFind == null)
+            {
+                ToggleFilter();
+            }
+
+            FucoFilterAndFind.DisplayFindTab();
+        }
+
+        private void RunOnceOnParentActivationManual()
+        {
+            grdDetails.DoubleClickCell += new TDoubleClickCellEventHandler(this.ShowTransactionTab);
         }
     }
 }

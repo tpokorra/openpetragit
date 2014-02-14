@@ -39,6 +39,7 @@ using Ict.Petra.Shared;
 using Ict.Petra.Server.MCommon.WebConnectors;
 using Ict.Petra.Shared.MPartner.Partner.Data;
 using Ict.Petra.Server.MPartner.Partner.Data.Access;
+using Npgsql;
 
 namespace Ict.Petra.Server.MCommon
 {
@@ -440,42 +441,62 @@ namespace Ict.Petra.Server.MCommon
                 FSelectSQL = FFindParameters.FSqlQuery;
             }
 
-            FTmpDataTable.TableName = FFindParameters.FSearchName;
+            TLogging.LogAtLevel(9, (this.GetType().FullName + ".ExecuteFullQuery SQL:" + FSelectSQL));
+
+            // create temp table
+            FTmpDataTable = new DataTable(FFindParameters.FPagedTable + "_for_paging");
+
+            // Fill temporary table with query results (all records)
+            FDataAdapter = null;
+            DBAccess.GDBAccessObj.PrepareNextCommand();
+            DBAccess.GDBAccessObj.SetTimeoutForNextCommand(60);
+
+            FDataAdapter = (DbDataAdapter)DBAccess.GDBAccessObj.SelectDA(FSelectSQL, null, FFindParameters.FParametersArray);
+
+            if ((FFindParameters.FColumNameMapping != null) && (FDataAdapter != null))
+            {
+                PerformColumnNameMapping();
+            }
+
+            //
+            // Actual DB call for execution of SELECT query
+            //
             try
             {
-                // Fill temporary table with query results (all records)
-                FDataAdapter = null;
-                DBAccess.GDBAccessObj.PrepareNextCommand();
-                DBAccess.GDBAccessObj.SetTimeoutForNextCommand(60);
+                FTotalRecords = FDataAdapter.Fill(FTmpDataTable);
+            }
+            catch (NpgsqlException Exp)
+            {
+                if (Exp.Code == "57014")  // Exception with Code 57014 is what Npgsql raises as a response to a Cancel request of a Command
+                {
+                    TLogging.LogAtLevel(7, this.GetType().FullName + ".ExecuteFullQuery: Query got cancelled; proper reply from Npgsql!");
+                }
+                else
+                {
+                    TLogging.Log(this.GetType().FullName + ".ExecuteFullQuery: Query got cancelled; general NpgsqlException occured: " + Exp.ToString());
+                }
 
-                DBAccess.GDBAccessObj.SelectDT(FTmpDataTable, FSelectSQL,
-                    null,
-                    FFindParameters.FParametersArray, -1, -1);
-            }
-            finally
-            {
-            }
-
-            try
-            {
-                FTotalRecords = FTmpDataTable.Rows.Count;
-            }
-            catch (System.InvalidOperationException)
-            {
-                // Note: these exceptions are thrown when a Query was cancelled. This works
-                // only with MS.NET though, but not with mono (at least up to 1.1.13.2)
                 TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
                 TProgressTracker.CancelJob(FProgressID);
+                
                 return;
             }
-            catch (Exception)
+            catch (Exception Exp)
             {
+                TLogging.LogAtLevel(7, this.GetType().FullName + ".ExecuteFullQuery: Query got cancelled; general Exception occured: " + Exp.ToString());
+
                 TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
                 TProgressTracker.CancelJob(FProgressID);
+
+
+
+
                 return;
             }
 
-            TLogging.LogAtLevel(7, "TPagedDataSet  FDataAdapter.Fill finished. FTotalRecords: " + FTotalRecords.ToString());
+            TLogging.LogAtLevel(7,
+                (this.GetType().FullName + ".ExecuteFullQuery: FDataAdapter.Fill finished. FTotalRecords: " + FTotalRecords.ToString()));
+
             FPageDataTable = FTmpDataTable.Clone();
             FPageDataTable.TableName = FFindParameters.FSearchName;
             TProgressTracker.SetCurrentState(FProgressID, "Query executed.", 100.0m);
@@ -494,7 +515,7 @@ namespace Ict.Petra.Server.MCommon
         /// </returns>
         public DataTable GetData(Int16 APage, Int16 APageSize)
         {
-            TLogging.LogAtLevel(7, "TPagedDataSet.GetData(" + APage.ToString() + ") called.");
+            TLogging.LogAtLevel(7, String.Format("TPagedDataSet.GetData called (APage: {0}, APageSize={1})", APage, APageSize));
 
             // wait until the query has been run in the other thread
             while (FTotalRecords == -1)
@@ -580,6 +601,8 @@ namespace Ict.Petra.Server.MCommon
 
         private void CopyRowsInPage(Int16 APage, Int16 APageSize)
         {
+            TLogging.LogAtLevel(7, String.Format("TPagedDataSet.CopyRowsInPage called (APage: {0}, APageSize={1})", APage, APageSize));
+
             Int32 RowInPage;
             Int32 MaxRowInPage;
 
@@ -594,29 +617,30 @@ namespace Ict.Petra.Server.MCommon
             {
                 FPageDataTable.ImportRow(FTmpDataTable.Rows[RowInPage]);
             }
+
+            TLogging.LogAtLevel(7, String.Format("TPagedDataSet.CopyRowsInPage imported {0} rows into FPageDataTable", RowInPage));
         }
 
-/*
- *      /// <summary>
- *      /// Creates a mapping between the names of the fields in the DB and how they
- *      /// should be named in the resulting DataTable.
- *      ///
- *      /// </summary>
- *      /// <returns>void</returns>
- *      private void PerformColumnNameMapping()
- *      {
- *          DataTableMapping AliasNames;
- *          IDictionaryEnumerator ColumNameMappingEnumerator;
- *
- *          AliasNames = FDataAdapter.TableMappings.Add(FTmpDataTable.TableName, FTmpDataTable.TableName);
- *          ColumNameMappingEnumerator = FFindParameters.FColumNameMapping.GetEnumerator();
- *
- *          while (ColumNameMappingEnumerator.MoveNext())
- *          {
- *              AliasNames.ColumnMappings.Add(ColumNameMappingEnumerator.Key.ToString(), ColumNameMappingEnumerator.Value.ToString());
- *          }
- *      }
- */
+        /// <summary>
+        /// Creates a mapping between the names of the fields in the DB and how they
+        /// should be named in the resulting DataTable.
+        ///
+        /// </summary>
+        /// <returns>void</returns>
+        private void PerformColumnNameMapping()
+        {
+            DataTableMapping AliasNames;
+            IDictionaryEnumerator ColumNameMappingEnumerator;
+
+            AliasNames = FDataAdapter.TableMappings.Add(FFindParameters.FPagedTable + "_for_paging", FFindParameters.FPagedTable + "_for_paging");
+            ColumNameMappingEnumerator = FFindParameters.FColumNameMapping.GetEnumerator();
+
+            while (ColumNameMappingEnumerator.MoveNext())
+            {
+                AliasNames.ColumnMappings.Add(ColumNameMappingEnumerator.Key.ToString(), ColumNameMappingEnumerator.Value.ToString());
+            }
+        }
+
         /// <summary>
         /// Cancels an asynchronously executing query. This might take some time;
         /// therefore always execute this procedure in a separate Thread!
@@ -625,6 +649,11 @@ namespace Ict.Petra.Server.MCommon
         /// <returns>void</returns>
         public void StopQuery()
         {
+#if TODORemoting
+            TLogging.LogAtLevel(7,
+                (this.GetType().FullName + ".StopQuery: ProgressState = " +
+                 Enum.GetName(typeof(TAsyncExecProgressState), FAsyncExecProgress.ProgressState)));
+#endif
             // TODO this cannot work, since FDataAdapter is always null
             // and even if FDataAdapter was implemented, we would have a different thread, and I am not sure how to access the Database object from the other thread?
 
@@ -635,10 +664,24 @@ namespace Ict.Petra.Server.MCommon
 
             try
             {
-                // Cancel the executing query.
-                TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery called...");
-                FDataAdapter.SelectCommand.Cancel();
-                TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery finished.");
+#if TODORemoting
+                if (FAsyncExecProgress.ProgressState == TAsyncExecProgressState.Aeps_Stopping)
+                {
+#endif
+                    // Cancel the executing query.
+                    TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery called...");
+                    FDataAdapter.SelectCommand.Cancel();
+                    TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery finished.");
+#if TODORemoting
+                }
+                else
+                {
+                    TLogging.LogAtLevel(7, this.GetType().FullName + ".StopQuery: Query got cancelled after returning records.");
+                }
+#endif
+
+                TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
+                TProgressTracker.CancelJob(FProgressID);
             }
             catch (Exception exp)
             {

@@ -309,7 +309,13 @@ namespace Ict.Petra.Client.MPartner.Gui
 
             tabPartners.Selecting += new TabControlCancelEventHandler(TabSelectionChanging);
 
-            SelectTabPage(FInitiallySelectedTabPage);
+            // We must switch to the selected TabPage only once the the 'Shown' Event of the Form has been run
+            // to make sure that the TabControl does not show the selected TabPage leftmost, but at its' correct
+            // place in the order of the Tabs. (See Bug https://tracker.openpetra.org/view.php?id=2392)
+            if (FPetraUtilsObject.FormHasBeenShown)
+            {
+                SelectTabPage(FInitiallySelectedTabPage);
+            }
 
             CalculateTabHeaderCounters(this);
 
@@ -520,6 +526,11 @@ namespace Ict.Petra.Client.MPartner.Gui
                     (TUC_FinanceDetails)FTabSetup[TDynamicLoadableUserControls.dlucFinanceDetails];
 
                 if (!UCFinanceDetails.ValidateAllData(false, AProcessAnyDataValidationErrors, AValidateSpecificControl))
+                {
+                    ReturnValue = false;
+                }
+
+                if (!UCFinanceDetails.GetPartnerDataFromControls())
                 {
                     ReturnValue = false;
                 }

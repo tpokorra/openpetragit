@@ -28,12 +28,18 @@ RootNode:
         txtControl: {ReadOnly=true, Label=Hash, Unbound=true, Format=Decimal, Width=147}
         pnlDetailGrid:
             Dock: Fill
-            Controls: [pnlDetailButtons, grdDetails]
+            Controls: [pnlFilterAndFind, pnlDetailButtons, grdDetails]
+        pnlFilterAndFind:
+            ExpandedWidth: 170
+            ShowApplyFilterButton: FilterContext.StandardFilterOnly
+            ShowKeepFilterTurnedOnButton: FilterContext.StandardFilterOnly
+            FilterControls: [txtDetailJournalDescription, Column:SubSystemCode, Column:TransactionTypeCode, cmbDetailTransactionCurrency]
+            FindControls: [txtDetailJournalDescription, Column:SubSystemCode, Column:TransactionTypeCode, cmbDetailTransactionCurrency]
         pnlDetailButtons:
             Dock: Bottom
             Controls: [btnAdd, btnDelete]
             ControlsOrientation: horizontal
-        btnAdd: {Action=actNew, Width=120}
+        btnAdd: {Action=actNew, Width=120, Tooltip=Click to add a new journal}
         btnDelete: {Action=actDelete, Width=120}
         grdDetails:
             Dock: Fill
@@ -47,7 +53,7 @@ RootNode:
                 SubSystemCode: {Label=Subsystem Code}
                 TransactionTypeCode: {Label=Transaction Type}
             ActionFocusRow: FocusedRowChanged
-            ActionDoubleClick: ShowTransactionTab
+            #ActionDoubleClickCell: ShowTransactionTab     #Not supported by generator
             ActionEnterKeyPressed: ShowTransactionTab
             SortOrder: ARecurringJournal.JournalNumber DESC
             RowFilter: ARecurringJournal.BatchNumber

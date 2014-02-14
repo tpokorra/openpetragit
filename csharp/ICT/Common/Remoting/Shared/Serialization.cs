@@ -99,9 +99,13 @@ namespace Ict.Common.Remoting.Shared
 
             return !(
                        o.GetType() == typeof(Int16)
+//                       || o.GetType() == typeof(Int32[])
                        || o.GetType() == typeof(Int32)
+//                       || o.GetType() == typeof(Int32[])
                        || o.GetType() == typeof(Int64)
+//                       || o.GetType() == typeof(Int64[])
                        || o.GetType() == typeof(bool)
+//                       || o.GetType() == typeof(bool[])
                        );
         }
 

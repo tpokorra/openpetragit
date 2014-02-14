@@ -37,7 +37,10 @@ namespace Ict.Petra.Client.CommonControls.Logic
         static TDelegateOpenConferenceFindScreen FOpenConferenceFindScreen;
         static TDelegateOpenEventFindScreen FOpenEventFindScreen;
         static TDelegateOpenExtractFindScreen FOpenExtractFindScreen;
+        static TDelegateOpenExtractMasterScreen FOpenExtractMasterScreen;
         static TDelegateOpenRangeFindScreen FOpenRangeFindScreen;
+        static TDelegateOpenGetMergeDataDialog FOpenGetMergeDataDialog;
+        static TDelegateOpenPrintPartnerDialog FOpenPrintPartnerDialog;
 
         /// <summary>
         /// This property is used to provide a function which opens a modal Partner Find screen.
@@ -108,6 +111,23 @@ namespace Ict.Petra.Client.CommonControls.Logic
         }
 
         /// <summary>
+        /// This property is used to provide a function which opens the Extract Master screen.
+        /// </summary>
+        /// <description>The Delegate is set up at the start of the application.</description>
+        public static TDelegateOpenExtractMasterScreen OpenExtractMasterScreen
+        {
+            get
+            {
+                return FOpenExtractMasterScreen;
+            }
+
+            set
+            {
+                FOpenExtractMasterScreen = value;
+            }
+        }
+    
+        /// <summary>
         /// This property is used to provide a function which opens the Range find screen.
         /// </summary>
         /// <description>The Delegate is set up at the start of the application.</description>
@@ -121,6 +141,40 @@ namespace Ict.Petra.Client.CommonControls.Logic
             set
             {
                 FOpenRangeFindScreen = value;
+            }
+        }
+
+        /// <summary>
+        /// This property is used to provide a function which opens the Merge Select dialog.
+        /// </summary>
+        /// <description>The Delegate is set up at the start of the application.</description>
+        public static TDelegateOpenGetMergeDataDialog OpenGetMergeDataDialog
+        {
+            get
+            {
+                return FOpenGetMergeDataDialog;
+            }
+
+            set
+            {
+                FOpenGetMergeDataDialog = value;
+            }
+        }
+
+        /// <summary>
+        /// This property is used to provide a function which opens the Print Partner report dialog.
+        /// </summary>
+        /// <description>The Delegate is set up at the start of the application.</description>
+        public static TDelegateOpenPrintPartnerDialog OpenPrintPartnerDialog
+        {
+            get
+            {
+                return FOpenPrintPartnerDialog;
+            }
+
+            set
+            {
+                FOpenPrintPartnerDialog = value;
             }
         }
     }

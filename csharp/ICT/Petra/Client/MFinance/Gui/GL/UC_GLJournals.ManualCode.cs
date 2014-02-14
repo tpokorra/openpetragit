@@ -70,6 +70,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         public void LoadJournals(Int32 ALedgerNumber, Int32 ABatchNumber, string ABatchStatus = MFinanceConstants.BATCH_UNPOSTED)
         {
             bool batchChanged = (FBatchNumber != ABatchNumber);
+            bool ledgerChanged = (FLedgerNumber != ALedgerNumber);
 
             //Make sure the current effective date for the Batch is correct
             DateTime batchDateEffective = GetBatchRow().DateEffective;
@@ -82,10 +83,14 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
             }
 
+            // Get a view on the journals for the specified batch
+            DataView dv = new DataView(FMainDS.AJournal, String.Format("{0}={1}",
+                    AJournalTable.GetBatchNumberDBName(), ABatchNumber), "", DataViewRowState.CurrentRows);
+
             //Check if same Journals as previously selected
-            if ((FLedgerNumber == ALedgerNumber) && !batchChanged && (FBatchStatus == ABatchStatus)
-                && (FMainDS.AJournal.DefaultView.Count > 0))
+            if ((FLedgerNumber == ALedgerNumber) && !batchChanged && (FBatchStatus == ABatchStatus) && (dv.Count > 0))
             {
+                // The journals are the same and we have loaded them already
                 if (GetBatchRow().BatchStatus == MFinanceConstants.BATCH_UNPOSTED)
                 {
                     if (GetSelectedRowIndex() > 0)
@@ -93,45 +98,48 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                         GetDetailsFromControls(GetSelectedDetailRow());
                     }
                 }
-
-                return;
             }
-
-            FLedgerNumber = ALedgerNumber;
-            FBatchNumber = ABatchNumber;
-            FBatchStatus = ABatchStatus;
-
-            FPreviouslySelectedDetailRow = null;
-
-            if (batchChanged)
+            else
             {
-                //Clear all previous data.
-                FMainDS.ATransAnalAttrib.Clear();
-                FMainDS.ATransaction.Clear();
-                FMainDS.AJournal.Clear();
+                // Need to load a new journal
+                FLedgerNumber = ALedgerNumber;
+                FBatchNumber = ABatchNumber;
+                FBatchStatus = ABatchStatus;
+
+                FPreviouslySelectedDetailRow = null;
+
+                if (batchChanged || ledgerChanged)
+                {
+                    //Clear all previous data.
+                    FMainDS.ATransAnalAttrib.Clear();
+                    FMainDS.ATransaction.Clear();
+                    FMainDS.AJournal.Clear();
+                }
+
+                grdDetails.DataSource = null;
+                grdDetails.DataSource = new DevAge.ComponentModel.BoundDataView(FMainDS.AJournal.DefaultView);
+
+                // This sets the base rowFilter and sort and calls manual code
+                ShowData();
+
+                // only load from server if there are no journals loaded yet for this batch
+                // otherwise we would overwrite journals that have already been modified
+                dv = FMainDS.AJournal.DefaultView;
+
+                if (dv.Count == 0)
+                {
+                    FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.LoadAJournalAndContent(ALedgerNumber, ABatchNumber));
+                }
+
+                // Now set up the complete current filter
+                FFilterPanelControls.SetBaseFilter(dv.RowFilter, true);
+                ApplyFilter();
             }
 
-            grdDetails.DataSource = null;
-            grdDetails.DataSource = new DevAge.ComponentModel.BoundDataView(FMainDS.AJournal.DefaultView);
+            SelectRowInGrid((batchChanged || ledgerChanged) ? 1 : FPrevRowChangedRow);
 
-            FMainDS.AJournal.DefaultView.RowFilter = string.Format("{0} = {1}",
-                AJournalTable.GetBatchNumberDBName(),
-                FBatchNumber);
-
-            FMainDS.AJournal.DefaultView.Sort = String.Format("{0} DESC",
-                AJournalTable.GetJournalNumberDBName()
-                );
-
-            // only load from server if there are no journals loaded yet for this batch
-            // otherwise we would overwrite journals that have already been modified
-            if (FMainDS.AJournal.DefaultView.Count == 0)
-            {
-                FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.LoadAJournalAndContent(ALedgerNumber, ABatchNumber));
-            }
-
-            ShowData();
-
-            SelectRowInGrid(1);
+            UpdateRecordNumberDisplay();
+            SetRecordNumberDisplayProperties();
 
             txtDetailExchangeRateToBase.Enabled = false;
             txtBatchNumber.Text = FBatchNumber.ToString();
@@ -228,6 +236,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
         private void ShowDetailsManual(AJournalRow ARow)
         {
+            grdDetails.TabStop = (ARow != null);
+
+            if (ARow == null)
+            {
+                btnAdd.Focus();
+            }
+
             if ((ARow == null) || (ARow.JournalStatus == MFinanceConstants.BATCH_CANCELLED))
             {
                 ((TFrmGLBatch)ParentForm).DisableTransactions();
@@ -514,6 +529,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             btnGetSetExchangeRate.Click += new EventHandler(SetExchangeRateValue);
             cmbDetailTransactionCurrency.SelectedValueChanged +=
                 new System.EventHandler(ResetCurrencyExchangeRate);
+
+            grdDetails.DoubleClickCell += new TDoubleClickCellEventHandler(this.ShowTransactionTab);
         }
 
         private void SetExchangeRateValue(Object sender, EventArgs e)
@@ -551,6 +568,19 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         private decimal GetActualExchangeRateForeign()
         {
             return txtDetailExchangeRateToBase.NumberValueDecimal.Value;
+        }
+
+        /// <summary>
+        /// Shows the Filter/Find UserControl and switches to the Find Tab.
+        /// </summary>
+        public void ShowFindPanel()
+        {
+            if (FucoFilterAndFind == null)
+            {
+                ToggleFilter();
+            }
+
+            FucoFilterAndFind.DisplayFindTab();
         }
     }
 }

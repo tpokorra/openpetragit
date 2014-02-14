@@ -178,6 +178,7 @@ namespace Ict.Common.Controls
 
             // DataBind the DataGrid
             DataSource = new DevAge.ComponentModel.BoundDataView(FDataView);
+            this.SelectRowWithoutFocus(1);
 
             // Hook event that allows popping up a question whether to check the CheckBox
             if (!DesignMode)
@@ -255,10 +256,18 @@ namespace Ict.Common.Controls
                             // eg. motivation group and detail
                             foreach (String KeyColumn in FKeyColumns)
                             {
-                                ReturnValue = StringHelper.AddCSV(ReturnValue, Row[KeyColumn].ToString());
-                            }
-                        }
-                    }
+                                if (ReturnValue != String.Empty)
+                                {
+                                    ReturnValue += ",";
+                                }
+
+                                ReturnValue += ('"' + Row[KeyColumn].ToString() + '"'); // This was changed from AddCsv because
+                            }                                                       // I need it to consistently add quotes to all of the values in the list
+
+                        }                                                           // (Or no quotes would also be fine, but not some with and some without!)
+
+                    }                                                               // Tim Ingham, Nov 2013
+
                 }
             }
 

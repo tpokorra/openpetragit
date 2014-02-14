@@ -52,11 +52,13 @@ using Ict.Petra.Client.CommonControls.Logic;
 using Ict.Petra.Client.MCommon;
 using Ict.Petra.Client.MCommon.Gui;
 using Ict.Petra.Client.MConference.Gui;
+using Ict.Petra.Client.MFinance.Gui;
 using Ict.Petra.Client.MPartner.Gui;
 using Ict.Petra.Client.MPartner.Gui.Extracts;
 using Ict.Petra.Client.MPartner.Gui.Setup;
 using Ict.Petra.Client.MPersonnel.Gui;
-using Ict.Petra.Client.MFinance.Gui;
+using Ict.Petra.Client.MReporting.Gui;
+using Ict.Petra.Client.MReporting.Gui.MPartner;
 using Ict.Petra.Client.MSysMan.Gui;
 using SplashScreen;
 using PetraClientShutdown;
@@ -626,7 +628,10 @@ namespace Ict.Petra.Client.App.PetraClient
             TCommonScreensForwarding.OpenConferenceFindScreen = @TConferenceFindScreenManager.OpenModalForm;
             TCommonScreensForwarding.OpenEventFindScreen = @TEventFindScreenManager.OpenModalForm;
             TCommonScreensForwarding.OpenExtractFindScreen = @TExtractFindScreenManager.OpenModalForm;
+            TCommonScreensForwarding.OpenExtractMasterScreen = @TExtractMasterScreenManager.OpenForm;
             TCommonScreensForwarding.OpenRangeFindScreen = @TPostcodeRangeSetupManager.OpenModalForm;
+            TCommonScreensForwarding.OpenGetMergeDataDialog = @TGetMergeDataManager.OpenModalForm;
+            TCommonScreensForwarding.OpenPrintPartnerDialog = @TPrintPartnerModal.OpenModalForm;
 
             // Set up Delegate for the opening of Forms from the Main Menu
             Ict.Common.Controls.TLstTasks.OpenNewOrExistingForm = @Ict.Petra.Client.CommonForms.TFormsList.OpenNewOrExistingForm;
@@ -636,6 +641,9 @@ namespace Ict.Petra.Client.App.PetraClient
 
             // Set up Delegate for the set-up of various Colours of all SourceGrid DataGrid instances from UserDefaults
             Ict.Common.Controls.TSgrdDataGrid.SetColourInformation = @SetDataGridColoursFromUserDefaults;
+
+            // Set up Delegate for the set-up of various Colours of all Filter and Find instances from UserDefaults
+            Ict.Common.Controls.TUcoFilterAndFind.SetColourInformation = @SetFilterFindColoursFromUserDefaults;
 
             // Set up Data Validation Delegates
             TSharedValidationHelper.SharedGetDataDelegate = @TServerLookup.TMCommon.GetData;
@@ -707,6 +715,25 @@ namespace Ict.Petra.Client.App.PetraClient
                 ReturnValue.SelectionColour =
                     System.Drawing.Color.FromArgb(120, System.Drawing.Color.FromKnownColor(System.Drawing.KnownColor.Highlight));
             }
+
+            return ReturnValue;
+        }
+
+        /// <summary>
+        /// Sets up various Colours of all Filter and Find instances from UserDefaults.
+        /// </summary>
+        /// <returns>void</returns>
+        private static TUcoFilterAndFind.ColourInformation SetFilterFindColoursFromUserDefaults()
+        {
+            TUcoFilterAndFind.ColourInformation ReturnValue = new TUcoFilterAndFind.ColourInformation();
+
+            ReturnValue.FilterColour = System.Drawing.ColorTranslator.FromHtml(
+                TUserDefaults.GetStringDefault(TUserDefaults.NamedDefaults.COLOUR_FILTER_PANEL,
+                    System.Drawing.ColorTranslator.ToHtml(System.Drawing.Color.LightBlue)));
+
+            ReturnValue.FindColour = System.Drawing.ColorTranslator.FromHtml(
+                TUserDefaults.GetStringDefault(TUserDefaults.NamedDefaults.COLOUR_FIND_PANEL,
+                    System.Drawing.ColorTranslator.ToHtml(System.Drawing.Color.BurlyWood)));
 
             return ReturnValue;
         }

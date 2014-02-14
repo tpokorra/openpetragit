@@ -951,10 +951,21 @@ namespace Ict.Petra.Shared.MPartner.Validation
 
             if (AValidationControlsDict.TryGetValue(ValidationColumn, out ValidationControlsData))
             {
-                VerificationResult = IsValidPartner(
-                    ARow.BankKey, new TPartnerClass[] { TPartnerClass.BANK }, false, string.Empty,
-                    AContext, ValidationColumn, ValidationControlsData.ValidationControl
-                    );
+                // more specific error message if a bank has not been selected
+                if (ARow.BankKey == 0)
+                {
+                    VerificationResult = new TVerificationResult(AContext, ErrorCodes.GetErrorInfo(
+                            PetraErrorCodes.ERR_BANKINGDETAILS_NO_BANK_SELECTED, new string[] { ARow.BankKey.ToString() }));
+
+                    VerificationResult = new TScreenVerificationResult(VerificationResult, ValidationColumn, ValidationControlsData.ValidationControl);
+                }
+                else
+                {
+                    VerificationResult = IsValidPartner(
+                        ARow.BankKey, new TPartnerClass[] { TPartnerClass.BANK }, false, string.Empty,
+                        AContext, ValidationColumn, ValidationControlsData.ValidationControl
+                        );
+                }
 
                 // Since the validation can result in different ResultTexts we need to remove any validation result manually as a call to
                 // AVerificationResultCollection.AddOrRemove wouldn't remove a previous validation result with a different
@@ -964,7 +975,7 @@ namespace Ict.Petra.Shared.MPartner.Validation
                 AVerificationResultCollection.AddAndIgnoreNullValue(VerificationResult);
             }
 
-            // validate that there is at least one main account, but not multiple?
+            // validate that there are not multiple main accounts
             int countMainAccount = 0;
 
             foreach (PartnerEditTDSPBankingDetailsRow bdrow in ABankingDetails.Rows)
@@ -978,25 +989,14 @@ namespace Ict.Petra.Shared.MPartner.Validation
                 }
             }
 
-            if (countMainAccount == 0)
-            {
-                AVerificationResultCollection.Add(
-                    new TScreenVerificationResult(
-                        new TVerificationResult(
-                            AContext,
-                            ErrorCodes.GetErrorInfo(PetraErrorCodes.ERR_BANKINGDETAILS_ONLYONEMAINACCOUNT)),
-                        ((PartnerEditTDSPBankingDetailsTable)ARow.Table).ColumnMainAccount,
-                        ValidationControlsData.ValidationControl
-                        ));
-            }
-            else if (countMainAccount > 1)
+            if (countMainAccount > 1)
             {
                 // will we ever get here?
                 AVerificationResultCollection.Add(
                     new TScreenVerificationResult(
                         new TVerificationResult(
                             AContext,
-                            ErrorCodes.GetErrorInfo(PetraErrorCodes.ERR_BANKINGDETAILS_ATLEASTONEMAINACCOUNT)),
+                            ErrorCodes.GetErrorInfo(PetraErrorCodes.ERR_BANKINGDETAILS_ONLYONEMAINACCOUNT)),
                         ((PartnerEditTDSPBankingDetailsTable)ARow.Table).ColumnMainAccount,
                         ValidationControlsData.ValidationControl
                         ));

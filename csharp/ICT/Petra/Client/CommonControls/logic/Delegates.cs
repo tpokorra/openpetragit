@@ -24,6 +24,7 @@
 using System;
 using System.Windows.Forms;
 using Ict.Petra.Shared.MPartner;
+using Ict.Petra.Shared;
 
 namespace Ict.Petra.Client.CommonControls.Logic
 {
@@ -31,6 +32,7 @@ namespace Ict.Petra.Client.CommonControls.Logic
     public delegate bool TDelegateOpenPartnerFindScreen(String ARestrictToPartnerClass,
         out Int64 APartnerKey,
         out String AShortName,
+        out TPartnerClass? APartnerClass,
         out TLocationPK ALocationPK,
         Form AParentForm);
 
@@ -54,10 +56,23 @@ namespace Ict.Petra.Client.CommonControls.Logic
         out String AExtractDesc,
         Form AParentForm);
 
+    /// <summary>Delegate for a call to open the Extract Master screen</summary>
+    public delegate void TDelegateOpenExtractMasterScreen(Form AParentForm);
+    
     /// <summary>Delegate for a call to open a Modal Range Find screen</summary>
     public delegate bool TDelegateOpenRangeFindScreen(String ARegionName,
         out String[] ARangeName,
         out String[] RangeFrom,
         out String[] RangeTo,
+        Form AParentForm);
+
+    /// <summary>Delegate for a call to open a Modal Range Find screen</summary>
+    public delegate bool TDelegateOpenGetMergeDataDialog(long AFromPartnerKey,
+        long AToPartnerKey,
+        string ADataType,
+        Form AParentForm);
+
+    /// <summary>Delegate for a call to open a Modal Print Partner report screen</summary>
+    public delegate bool TDelegateOpenPrintPartnerDialog(long APartnerKey,
         Form AParentForm);
 }

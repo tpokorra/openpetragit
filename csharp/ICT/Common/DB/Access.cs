@@ -578,39 +578,29 @@ namespace Ict.Common.DB
         /// </summary>
         private void CheckDatabaseVersion()
         {
-            string DBPatchVersion;
-            TDBTransaction transaction;
-            TFileVersionInfo dbversion;
-            TFileVersionInfo serverExeInfo;
-
             if (TAppSettingsManager.GetValue("action", string.Empty, false) == "patchDatabase")
             {
                 // we want to upgrade the database, so don't check for the database version
                 return;
             }
 
-            transaction = DBAccess.GDBAccessObj.BeginTransaction();
+            TDBTransaction transaction = DBAccess.GDBAccessObj.BeginTransaction();
 
-            try
+            // now check if the database is 'up to date'; otherwise run db patch against it
+            DataTable Tbl = DBAccess.GDBAccessObj.SelectDT(
+                "SELECT s_default_value_c FROM PUB_s_system_defaults WHERE s_default_code_c = 'CurrentDatabaseVersion'",
+                "Temp", transaction);
+            DBAccess.GDBAccessObj.RollbackTransaction();
+
+            if (Tbl.Rows.Count == 0)
             {
-                // now check if the database is 'up to date'; otherwise run db patch against it
-                DBPatchVersion =
-                    Convert.ToString(DBAccess.GDBAccessObj.ExecuteScalar(
-                            "SELECT s_default_value_c FROM PUB_s_system_defaults WHERE s_default_code_c = 'CurrentDatabaseVersion'",
-                            transaction));
-            }
-            catch (Exception)
-            {
-                // this can happen when connecting to an old Petra 2.x database, or a completely different database
                 return;
             }
-            finally
-            {
-                DBAccess.GDBAccessObj.RollbackTransaction();
-            }
 
-            dbversion = new TFileVersionInfo(DBPatchVersion);
-            serverExeInfo = new TFileVersionInfo(TFileVersionInfo.GetApplicationVersion());
+            string DBPatchVersion = Convert.ToString(Tbl.Rows[0]["s_default_value_c"]);
+
+            TFileVersionInfo dbversion = new TFileVersionInfo(DBPatchVersion);
+            TFileVersionInfo serverExeInfo = new TFileVersionInfo(TFileVersionInfo.GetApplicationVersion());
 
             if (dbversion.CompareWithoutPrivatePart(serverExeInfo) < 0)
             {
@@ -1362,7 +1352,8 @@ namespace Ict.Common.DB
                     {
                         TLogging.Log(
                             "BeginTransaction: Attempting to reconnect to the database as the DB connection isn't allowing the start of a DB Transaction! (Connection State: "
-                            + FSqlConnection.State.ToString("G") + ")");
+                            +
+                            FSqlConnection.State.ToString("G") + ")");
 
                         if (FSqlConnection.State == ConnectionState.Broken)
                         {
@@ -1482,7 +1473,8 @@ namespace Ict.Common.DB
                     {
                         TLogging.Log(
                             "BeginTransaction: Attempting to reconnect to the database as the DB connection isn't allowing the start of a DB Transaction! (Connection State: "
-                            + FSqlConnection.State.ToString("G") + ")");
+                            +
+                            FSqlConnection.State.ToString("G") + ")");
 
                         if (FSqlConnection.State == ConnectionState.Broken)
                         {
@@ -1562,7 +1554,22 @@ namespace Ict.Common.DB
                           AppDomain.CurrentDomain.ToString() + " ).";
                 }
 
-                FTransaction.Rollback();
+                // Attempt to roll back the DB Transaction.
+                try
+                {
+                    FTransaction.Rollback();
+                }
+                catch (Exception Exc)
+                {
+                    // This catch block will handle any errors that may have occurred
+                    // on the server that would cause the rollback to fail, such as
+                    // a closed connection.
+                    //
+                    // MSDN says: "Try/Catch exception handling should always be used when rolling back a
+                    // transaction. A Rollback generates an InvalidOperationException if the connection is
+                    // terminated or if the transaction has already been rolled back on the server."
+                    TLogging.Log("An Exception occured while an attempt to roll back a DB Transaction was made: " + Exc.ToString());
+                }
 
                 FTransaction.Dispose();
 

@@ -56,6 +56,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
 
                 ucoValues.LedgerNumber = value;
                 ucoValues.LoadValues(FLedgerNumber);
+
+                SelectRowInGrid(1);
+                UpdateRecordNumberDisplay();
             }
         }
         private void NewRow(System.Object sender, EventArgs e)

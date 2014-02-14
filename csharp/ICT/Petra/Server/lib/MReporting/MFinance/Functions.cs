@@ -31,6 +31,7 @@ using Ict.Common.DB.DBCaching;
 using System.Data;
 using System.Collections;
 using System.Data.Odbc;
+using Ict.Petra.Server.MFinance.Reporting.WebConnectors;
 
 namespace Ict.Petra.Server.MReporting.MFinance
 {
@@ -157,7 +158,7 @@ namespace Ict.Petra.Server.MReporting.MFinance
 
             if (StringHelper.IsSame(f, "getLedgerName"))
             {
-                value = new TVariant(GetLedgerName(ops[1].ToInt()));
+                value = new TVariant(TFinanceReportingWebConnector.GetLedgerName(ops[1].ToInt()));
                 return true;
             }
 
@@ -467,24 +468,23 @@ namespace Ict.Petra.Server.MReporting.MFinance
 
         private decimal GetTransactionAmount(String currency_s)
         {
-            decimal ReturnValue;
+            decimal ReturnValue = 0;
 
-            ReturnValue = 0;
             currency_s = currency_s.ToLower();
 
-            if (currency_s.ToLower().CompareTo("transaction") == 0)
+            if (currency_s.CompareTo("transaction") == 0)
             {
                 ReturnValue = parameters.Get("a_transaction_amount_n", situation.GetColumn(), situation.GetDepth()).ToDecimal();
             }
             else
             {
-                if (currency_s.ToLower().CompareTo("base") == 0)
+                if (currency_s.CompareTo("base") == 0)
                 {
                     ReturnValue = parameters.Get("a_amount_in_base_currency_n", situation.GetColumn(), situation.GetDepth()).ToDecimal();
                 }
                 else
                 {
-                    if (currency_s.ToLower().CompareTo("international") == 0)
+                    if (currency_s.CompareTo("international") == 0)
                     {
                         ReturnValue = parameters.Get("a_amount_in_intl_currency_n", situation.GetColumn(), situation.GetDepth()).ToDecimal();
                     }
@@ -652,7 +652,7 @@ namespace Ict.Petra.Server.MReporting.MFinance
             ReturnValue = "";
             strSql = "SELECT a_cost_centre_code_c " + "FROM PUB_a_cost_centre " + "WHERE a_ledger_number_i = " + StringHelper.IntToStr(
                 pv_ledger_number_i) + " AND a_cost_centre_to_report_to_c = \"\"";
-            tab = situation.GetDatabaseConnection().SelectDT(strSql, "", situation.GetDatabaseConnection().Transaction);
+            tab = situation.GetDatabaseConnection().SelectDT(strSql, "table", situation.GetDatabaseConnection().Transaction);
 
             if (tab.Rows.Count > 0)
             {
@@ -843,7 +843,7 @@ namespace Ict.Petra.Server.MReporting.MFinance
                     }
                     else
                     {
-                        if (pv_currency_select_c == "Intl")
+                        if ((pv_currency_select_c == "Intl") || (pv_currency_select_c == "International"))
                         {
                             lv_currency_amount_n = Convert.ToDecimal(tab.Rows[0]["a_start_balance_base_n"]) * period.exchangeRateToIntl;
                         }
@@ -861,8 +861,12 @@ namespace Ict.Petra.Server.MReporting.MFinance
                         }
                     }
                 }
+                else // No row returned!
+                {
+                    return 0.0M; // This is mostly so I can put a breakpoint here and catch this eroneous event.
+                }
             }
-            else
+            else  // period != 0
             {
                 lv_currency_amount_n = GetActualValue(period, pv_currency_select_c);
 
@@ -925,25 +929,6 @@ namespace Ict.Petra.Server.MReporting.MFinance
 
             period = null;
             return lv_currency_amount_n;
-        }
-
-        private string GetLedgerName(int ledgernumber)
-        {
-            string ReturnValue;
-            string strSql;
-            DataTable tab;
-
-            ReturnValue = "";
-            strSql = "SELECT p_partner_short_name_c FROM PUB_a_ledger, PUB_p_partner WHERE a_ledger_number_i=" +
-                     StringHelper.IntToStr(ledgernumber) + " and PUB_a_ledger.p_partner_key_n = PUB_p_partner.p_partner_key_n";
-            tab = situation.GetDatabaseConnection().SelectDT(strSql, "GetLedgerName_TempTable", situation.GetDatabaseConnection().Transaction);
-
-            if (tab.Rows.Count > 0)
-            {
-                ReturnValue = Convert.ToString(tab.Rows[0]["p_partner_short_name_c"]);
-            }
-
-            return ReturnValue;
         }
 
         /// <summary>

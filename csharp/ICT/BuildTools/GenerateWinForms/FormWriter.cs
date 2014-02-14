@@ -94,6 +94,7 @@ namespace Ict.Tools.CodeGeneration.Winforms
                 AddControlGenerator(new ButtonGenerator());
                 AddControlGenerator(new RangeGenerator());
                 AddControlGenerator(new PanelGenerator());
+                AddControlGenerator(new ExtendedPanelGenerator());
                 AddControlGenerator(new CheckBoxReportGenerator());
                 AddControlGenerator(new TClbVersatileReportGenerator());
                 AddControlGenerator(new DateTimePickerReportGenerator());
@@ -127,6 +128,7 @@ namespace Ict.Tools.CodeGeneration.Winforms
                 AddControlGenerator(new GroupBoxGenerator());
                 AddControlGenerator(new RangeGenerator());
                 AddControlGenerator(new PanelGenerator());
+                AddControlGenerator(new ExtendedPanelGenerator());
                 AddControlGenerator(new SplitContainerGenerator());
                 AddControlGenerator(new UserControlGenerator());
                 AddControlGenerator(new LabelGenerator());
@@ -532,25 +534,59 @@ namespace Ict.Tools.CodeGeneration.Winforms
                 return "";
             }
 
-            System.Resources.ResXResourceWriter w = new System.Resources.ResXResourceWriter(AImageFileName + ".resx");
+            // AlanP added this retry loop after getting fed up with generating the solution and finding that
+            //  access to go.gif.resx is denied.  The assumption is that multi-threaded code generation
+            //  wants to access a well-used image file in multiple places.  The resx file is only a temporary
+            //  file.  A few lines down we delete it, which is probably why it fails to open.
+            // If that is not the cause the code shouldn't do any harm.
+            int nTries = 0;
+            int nTriesLimit = 4;                // 4 tries over 2 seconds should be enough!
+            string exceptionMsg = String.Empty;
+            TXMLParser parser = null;
 
-            if (AImageOrIcon == "Icon")
+            while (nTries < nTriesLimit)
             {
-                w.AddResource(AImageFileName, new Icon(AImageFileName));
-            }
-            else if ((AImageOrIcon == "Bitmap") && (Path.GetExtension(AImageFileName) == ".ico"))
-            {
-                w.AddResource(AImageFileName, (new Icon(AImageFileName)).ToBitmap());
-            }
-            else
-            {
-                w.AddResource(AImageFileName, new Bitmap(AImageFileName));
+                try
+                {
+                    System.Resources.ResXResourceWriter w = new System.Resources.ResXResourceWriter(AImageFileName + ".resx");
+
+                    if (AImageOrIcon == "Icon")
+                    {
+                        w.AddResource(AImageFileName, new Icon(AImageFileName));
+                    }
+                    else if ((AImageOrIcon == "Bitmap") && (Path.GetExtension(AImageFileName) == ".ico"))
+                    {
+                        w.AddResource(AImageFileName, (new Icon(AImageFileName)).ToBitmap());
+                    }
+                    else
+                    {
+                        w.AddResource(AImageFileName, new Bitmap(AImageFileName));
+                    }
+
+                    w.Close();
+
+                    parser = new TXMLParser(AImageFileName + ".resx", false);
+                    File.Delete(AImageFileName + ".resx");
+
+                    nTries = 999;           // success!
+                }
+                catch (Exception ex)        // probably an IO exception
+                {
+                    nTries++;
+                    parser = null;
+                    exceptionMsg = ex.Message;
+                    Application.DoEvents();
+                    System.Threading.Thread.Sleep(500);
+                }
             }
 
-            w.Close();
+            if ((nTries == nTriesLimit) || (parser == null))
+            {
+                throw new IOException(String.Format(
+                        "The system had {0} attempts to create, parse and delete the file {1}.resx as a resource but the following IO exception was raised: {2}",
+                        nTries, AImageFileName, exceptionMsg));
+            }
 
-            TXMLParser parser = new TXMLParser(AImageFileName + ".resx", false);
-            File.Delete(AImageFileName + ".resx");
             XmlDocument doc = parser.GetDocument();
             XmlNode child = doc.DocumentElement.FirstChild;
 
@@ -981,9 +1017,10 @@ namespace Ict.Tools.CodeGeneration.Winforms
             FTemplate.AddToCodelet("INITUSERCONTROLS", "");
             FTemplate.AddToCodelet("INITMANUALCODE", "");
             FTemplate.AddToCodelet("GRIDMULTISELECTION", "");
-            FTemplate.AddToCodelet("SELECTIONCHANGEDEVENT", "");
-            FTemplate.AddToCodelet("SELECTIONCHANGEDHANDLER", "");
             FTemplate.AddToCodelet("RUNONCEONACTIVATIONMANUAL", "");
+            FTemplate.AddToCodelet("RUNONCEONPARENTACTIVATIONMANUAL", "");
+            FTemplate.AddToCodelet("USERCONTROLSRUNONCEONACTIVATION", "");
+            FTemplate.AddToCodelet("SETINITIALFOCUS", "");
             FTemplate.AddToCodelet("EXITMANUALCODE", "");
             FTemplate.AddToCodelet("CANCLOSEMANUAL", "");
             FTemplate.AddToCodelet("INITNEWROWMANUAL", "");
@@ -991,6 +1028,7 @@ namespace Ict.Tools.CodeGeneration.Winforms
             FTemplate.AddToCodelet("DELETEREFERENCECOUNT", "");
             FTemplate.AddToCodelet("MULTIDELETEREFERENCECOUNT", "");
             FTemplate.AddToCodelet("ENABLEDELETEBUTTON", "");
+            FTemplate.AddToCodelet("CANDELETESELECTION", "");
             FTemplate.AddToCodelet("PREDELETEMANUAL", "");
             FTemplate.AddToCodelet("DELETEROWMANUAL", "");
             FTemplate.AddToCodelet("POSTDELETEMANUAL", "");
@@ -1000,6 +1038,7 @@ namespace Ict.Tools.CodeGeneration.Winforms
             FTemplate.AddToCodelet("MULTIDELETEDELETABLE", "");
             FTemplate.AddToCodelet("SELECTTABMANUAL", "");
             FTemplate.AddToCodelet("STOREMANUALCODE", "");
+            FTemplate.AddToCodelet("FINDANDFILTERHOOKUPEVENTS", "");
             FTemplate.AddToCodelet("ACTIONENABLINGDISABLEMISSINGFUNCS", "");
             FTemplate.AddToCodelet("PRIMARYKEYCONTROLSREADONLY", "");
             FTemplate.AddToCodelet("SHOWDETAILSMANUAL", "");
@@ -1032,6 +1071,11 @@ namespace Ict.Tools.CodeGeneration.Winforms
             if (FCodeStorage.ManualFileExistsAndContains("RunOnceOnActivationManual"))
             {
                 FTemplate.AddToCodelet("RUNONCEONACTIVATIONMANUAL", "RunOnceOnActivationManual();" + Environment.NewLine);
+            }
+
+            if (FCodeStorage.ManualFileExistsAndContains("RunOnceOnParentActivationManual"))
+            {
+                FTemplate.AddToCodelet("RUNONCEONPARENTACTIVATIONMANUAL", "RunOnceOnParentActivationManual();" + Environment.NewLine);
             }
 
             if (FCodeStorage.ManualFileExistsAndContains("ExitManualCode"))
@@ -1083,6 +1127,11 @@ namespace Ict.Tools.CodeGeneration.Winforms
             {
                 FTemplate.AddToCodelet("STOREMANUALCODE",
                     "SubmissionResult = StoreManualCode(ref SubmitDS, out VerificationResult);" + Environment.NewLine);
+            }
+
+            if (FCodeStorage.ManualFileExistsAndContains("FindAndFilterHookUpEvents"))
+            {
+                FTemplate.AddToCodelet("FINDANDFILTERHOOKUPEVENTS", "FindAndFilterHookUpEvents();" + Environment.NewLine);
             }
 
             if (FCodeStorage.HasAttribute("DatasetType"))
@@ -1310,39 +1359,49 @@ namespace Ict.Tools.CodeGeneration.Winforms
                         FCodeStorage.GetAttribute("DetailTable"));
                     FTemplate.AddToCodelet("DELETERECORD", deleteRecord);
 
-                    ProcessTemplate snippet = FTemplate.GetSnippet("SNIPMULTIDELETEDELETABLE");
+                    ProcessTemplate snippetMultiDelete = FTemplate.GetSnippet("SNIPMULTIDELETEDELETABLE");
+                    ProcessTemplate snippetCanDelete = FTemplate.GetSnippet("SNIPCANDELETESELECTION");
+                    bool bRequiresCanDeleteSelection = false;
 
                     // Write the one-line codelet that handles enable/disable of the delete button
-                    string enableDelete = "btnDelete.Enabled = ";
-                    string enableDeleteExtra = "((grdDetails.SelectedDataRows.Length > 1)";
+                    string enableDelete = "btnDelete.Enabled = pnlDetails.Enabled";
+                    string enableDeleteExtra = " && CanDeleteSelection()";
 
                     if (FCodeStorage.FControlList.ContainsKey("chkDetailDeletable")
                         || FCodeStorage.FControlList.ContainsKey("chkDeletable"))
                     {
-                        enableDeleteExtra += " || ((ARow != null) && (ARow.Deletable == true))) && ";
                         enableDelete += enableDeleteExtra;
-                        snippet.SetCodelet("DELETEABLEFLAG", "Deletable");
-                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippet);
+                        snippetMultiDelete.SetCodelet("DELETEABLEFLAG", "Deletable");
+                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippetMultiDelete);
+                        snippetCanDelete.SetCodelet("DELETEABLEFLAG", "Deletable");
+                        bRequiresCanDeleteSelection = true;
                     }
                     else if (FCodeStorage.FControlList.ContainsKey("chkDetailDeletableFlag")
                              || FCodeStorage.FControlList.ContainsKey("chkDeletableFlag"))
                     {
-                        enableDeleteExtra += " || ((ARow != null) && (ARow.DeletableFlag == true))) && ";
                         enableDelete += enableDeleteExtra;
-                        snippet.SetCodelet("DELETEABLEFLAG", "DeletableFlag");
-                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippet);
+                        snippetMultiDelete.SetCodelet("DELETEABLEFLAG", "DeletableFlag");
+                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippetMultiDelete);
+                        snippetCanDelete.SetCodelet("DELETEABLEFLAG", "DeletableFlag");
+                        bRequiresCanDeleteSelection = true;
                     }
                     else if (FCodeStorage.FControlList.ContainsKey("chkDetailTypeDeletable"))
                     {
-                        enableDeleteExtra += " || ((ARow != null) && (ARow.TypeDeletable == true))) && ";
                         enableDelete += enableDeleteExtra;
-                        snippet.SetCodelet("DELETEABLEFLAG", "TypeDeletable");
-                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippet);
+                        snippetMultiDelete.SetCodelet("DELETEABLEFLAG", "TypeDeletable");
+                        FTemplate.InsertSnippet("MULTIDELETEDELETABLE", snippetMultiDelete);
+                        snippetCanDelete.SetCodelet("DELETEABLEFLAG", "TypeDeletable");
+                        bRequiresCanDeleteSelection = true;
                     }
 
-                    enableDelete += "pnlDetails.Enabled;" + Environment.NewLine;
-
+                    enableDelete += ";" + Environment.NewLine;
                     FTemplate.AddToCodelet("ENABLEDELETEBUTTON", enableDelete);
+
+                    if (bRequiresCanDeleteSelection)
+                    {
+                        snippetCanDelete.SetCodelet("DETAILTABLE", FCodeStorage.GetAttribute("DetailTable"));
+                        FTemplate.InsertSnippet("CANDELETESELECTION", snippetCanDelete);
+                    }
                 }
             }
 
@@ -1412,6 +1471,32 @@ namespace Ict.Tools.CodeGeneration.Winforms
                 FTemplate.AddToCodelet("ADDMAINCONTROLS",
                     "this.Icon = (System.Drawing.Icon)resources.GetObject(\"$this.Icon\");" + Environment.NewLine);
                 AddImageToResource("$this.Icon", iconFileName, "Icon");
+            }
+
+            string initialFocusControl = String.Empty;
+
+            if (FCodeStorage.FControlList.ContainsKey("grdDetails"))
+            {
+                initialFocusControl = "grdDetails";
+            }
+
+            if (TYml2Xml.HasAttribute(rootNode, "InitialFocus"))
+            {
+                string tryFocus = TYml2Xml.GetAttribute(rootNode, "InitialFocus");
+
+                if (FCodeStorage.FControlList.ContainsKey(tryFocus))
+                {
+                    initialFocusControl = tryFocus;
+                }
+                else
+                {
+                    TLogging.Log("Warning !!! Cannot set initial focus.  The specified control was not found: " + tryFocus);
+                }
+            }
+
+            if (initialFocusControl != String.Empty)
+            {
+                FTemplate.SetCodelet("SETINITIALFOCUS", initialFocusControl + ".Focus();");
             }
 
             // add title

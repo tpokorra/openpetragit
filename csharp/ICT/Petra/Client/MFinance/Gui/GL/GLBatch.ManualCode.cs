@@ -57,19 +57,43 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             }
         }
 
+        /// <summary>
+        /// Handles the click event for filter/find.
+        /// </summary>
+        /// <param name="sender">Pass this on to the user control.</param>
+        /// <param name="e">Not evaluated.</param>
+        public void mniFilterFind_Click(object sender, System.EventArgs e)
+        {
+            switch (tabGLBatch.SelectedIndex)
+            {
+                case (int)eGLTabs.Batches:
+                    ucoBatches.MniFilterFind_Click(sender, e);
+                    break;
+
+                case (int)eGLTabs.Journals:
+                    ucoJournals.MniFilterFind_Click(sender, e);
+                    break;
+
+                case (int)eGLTabs.Transactions:
+                    ucoTransactions.MniFilterFind_Click(sender, e);
+                    break;
+            }
+        }
+
         private int standardTabIndex = 0;
 
         private void TFrmGLBatch_Load(object sender, EventArgs e)
         {
             FPetraUtilsObject.TFrmPetra_Load(sender, e);
 
-            //Need this to allow focus to go to the grid.
-            tabGLBatch.TabStop = false;
-
             tabGLBatch.SelectedIndex = standardTabIndex;
             TabSelectionChanged(null, null); //tabGiftBatch.Selecting += new TabControlCancelEventHandler(TabSelectionChanging);
 
-            this.ucoBatches.FocusGrid();
+            this.Shown += delegate
+            {
+                // This will ensure the grid gets the focus when the screen is shown for the first time
+                ucoBatches.SetInitialFocus();
+            };
         }
 
         private void InitializeManualCode()
@@ -77,8 +101,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             tabGLBatch.Selecting += new TabControlCancelEventHandler(TabSelectionChanging);
             this.tpgJournals.Enabled = false;
             this.tpgTransactions.Enabled = false;
-
-            this.Width = 815;
         }
 
         /// <summary>
@@ -157,6 +179,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         /// </summary>
         public void DisableJournals()
         {
+            this.tabGLBatch.TabStop = false;
+
             this.tpgJournals.Enabled = false;
             this.Refresh();
         }
@@ -166,6 +190,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         /// </summary>
         public void EnableJournals()
         {
+            this.tabGLBatch.TabStop = true;
+
             if (!this.tpgJournals.Enabled)
             {
                 this.tpgJournals.Enabled = true;
@@ -200,6 +226,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             {
                 this.tabGLBatch.SelectedTab = this.tpgBatches;
                 this.tpgJournals.Enabled = (ucoBatches.GetSelectedDetailRow() != null);
+                this.tabGLBatch.TabStop = this.tpgJournals.Enabled;
 
                 if (this.tpgTransactions.Enabled)
                 {
@@ -208,7 +235,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     ucoBatches.EnableTransactionTabForBatch();
                 }
 
-                this.ucoBatches.FocusGrid();
+                ucoBatches.SetInitialFocus();
                 FPreviousTab = eGLTabs.Batches;
             }
             else if (ATab == eGLTabs.Journals)
@@ -227,7 +254,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
                     this.ucoJournals.UpdateHeaderTotals(ucoBatches.GetSelectedDetailRow());
 
-                    this.ucoJournals.FocusGrid();
                     FPreviousTab = eGLTabs.Journals;
                 }
             }
@@ -317,6 +343,45 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         public TUC_GLTransactions GetTransactionsControl()
         {
             return ucoTransactions;
+        }
+
+        private void RunOnceOnActivationManual()
+        {
+            this.Resize += new EventHandler(TFrmGLBatch_Resize);
+        }
+
+        private bool FWindowIsMaximized = false;
+        void TFrmGLBatch_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                // set the flag that we are maximized
+                FWindowIsMaximized = true;
+
+                if (tabGLBatch.SelectedTab == this.tpgBatches)
+                {
+                    ucoTransactions.AutoSizeGrid();
+                    Console.WriteLine("Maximised - autosizing transactions");
+                }
+                else if (tabGLBatch.SelectedTab == this.tpgTransactions)
+                {
+                    ucoBatches.AutoSizeGrid();
+                    Console.WriteLine("Maximised - autosizing batches");
+                }
+                else
+                {
+                    ucoBatches.AutoSizeGrid();
+                    ucoTransactions.AutoSizeGrid();
+                }
+            }
+            else if (FWindowIsMaximized && (this.WindowState == FormWindowState.Normal))
+            {
+                // we have been maximized but now are normal.  In this case we need to re-autosize the cells because otherwise they are still 'stretched'.
+                ucoBatches.AutoSizeGrid();
+                ucoTransactions.AutoSizeGrid();
+                FWindowIsMaximized = false;
+                Console.WriteLine("Normal - autosizing both");
+            }
         }
     }
 }
