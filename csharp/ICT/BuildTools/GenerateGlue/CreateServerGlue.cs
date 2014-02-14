@@ -170,7 +170,7 @@ public class GenerateServerGlue
                 if (parametertype.EndsWith("[]"))
                 {
                     ArrayParameter = true;
-Console.WriteLine("ArrayParameter found: " + parametertype);
+//Console.WriteLine("ArrayParameter found: " + parametertype);
                 }
                 
                 parametertype = parametertype == "string" || parametertype == "String" ? "System.String" : parametertype;
@@ -183,8 +183,9 @@ Console.WriteLine("ArrayParameter found: " + parametertype);
                     && !(parametertype.EndsWith("[]")))
                 {
                     // need to restore Array type!
-                    parametertype += "[]";             
-Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype);                    
+                    parametertype += "[]";
+                     
+//Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype);                    
                 }
             }
 
@@ -204,7 +205,8 @@ Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype)
                     ParameterDefinition += ", ";
                 }
 
-                if (!BinaryParameter)
+                if ((!BinaryParameter)
+                    && (!ArrayParameter))
                 {
                     ParameterDefinition += parametertype + " " + p.ParameterName;
                 }
@@ -245,7 +247,8 @@ Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype)
             }
             else
             {
-                if (BinaryParameter)
+                if (BinaryParameter 
+                    || ArrayParameter)
                 {
                     ActualParameters += "(" + parametertype + ")THttpBinarySerializer.DeserializeObject(" + p.ParameterName + ",\"binary\")";
                 }
@@ -320,7 +323,7 @@ Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype)
             snippet.SetCodelet("LOCALRETURN", localreturn);
         }
 
-Console.WriteLine("Final ParameterDefinition = " + ParameterDefinition);
+//Console.WriteLine("Final ParameterDefinition = " + ParameterDefinition);
         snippet.SetCodelet("PARAMETERDEFINITION", ParameterDefinition);
         snippet.SetCodelet("ACTUALPARAMETERS", ActualParameters);
 
