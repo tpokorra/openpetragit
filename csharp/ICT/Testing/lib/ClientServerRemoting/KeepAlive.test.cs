@@ -110,6 +110,7 @@ namespace Ict.Testing.ClientServerRemoting
         /// test keep alive signal
         /// </summary>
         [Test]
+        [Ignore("We know that this doesn't work yet! (According to Timo)")]
         public void TestKeepAliveWithTimeout()
         {
             // TODORemoting

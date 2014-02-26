@@ -22,6 +22,7 @@
 // along with OpenPetra.org.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.IO;
+using System.Collections;
 using System.Data;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
@@ -330,14 +331,39 @@ namespace Ict.Testing.NUnitTools
                 throw new Exception("Nant did not succeed");
             }
         }
+            
     }
 
+    /// <summary>
+    /// This converter converts an <see cref="IEnumerator" /> to
+    /// an <see cref="IEnumerable" />. This is useful for passing
+    /// a VerificationResultCollection to ensure it is empty using code like this:
+    /// <code>Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);</code>.
+    /// </summary>
+    public static class IEnumerableConverter
+    {    
+        /// <summary>
+        /// This Extension Method converts an <see cref="IEnumerator" /> to
+        /// an <see cref="IEnumerable" />. This is useful for passing
+        /// a VerificationResultCollection to ensure it is empty using code like this:
+        /// <code>Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);</code>.
+        /// </summary>
+        /// <param name="AEnumerator"><see cref="IEnumerator" /> to convert.</param>
+        /// <returns>An <see cref="IEnumerable" /> representing the <see cref="IEnumerator" />.</returns>
+        public static IEnumerable ToIEnumerable(this IEnumerator AEnumerator)
+        {
+            while (AEnumerator.MoveNext()) 
+            {
+                yield return AEnumerator.Current;
+            }
+        }
+    }
+    
     /// <summary>
     /// This converter finds the different date substrings in a string like a message.
     /// Actually the common date format looks like "dd-MMM-yyyy" and so we are dealing
     /// with strings like "This Date is valid from 17-JAN-2009 to 21-FEB-2010".
     /// </summary>
-
     public class DateConverter
     {
         MatchCollection matchCollection;

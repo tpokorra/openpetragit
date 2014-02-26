@@ -121,7 +121,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
             //
             VerificationResult = PayAPDocument(APInfos.ApDS.AApDocument[0].ApDocumentId, Amount,
                 APInfos.BankAccount, APInfos.CurrencyCode, APInfos.PeriodEndDate, out PaymentNumber);
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             // Save the current amount on the AP account
             decimal APAccountBalanceAfter = new TGet_GLM_Info(FLedgerNumber,
@@ -189,7 +189,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
             // Act: Immediately "un-pay" and "un-post" this invoice!
             //
             VerificationResult = ReversePayment(PaymentNumber, APInfos.PeriodEndDate, DocumentIDs, APInfos.ApDS);
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             // Save the current amount on the AP account
             decimal APAccountBalanceAfter = new TGet_GLM_Info(FLedgerNumber,
@@ -227,7 +227,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                 ANarrative,
                 out APInfos.ApDS);
 
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             GetLedgerInfo(out APInfos.PeriodStartDate, out APInfos.PeriodEndDate, out APInfos.ForexGainsLossesAccount);
 
@@ -305,7 +305,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                     VerificationResult.BuildVerificationResultString());
             }
 
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             return VerificationResult;
         }
@@ -330,7 +330,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                     VerificationResult.BuildVerificationResultString());
             }
 
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             return VerificationResult;
         }
@@ -356,7 +356,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                 APInfos.CostCentreCode).YtdActual;
 
             VerificationResult = PostAPDocument(APInfos.ApDS, APInfos.PeriodStartDate, ref ADocumentIds);
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             //
             // Guard Assert: Posting OK?
@@ -394,7 +394,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                 APInfos.CostCentreCode).YtdActual;
 
             VerificationResult = PostAPDocument(APInfos.ApDS, APInfos.PeriodStartDate, ref ADocumentIds);
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             //
             // Guard Assert: Posting OK?
@@ -427,7 +427,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
             //
             VerificationResult = PayAPDocument(APInfos.ApDS.AApDocument[0].ApDocumentId, Amount,
                 APInfos.BankAccount, APInfos.CurrencyCode, APInfos.PeriodEndDate, out APaymentNumber, ExchangeRatePayment);
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             // Save the current amount on the AP account and Bank Account
             decimal APAccountBalanceAfter = new TGet_GLM_Info(FLedgerNumber,
@@ -487,7 +487,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                     VerificationResult.BuildVerificationResultString());
             }
 
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             APaymentNumber = DocPayment.PaymentNumber;
 
@@ -509,7 +509,7 @@ namespace Ict.Testing.Petra.Server.MFinance.AP
                     VerificationResult.BuildVerificationResultString());
             }
 
-            Assert.That(VerificationResult, Is.Empty);  // Guard Assert
+            Assert.That(VerificationResult.GetEnumerator().ToIEnumerable(), Is.Empty);  // Guard Assert
 
             // "Un-post" the specified invoice - returning it to "Approved" status!
             ADocumentIds[0] += 2; // The invoice I posted was reversed, and a duplicate now exists with an Id 2 greater than the original.

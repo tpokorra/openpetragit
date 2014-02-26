@@ -293,9 +293,13 @@ namespace Ict.Common.IO
                 LogRequest(url, parameters);
                 TLogging.Log(e.Message);
                 TLogging.Log("Error message from server:");
-                StreamReader sr = new StreamReader(e.Response.GetResponseStream());
-                TLogging.Log(sr.ReadToEnd());
-                sr.Close();
+                
+                if (e.Response != null) 
+                {
+                    StreamReader sr = new StreamReader(e.Response.GetResponseStream());
+                    TLogging.Log(sr.ReadToEnd());
+                    sr.Close();                    
+                }
             }
 
             return String.Empty;

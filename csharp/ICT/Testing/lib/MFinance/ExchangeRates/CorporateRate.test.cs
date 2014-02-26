@@ -76,9 +76,9 @@ namespace Tests.MFinance.Client.ExchangeRates
                 TPetraConnector.Connect("../../etc/TestClient.config");
                 FConnectedToServer = true;
             }
-            catch (Exception)
+            catch (Exception Exc)
             {
-                Assert.Fail("Failed to connect to the Petra Server.  Have you forgotten to launch the Server Console");
+                Assert.Fail("Failed to connect to the Petra Server.  Have you forgotten to launch the Server Console? Exception: \r\n" + Exc.ToString());
             }
         }
 
