@@ -78,7 +78,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         /// <param name="ABatchStatus"></param>
         /// <param name="AJournalStatus"></param>
         /// <param name="AFromBatchTab"></param>
-        public void LoadTransactions(Int32 ALedgerNumber,
+        /// <returns>True if new GL transactions were loaded, false if transactions had been loaded already.</returns>
+        public bool LoadTransactions(Int32 ALedgerNumber,
             Int32 ABatchNumber,
             Int32 AJournalNumber,
             string AForeignCurrencyName,
@@ -86,8 +87,10 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             string AJournalStatus = MFinanceConstants.BATCH_UNPOSTED,
             bool AFromBatchTab = false)
         {
-            this.Cursor = Cursors.WaitCursor;
+            Console.WriteLine("LoadTransactions");
+            DateTime dtStart = DateTime.Now;
 
+            bool IsNewBatch = false;
             FLoadCompleted = false;
             FBatchRow = GetBatchRow();
             FIsUnposted = (FBatchRow.BatchStatus == MFinanceConstants.BATCH_UNPOSTED);
@@ -113,12 +116,12 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
 
                 FLoadCompleted = true;
-                this.Cursor = Cursors.Default;
+                Console.WriteLine("LoadTransactions quick exit  {0}", ((DateTime.Now - dtStart).TotalMilliseconds));
             }
             else
             {
                 // A new ledger/batch
-                SuspendLayout();
+                IsNewBatch = true;
                 bool requireControlSetup = (FLedgerNumber == -1) || (FTransactionCurrency != AForeignCurrencyName);
 
                 FLedgerNumber = ALedgerNumber;
@@ -130,9 +133,12 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 FJournalStatus = AJournalStatus;
 
                 FPreviouslySelectedDetailRow = null;
+                grdDetails.SuspendLayout();
                 grdDetails.DataSource = null;
                 grdAnalAttributes.DataSource = null;
 
+                // This sets the main part of the filter but excluding the additional items set by the user GUI
+                // It gets the right sort order
                 SetTransactionDefaultView();
 
                 //Load from server if necessary
@@ -141,7 +147,11 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     FMainDS.Merge(TRemote.MFinance.GL.WebConnectors.LoadATransactionATransAnalAttrib(ALedgerNumber, ABatchNumber, AJournalNumber));
                 }
 
+                // We need to call this because we have not called ShowData(), which would have set it.  This differs from the Gift screen.
                 grdDetails.DataSource = new DevAge.ComponentModel.BoundDataView(FMainDS.ATransaction.DefaultView);
+
+                // Now we set the full filter
+                ApplyFilter();
 
                 FJournalRow = GetJournalRow();
 
@@ -186,8 +196,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
                 //This will update transaction headers
                 UpdateTransactionTotals(false);
-                ResumeLayout();
+                grdDetails.ResumeLayout();
                 FLoadCompleted = true;
+                Console.WriteLine("LoadTransactions completed  {0}", ((DateTime.Now - dtStart).TotalMilliseconds));
             }
 
             SelectRowInGrid(1);
@@ -196,7 +207,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             UpdateRecordNumberDisplay();
             SetRecordNumberDisplayProperties();
 
-            this.Cursor = Cursors.Default;
+            return IsNewBatch;
         }
 
         /// <summary>
@@ -230,20 +241,14 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     FBatchNumber,
                     ATransactionTable.GetJournalNumberDBName(),
                     FJournalNumber);
+                FMainDS.ATransaction.DefaultView.RowFilter = rowFilter;
+                FFilterPanelControls.SetBaseFilter(rowFilter, true);
+                FCurrentActiveFilter = rowFilter;
+                // We don't apply the filter yet!
 
                 FMainDS.ATransaction.DefaultView.Sort = String.Format("{0} " + sort,
                     ATransactionTable.GetTransactionNumberDBName()
                     );
-
-                FMainDS.ATransaction.DefaultView.RowFilter = rowFilter;
-                FFilterPanelControls.SetBaseFilter(rowFilter, true);
-
-                if (grdDetails.DataSource != null)
-                {
-                    ApplyFilter();
-                    UpdateRecordNumberDisplay();
-                    SetRecordNumberDisplayProperties();
-                }
             }
         }
 
@@ -369,7 +374,11 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             this.CreateNewATransaction();
 
+            ClearControls();
+            ValidateAllData(true, false);
+
             pnlTransAnalysisAttributes.Enabled = true;
+            btnDeleteAll.Enabled = btnDelete.Enabled && (FFilterPanelControls.BaseFilter == FCurrentActiveFilter);
 
             //Needs to be called at end of addition process to process Analysis Attributes
             AccountCodeDetailChanged(null, null);
@@ -405,16 +414,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             if (FPreviouslySelectedDetailRow != null)
             {
                 ANewRow.CostCentreCode = FPreviouslySelectedDetailRow.CostCentreCode;
-                FPreviouslySelectedDetailRow = null;
-                ClearControls();
             }
-
-            FPreviouslySelectedDetailRow = (GLBatchTDSATransactionRow)ANewRow;
-
-            btnDeleteAll.Enabled = true;
-
-            ShowDetails(FPreviouslySelectedDetailRow);
-            cmbDetailCostCentreCode.Focus();
         }
 
         /// <summary>
@@ -1090,12 +1090,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                                  && (GetBatchRow() != null)
                                  && (FIsUnposted)
                                  && (FJournalRow.JournalStatus == MFinanceConstants.BATCH_UNPOSTED);
+            Boolean canDeleteAll = (FFilterPanelControls.BaseFilter == FCurrentActiveFilter);
 
             // pnlDetailsProtected must be changed first: when the enabled property of the control is changed, the focus changes, which triggers validation
             pnlDetailsProtected = !changeable;
             pnlDetails.Enabled = (changeable && grdDetails.Rows.Count > 1);
             btnDelete.Enabled = (changeable && grdDetails.Rows.Count > 1);
-            btnDeleteAll.Enabled = (changeable && grdDetails.Rows.Count > 1);
+            btnDeleteAll.Enabled = (changeable && canDeleteAll && grdDetails.Rows.Count > 1);
             pnlTransAnalysisAttributes.Enabled = changeable;
             lblAnalAttributes.Enabled = (changeable && grdDetails.Rows.Count > 1);
             btnNew.Enabled = changeable;
@@ -1123,7 +1124,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
                     //Delete transactions
                     SetTransAnalAttributeDefaultView();
-                    SetTransactionDefaultView();
 
                     for (int i = FMainDS.ATransAnalAttrib.DefaultView.Count - 1; i >= 0; i--)
                     {
@@ -1137,6 +1137,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
                     UpdateTransactionTotals();
 
+                    // Be sure to set the last transaction number in the parent table before saving all the changes
+                    SetJournalLastTransNumber();
+
                     FPetraUtilsObject.SetChangedFlag();
 
                     //Need to call save
@@ -1145,8 +1148,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                         MessageBox.Show(Catalog.GetString("The journal has been cleared successfully!"),
                             Catalog.GetString("Success"),
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        SetJournalLastTransNumber();
                     }
                     else
                     {
@@ -1316,8 +1317,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
 
                 //Bubble the transaction to delete to the top
-                SetTransactionDefaultView();
-
                 DataView transView = new DataView(FMainDS.ATransaction);
                 transView.RowFilter = String.Format("{0}={1} AND {2}={3}",
                     ATransactionTable.GetBatchNumberDBName(),
@@ -1348,7 +1347,11 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                         for (int j = 4; j < transRowToCopyDown.Table.Columns.Count; j++)
                         {
                             //Update all columns except the pk fields that remain the same
-                            transRowToReceive[j] = transRowToCopyDown[j];
+                            if (!transRowToCopyDown.Table.Columns[j].ColumnName.EndsWith("_text"))
+                            {
+                                // Don't include the columns that the filter uses for numeric textual comparison
+                                transRowToReceive[j] = transRowToCopyDown[j];
+                            }
                         }
                     }
 
@@ -1399,6 +1402,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             finally
             {
                 SetTransactionDefaultView();
+                ApplyFilter();
             }
 
             return deletionSuccessful;
@@ -1704,6 +1708,18 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
         private void RunOnceOnParentActivationManual()
         {
+            grdDetails.DataSource.ListChanged += new System.ComponentModel.ListChangedEventHandler(DataSource_ListChanged);
+        }
+
+        private void DataSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
+        {
+            if (grdDetails.CanFocus && (grdDetails.Rows.Count > 1))
+            {
+                AutoSizeGrid();
+            }
+
+            // If the grid list changes we might need to disable the Delete All button
+            btnDeleteAll.Enabled = btnDelete.Enabled && (FFilterPanelControls.BaseFilter == FCurrentActiveFilter);
         }
 
         /// <summary>
@@ -1729,6 +1745,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             grdDetails.Rows.AutoSizeMode = SourceGrid.AutoSizeMode.None;
             grdDetails.AutoSizeCells();
             grdDetails.ShowCell(FPrevRowChangedRow);
+
+            Console.WriteLine("Done AutoSizeGrid() on {0} rows", grdDetails.Rows.Count);
         }
     }
 }

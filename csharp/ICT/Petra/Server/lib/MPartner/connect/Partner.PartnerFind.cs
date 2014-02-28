@@ -102,6 +102,17 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
         }
 
         /// <summary>
+        /// Procedure to execute a Find query. Although the full
+        /// query results are retrieved from the DB and stored internally in an object,
+        /// data will be returned in 'pages' of data, each page holding a defined number
+        /// of records.
+        /// </summary>
+        public void PerformSearchByBankDetails(DataTable ACriteriaData)
+        {
+            FPartnerFind.PerformSearchByBankDetails(ACriteriaData);
+        }
+
+        /// <summary>
         /// Returns the specified find results page.
         ///
         /// @comment Pages can be requested in any order!
@@ -146,6 +157,16 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
             out TVerificationResultCollection AVerificationResult)
         {
             return AddAllFoundPartnersToExtract(AExtractID, out AVerificationResult);
+        }
+
+        /// <summary>
+        /// Checks if a search result contains a given partner
+        /// </summary>
+        /// <param name="APartnerKey">Partner key of partner</param>
+        /// <returns>True if partner is included, false if not.</returns>
+        public bool CheckIfResultsContainPartnerKey(long APartnerKey)
+        {
+            return FPartnerFind.CheckIfResultsContainPartnerKey(APartnerKey);
         }
     }
 }
