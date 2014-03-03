@@ -236,7 +236,6 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
             out TVerificationResultCollection AVerificationResult)
         {
             TDBTransaction SubmitChangesTransaction;
-            TValidationControlsDict ValidationControlsDict = new TValidationControlsDict();
 
             AVerificationResult = null;
 
@@ -245,15 +244,15 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
             if (ASubmitTable != null)
             {
                 AVerificationResult = new TVerificationResultCollection();
-                
+
                 SubmitChangesTransaction = DBAccess.GDBAccessObj.BeginTransaction(IsolationLevel.Serializable);
-                
+
                 try
                 {
                     if (ATablename == AAccountingPeriodTable.GetTableDBName())
                     {
                         AAccountingPeriodAccess.SubmitChanges((AAccountingPeriodTable)ASubmitTable, SubmitChangesTransaction);
-                        
+
                         TCacheableTablesManager.GCacheableTablesManager.MarkCachedTableNeedsRefreshing(
                             TCacheableFinanceTablesEnum.AccountingPeriodList.ToString());
                     }
@@ -276,14 +275,14 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                     else if (ATablename == AFeesPayableTable.GetTableDBName())
                     {
                         AFeesPayableAccess.SubmitChanges((AFeesPayableTable)ASubmitTable, SubmitChangesTransaction);
-                        
+
                         TCacheableTablesManager.GCacheableTablesManager.MarkCachedTableNeedsRefreshing(
                             TCacheableFinanceTablesEnum.FeesPayableList.ToString());
                     }
                     else if (ATablename == AFeesReceivableTable.GetTableDBName())
                     {
                         AFeesReceivableAccess.SubmitChanges((AFeesReceivableTable)ASubmitTable, SubmitChangesTransaction);
-                        
+
                         TCacheableTablesManager.GCacheableTablesManager.MarkCachedTableNeedsRefreshing(
                             TCacheableFinanceTablesEnum.FeesReceivableList.ToString());
                     }
@@ -311,7 +310,7 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                     else if (ATablename == ASuspenseAccountTable.GetTableDBName())
                     {
                         ASuspenseAccountAccess.SubmitChanges((ASuspenseAccountTable)ASubmitTable, SubmitChangesTransaction);
-                        
+
                         TCacheableTablesManager.GCacheableTablesManager.MarkCachedTableNeedsRefreshing(
                             TCacheableFinanceTablesEnum.SuspenseAccountList.ToString());
                     }
@@ -341,8 +340,8 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                     }
                     else if (ATablename == PInternationalPostalTypeTable.GetTableDBName())
                     {
-                        ValidateInternationalPostalType(ValidationControlsDict, ref AVerificationResult, ASubmitTable);
-                        ValidateInternationalPostalTypeManual(ValidationControlsDict, ref AVerificationResult, ASubmitTable);
+                        ValidateInternationalPostalType(ref AVerificationResult, ASubmitTable);
+                        ValidateInternationalPostalTypeManual(ref AVerificationResult, ASubmitTable);
 
                         if (TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
                         {
@@ -352,7 +351,7 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                     else if (ATablename == PtApplicationTypeTable.GetTableDBName())
                     {
                         PtApplicationTypeAccess.SubmitChanges((PtApplicationTypeTable)ASubmitTable, SubmitChangesTransaction);
-                        
+
                         // mark dependent lists for needing to be refreshed since there was a change in base list
                         TCacheableTablesManager.GCacheableTablesManager.MarkCachedTableNeedsRefreshing(
                             TCacheablePersonTablesEnum.EventApplicationTypeList.ToString());
@@ -388,13 +387,13 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                 }
             }
 
-            if ((AVerificationResult != null) && 
-                (AVerificationResult.Count > 0))
+            if ((AVerificationResult != null)
+                && (AVerificationResult.Count > 0))
             {
                 // Downgrade TScreenVerificationResults to TVerificationResults in order to allow
                 // Serialisation (needed for .NET Remoting).
                 TVerificationResultCollection.DowngradeScreenVerificationResults(AVerificationResult);
-                
+
                 return AVerificationResult.HasCriticalErrors ? TSubmitChangesResult.scrError : TSubmitChangesResult.scrOK;
             }
 
@@ -403,10 +402,8 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
 
         #region Data Validation
 
-        static partial void ValidateInternationalPostalType(TValidationControlsDict ValidationControlsDict,
-            ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
-        static partial void ValidateInternationalPostalTypeManual(TValidationControlsDict ValidationControlsDict,
-            ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
+        static partial void ValidateInternationalPostalType(ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
+        static partial void ValidateInternationalPostalTypeManual(ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
 
         #endregion Data Validation
     }

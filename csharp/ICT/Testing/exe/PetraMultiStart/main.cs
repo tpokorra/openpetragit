@@ -125,8 +125,8 @@ public class main
 
             try
             {
-              // We use the following server call ONLY for an 'side effect' - namely when it throws an Exception!
-              int Tmp = TRemote.GetClientsConnected();  // Causes: CA1804:RemoveUnusedLocals (but is suppressed for that reason with the SuppressMessage Attribute!)
+                // We use the following server call ONLY for an 'side effect' - namely when it throws an Exception!
+                int Tmp = TRemote.GetClientsConnected();  // Causes: CA1804:RemoveUnusedLocals (but is suppressed for that reason with the SuppressMessage Attribute!)
             }
             catch (Exception exp)
             {

@@ -361,7 +361,7 @@ public class TOpenPetraOrg : WebService
         if (IsUserLoggedIn())
         {
             TSupplierEditUIConnector uiconnector = new TSupplierEditUIConnector();
-            
+
             TSubmitChangesResult changesResult = uiconnector.SubmitChanges(ref AInspectDS);
             return new TCombinedSubmitChangesResult(changesResult, AInspectDS, new TVerificationResultCollection());
         }

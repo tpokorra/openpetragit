@@ -283,7 +283,7 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
             out TVerificationResultCollection AVerificationResult)
         {
             bool NewTransaction;
-            
+
             AVerificationResult = new TVerificationResultCollection();
 
             if (AInspectDS == null)
@@ -324,10 +324,10 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                 } // foreach (document)
 
             } // if {there's actually a document}
-            
+
             TDBTransaction SubmitChangesTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.Serializable,
                 out NewTransaction);
-            
+
             try
             {
                 if (AInspectDS.AApDocument != null)
@@ -348,10 +348,8 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
 
                 if (AInspectDS.AApDocumentDetail != null) // Document detail lines
                 {
-                    TValidationControlsDict ValidationControlsDict = new TValidationControlsDict();
-
-                    ValidateApDocumentDetail(ValidationControlsDict, ref AVerificationResult, AInspectDS.AApDocumentDetail);
-                    ValidateApDocumentDetailManual(ValidationControlsDict, ref AVerificationResult, AInspectDS.AApDocumentDetail);
+                    ValidateApDocumentDetail(ref AVerificationResult, AInspectDS.AApDocumentDetail);
+                    ValidateApDocumentDetailManual(ref AVerificationResult, AInspectDS.AApDocumentDetail);
 
                     if (TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
                     {
@@ -364,12 +362,11 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                     AApAnalAttribAccess.SubmitChanges(AInspectDS.AApAnalAttrib, SubmitChangesTransaction);
                 }
 
-                
                 if (NewTransaction)
-                {                
+                {
                     DBAccess.GDBAccessObj.CommitTransaction();
                 }
-            } 
+            }
             catch (Exception Exc)
             {
                 TLogging.Log("An Exception occured while saving an AP Document:" + Environment.NewLine + Exc.ToString());
@@ -379,14 +376,14 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                     DBAccess.GDBAccessObj.RollbackTransaction();
                 }
 
-                if (AVerificationResult == null) 
+                if (AVerificationResult == null)
                 {
                     AVerificationResult = new TVerificationResultCollection();
                 }
-                
+
                 AVerificationResult.Add(new TVerificationResult("Save AP Document", Exc.Message,
-                    TResultSeverity.Resv_Critical));
-                
+                        TResultSeverity.Resv_Critical));
+
                 throw;
             }
 
@@ -396,8 +393,8 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                 // Serialisation (needed for .NET Remoting).
                 TVerificationResultCollection.DowngradeScreenVerificationResults(AVerificationResult);
             }
-            
-            return TSubmitChangesResult.scrOK;            
+
+            return TSubmitChangesResult.scrOK;
         }
 
         /// <summary>
@@ -967,21 +964,21 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
             try
             {
                 AApAnalAttribAccess.SubmitChanges(TempDS.AApAnalAttrib, SubmitChangesTransaction);
-    
+
                 AApDocumentDetailAccess.SubmitChanges(TempDS.AApDocumentDetail, SubmitChangesTransaction);
-                
+
                 AApDocumentAccess.SubmitChanges(TempDS.AApDocument, SubmitChangesTransaction);
 
                 DBAccess.GDBAccessObj.CommitTransaction();
-            } 
-            catch (Exception Exc) 
+            }
+            catch (Exception Exc)
             {
                 TLogging.Log("An Exception occured during the deletion of AP Documents:" + Environment.NewLine + Exc.ToString());
-                
+
                 DBAccess.GDBAccessObj.RollbackTransaction();
-                
+
                 throw;
-            }           
+            }
         }
 
         /// <summary>
@@ -1007,7 +1004,7 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
             bool NewTransaction = false;
             bool PostingWorkedOk;
             ABatchRow batch;
-            
+
             AccountsPayableTDS MainDS = LoadDocumentsAndCheck(ALedgerNumber, AAPDocumentIds, APostingDate, Reversal, out AVerificationResult);
 
             if (!TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
@@ -1059,18 +1056,18 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                 }
             }
 
-            SubmitChangesTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.Serializable, 
+            SubmitChangesTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.Serializable,
                 TEnforceIsolationLevel.eilMinimum, out NewTransaction);
 
             try
             {
                 AApDocumentAccess.SubmitChanges(MainDS.AApDocument, SubmitChangesTransaction);
-                
+
                 if (NewTransaction)
-                {                
+                {
                     DBAccess.GDBAccessObj.CommitTransaction();
                 }
-            } 
+            }
             catch (Exception Exc)
             {
                 // Now I've got GL entries, but "unposted" AP documents!
@@ -1576,7 +1573,7 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
         {
             bool NewTransaction;
             TDBTransaction ReadTransaction;
-            
+
             AVerificationResult = new TVerificationResultCollection();
             bool ResultValue = false;
 
@@ -1589,7 +1586,7 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                 return false;
             }
 
-            ReadTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.ReadCommitted, 
+            ReadTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.ReadCommitted,
                 TEnforceIsolationLevel.eilMinimum, out NewTransaction);
 
             foreach (AccountsPayableTDSAApDocumentPaymentRow row in MainDS.AApDocumentPayment.Rows)
@@ -1705,8 +1702,8 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
 
                 // store ApPayment and ApDocumentPayment to database
                 AApPaymentAccess.SubmitChanges(MainDS.AApPayment, SubmitChangesTransaction);
-                AApDocumentPaymentAccess.SubmitChanges(MainDS.AApDocumentPayment, SubmitChangesTransaction);                   
-                
+                AApDocumentPaymentAccess.SubmitChanges(MainDS.AApDocumentPayment, SubmitChangesTransaction);
+
                 // save changed status of AP documents to database
                 AApDocumentAccess.SubmitChanges(MainDS.AApDocument, SubmitChangesTransaction);
 
@@ -1724,7 +1721,7 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
                 }
 
                 AVerificationResult.Add(new TVerificationResult("Post AP Payment",
-                    e.Message, TResultSeverity.Resv_Critical));
+                        e.Message, TResultSeverity.Resv_Critical));
 
                 throw;
             }
@@ -2074,10 +2071,8 @@ namespace Ict.Petra.Server.MFinance.AP.WebConnectors
 
         #region Data Validation
 
-        static partial void ValidateApDocumentDetail(TValidationControlsDict ValidationControlsDict,
-            ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
-        static partial void ValidateApDocumentDetailManual(TValidationControlsDict ValidationControlsDict,
-            ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
+        static partial void ValidateApDocumentDetail(ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
+        static partial void ValidateApDocumentDetailManual(ref TVerificationResultCollection AVerificationResult, TTypedDataTable ASubmitTable);
 
         #endregion Data Validation
     }
