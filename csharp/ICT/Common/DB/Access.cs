@@ -621,18 +621,17 @@ namespace Ict.Common.DB
         {
             if ((FSqlConnection != null) && (FSqlConnection.State != ConnectionState.Closed))
             {
-                CloseDBConnectionInternal(FDbType);
+                CloseDBConnectionInternal();
             }
         }
 
         /// <summary>
         /// Closes the DB connection.
         /// </summary>
-        /// <param name="ADbType">The Type of DB whose Connection should be closed</param>
         /// <returns>void</returns>
         /// <exception cref="EDBConnectionNotAvailableException">Thrown if an attempt is made to close an
         /// already/still closed connection.</exception>
-        private void CloseDBConnectionInternal(TDBType ADbType)
+        private void CloseDBConnectionInternal()
         {
             if (ConnectionReady())
             {
