@@ -1981,7 +1981,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
 
                 PrepareBankingDetailsForSaving(ref AInspectDS, ref AVerificationResult, SubmitChangesTransaction);
 
-                if (AVerificationResult.HasCriticalErrors)
+                if (!TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
                 {
                     DBAccess.GDBAccessObj.RollbackTransaction();
                     return TSubmitChangesResult.scrError;
@@ -2068,8 +2068,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                         // all tables in the dataset will be stored.
                         // there are exceptions: for example cascading delete of foundations, change of unique key of family id
                         // those tables need to have run AcceptChanges
-                        SubmissionResult = PartnerEditTDSAccess.SubmitChanges(AInspectDS, out SingleVerificationResultCollection);
-                        AVerificationResult.AddCollection(SingleVerificationResultCollection);
+                        PartnerEditTDSAccess.SubmitChanges(AInspectDS);
                     }
 
                     if (SubmissionResult == TSubmitChangesResult.scrOK)
@@ -2281,7 +2280,6 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
             TDBTransaction ASubmitChangesTransaction,
             out TVerificationResultCollection AVerificationResult)
         {
-            TVerificationResultCollection SingleVerificationResultCollection;
             TOfficeSpecificDataLabelsUIConnector OfficeSpecificDataLabelsUIConnector;
             PartnerEditTDSFamilyMembersTable FamilyMembersTableSubmit;
 
@@ -2306,7 +2304,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                         ValidatePPartner(ValidationControlsDict, ref AVerificationResult, AInspectDS.PPartner);
                         ValidatePPartnerManual(ValidationControlsDict, ref AVerificationResult, AInspectDS.PPartner);
 
-                        if (AVerificationResult.HasCriticalErrors)
+                        if (!TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
                         {
                             AllSubmissionsOK = false;
                         }
@@ -2360,12 +2358,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                         FamilyMembersTableSubmit = AInspectDS.FamilyMembers;
 //                      TLogging.LogAtLevel(7, "FamilyMembersTableSubmit.Rows.Count: " + FamilyMembersTableSubmit.Rows.Count.ToString());
 
-                        if (!SpecialSubmitProcessingFamilyMembers(FamilyMembersTableSubmit, ASubmitChangesTransaction,
-                                out SingleVerificationResultCollection))
-                        {
-                            AllSubmissionsOK = false;
-                            AVerificationResult.AddCollection(SingleVerificationResultCollection);
-                        }
+                        SpecialSubmitProcessingFamilyMembers(FamilyMembersTableSubmit, ASubmitChangesTransaction);
                     }
                 }
 
@@ -2378,7 +2371,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                             ValidatePBank(ValidationControlsDict, ref AVerificationResult, AInspectDS.PBank);
                             ValidatePBankManual(ValidationControlsDict, ref AVerificationResult, AInspectDS.PBank);
 
-                            if (AVerificationResult.HasCriticalErrors)
+                            if (!TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
                             {
                                 AllSubmissionsOK = false;
                             }
@@ -2953,14 +2946,11 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
             return TNewPartnerKey.SubmitNewPartnerKey(AFieldPartnerKey, AOriginalDefaultKey, ref ANewPartnerKey);
         }
 
-        private bool SpecialSubmitProcessingFamilyMembers(
+        private void SpecialSubmitProcessingFamilyMembers(
             PartnerEditTDSFamilyMembersTable AFamilyMembersTable,
-            TDBTransaction ASubmitChangesTransaction,
-            out TVerificationResultCollection AVerificationResult)
+            TDBTransaction ASubmitChangesTransaction)
         {
             Int32 DummyCounter = 100;
-
-            AVerificationResult = null;
 
             /*
              * Load the Persons of a Family
@@ -2981,10 +2971,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
             }
 
             // Save the dummy values
-            if (!PPersonAccess.SubmitChanges(FamilyPersonsDT, ASubmitChangesTransaction, out AVerificationResult))
-            {
-                return false;
-            }
+            PPersonAccess.SubmitChanges(FamilyPersonsDT, ASubmitChangesTransaction);
 
             FamilyPersonsDT.AcceptChanges();
 
@@ -2997,14 +2984,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
             }
 
             // Save the changes
-            if (!PPersonAccess.SubmitChanges(FamilyPersonsDT, ASubmitChangesTransaction, out AVerificationResult))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            PPersonAccess.SubmitChanges(FamilyPersonsDT, ASubmitChangesTransaction);
         }
 
         #endregion

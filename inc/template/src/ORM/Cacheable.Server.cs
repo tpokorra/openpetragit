@@ -9,6 +9,7 @@ using System.Data.Odbc;
 using Ict.Common.Data;
 using Ict.Common;
 using Ict.Common.DB;
+using Ict.Common.Data.Exceptions;
 using Ict.Common.Verification;
 using Ict.Common.Exceptions;
 using Ict.Common.Remoting.Server;
@@ -325,7 +326,6 @@ namespace {#NAMESPACE}
         {
             TDBTransaction SubmitChangesTransaction;
             TSubmitChangesResult SubmissionResult = TSubmitChangesResult.scrError;
-            TVerificationResultCollection SingleVerificationResultCollection;
             string CacheableDTName = Enum.GetName(typeof(TCacheable{#SUBMODULE}TablesEnum), ACacheableTable);
 
             // Console.WriteLine("Entering {#SUBMODULE}.SaveChangedStandardCacheableTable...");
@@ -541,7 +541,6 @@ public TSubmitChangesResult SaveChangedStandardCacheableTable(TCacheableFinanceT
 {
     TDBTransaction SubmitChangesTransaction;
     TSubmitChangesResult SubmissionResult = TSubmitChangesResult.scrError;
-    TVerificationResultCollection SingleVerificationResultCollection;
     string CacheableDTName = Enum.GetName(typeof(TCacheableFinanceTablesEnum), ACacheableTable);
     Type TmpType;
 
@@ -661,17 +660,11 @@ case TCacheable{#SUBMODULE}TablesEnum.{#ENUMNAME}:
         {#DATATABLENAME}Validation.Validate(ASubmitTable, ref AVerificationResult);
         Validate{#ENUMNAME}Manual(ref AVerificationResult, ASubmitTable);
 
-        if (!AVerificationResult.HasCriticalErrors)
+        if (TVerificationHelper.IsNullOrOnlyNonCritical(AVerificationResult))
         {
-            if ({#DATATABLENAME}Access.SubmitChanges(({#DATATABLENAME}Table)ASubmitTable, SubmitChangesTransaction,
-                out SingleVerificationResultCollection))
-            {
-                SubmissionResult = TSubmitChangesResult.scrOK;
-            }
-            else
-            {
-                AVerificationResult.AddCollection(SingleVerificationResultCollection);
-            }
+            {#DATATABLENAME}Access.SubmitChanges(({#DATATABLENAME}Table)ASubmitTable, SubmitChangesTransaction);
+
+            SubmissionResult = TSubmitChangesResult.scrOK;
         }
     }
 
