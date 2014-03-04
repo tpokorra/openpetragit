@@ -106,7 +106,6 @@ namespace Ict.Petra.Server.App.Core
                 null);
 
             TClientManager.InitializeStaticVariables(FSystemDefaultsCache,
-                TCacheableTablesManager.GCacheableTablesManager,
                 FUserManager,
                 new TErrorLog(),
                 new TMaintenanceLogonMessage());
