@@ -384,7 +384,7 @@ namespace Ict.Testing.NUnitTools
                     VerificationResultStr);
             }
         }
-    }    
+    }
 
     /// <summary>
     /// This converter finds the different date substrings in a string like a message.

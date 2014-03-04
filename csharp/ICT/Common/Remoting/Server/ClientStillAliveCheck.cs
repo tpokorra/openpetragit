@@ -45,8 +45,6 @@ namespace Ict.Common.Remoting.Server
         #endregion
 
 
-
-
         [SuppressMessage("Gendarme.Rules.Performance", "AvoidUnusedPrivateFieldsRule",
              Justification = "Gendarme identifies this Field as unused, which is wrong, hence we want to surpress the Gendarme Warning.")]
         private static Thread UClientStillAliveCheckThread;

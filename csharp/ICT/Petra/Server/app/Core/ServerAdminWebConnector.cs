@@ -216,7 +216,7 @@ namespace Ict.Petra.Server.App.Core.ServerAdmin.WebConnectors
         {
             return TServerManagerBase.TheServerManager.AddUser(AUserID, APassword);
         }
-        
+
         /// Allows the admin console to run a timed job now
         [CheckServerAdminToken]
         public static void PerformTimedProcessingNow(string AProcessName)

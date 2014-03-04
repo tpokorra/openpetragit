@@ -103,7 +103,7 @@ public class GenerateServerGlue
                             {
                                 ParameterType += ".ARRAY";
                             }
-                            
+
 //                            if (ParameterType == "SortedList")
 //                            {
 //Console.WriteLine(p.ParameterName + "'s ParameterType = SortedList");
@@ -163,7 +163,7 @@ public class GenerateServerGlue
         {
             string parametertype = p.TypeReference.ToString();
             bool ArrayParameter = false;
-            
+
             // check if the parametertype is not a generic type, eg. dictionary or list
             if (!parametertype.Contains("<"))
             {
@@ -172,25 +172,27 @@ public class GenerateServerGlue
                     ArrayParameter = true;
 //Console.WriteLine("ArrayParameter found: " + parametertype);
                 }
-                
+
                 parametertype = parametertype == "string" || parametertype == "String" ? "System.String" : parametertype;
                 parametertype = parametertype == "bool" || parametertype == "Boolean" ? "System.Boolean" : parametertype;
                 parametertype = parametertype.Contains("Int32") || parametertype == "int" ? "System.Int32" : parametertype;
                 parametertype = parametertype.Contains("Int16") || parametertype == "short" ? "System.Int16" : parametertype;
                 parametertype = parametertype.Contains("Int64") || parametertype == "long" ? "System.Int64" : parametertype;
-                
-                if (ArrayParameter 
+
+                if (ArrayParameter
                     && !(parametertype.EndsWith("[]")))
                 {
                     // need to restore Array type!
                     parametertype += "[]";
-                     
-//Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype);                    
+
+//Console.WriteLine("ArrayParameter found - new parametertype = " + parametertype);
                 }
             }
 
-            bool BinaryParameter = !((parametertype.StartsWith("System.Int64")) || (parametertype.StartsWith("System.Int32")) || (parametertype.StartsWith("System.Int16"))
-                                     || (parametertype.StartsWith("System.String")) || (parametertype.StartsWith("System.Boolean")));
+            bool BinaryParameter =
+                !((parametertype.StartsWith("System.Int64")) || (parametertype.StartsWith("System.Int32"))
+                  || (parametertype.StartsWith("System.Int16"))
+                  || (parametertype.StartsWith("System.String")) || (parametertype.StartsWith("System.Boolean")));
 
             if (ActualParameters.Length > 0)
             {
@@ -247,7 +249,7 @@ public class GenerateServerGlue
             }
             else
             {
-                if (BinaryParameter 
+                if (BinaryParameter
                     || ArrayParameter)
                 {
                     ActualParameters += "(" + parametertype + ")THttpBinarySerializer.DeserializeObject(" + p.ParameterName + ",\"binary\")";

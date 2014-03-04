@@ -55,33 +55,33 @@ public class main
 
         if (AXMLValue >= 1)
         {
-                ReturnValue = Convert.ToInt64(AXMLValue * 60 * 1000);
-            }
-            else
-            {
-                ReturnValue = Convert.ToInt64(AXMLValue * 100 * 1000);
-            }
-
-            return ReturnValue;
+            ReturnValue = Convert.ToInt64(AXMLValue * 60 * 1000);
         }
-
-        /// <summary>
-        /// Kill all instances of a Process by name
-        /// </summary>
-        /// <param name="name">name of the process to kill</param>
-        /// <example>
-        /// KillAllProcesses( "Outlook" );
-        /// </example>
-        public static void KillAllProcesses(String name)
+        else
         {
-            Process[] processes = Process.GetProcessesByName(name);
-
-            foreach (Process p in processes)
-            {
-                Console.WriteLine("{0}: try killing {1}", DateTime.Now.ToLongTimeString() ,p.MainWindowTitle);
-                p.Kill();
-            }
+            ReturnValue = Convert.ToInt64(AXMLValue * 100 * 1000);
         }
+
+        return ReturnValue;
+    }
+
+    /// <summary>
+    /// Kill all instances of a Process by name
+    /// </summary>
+    /// <param name="name">name of the process to kill</param>
+    /// <example>
+    /// KillAllProcesses( "Outlook" );
+    /// </example>
+    public static void KillAllProcesses(String name)
+    {
+        Process[] processes = Process.GetProcessesByName(name);
+
+        foreach (Process p in processes)
+        {
+            Console.WriteLine("{0}: try killing {1}", DateTime.Now.ToLongTimeString(), p.MainWindowTitle);
+            p.Kill();
+        }
+    }
 
     /// <summary>
     /// Returns the duration of a break. The duration will be fixed if there is no 'random' Attribute
@@ -89,27 +89,27 @@ public class main
     /// </summary>
     /// <param name="ACursor"></param>
     /// <returns>Duration of a Break.</returns>
-        public static Int64 RandomBreak(XmlNode ACursor)
+    public static Int64 RandomBreak(XmlNode ACursor)
+    {
+        Int64 ReturnValue;
+        Int64 time;
+        Int64 deviation;
+
+        time = GetMilliSeconds(TXMLParser.GetDoubleAttribute(ACursor, "time"));
+
+        deviation = GetMilliSeconds(TXMLParser.GetDoubleAttribute(ACursor, "random"));
+
+        if (deviation > 0)
         {
-            Int64 ReturnValue;
-            Int64 time;
-            Int64 deviation;
-
-            time = GetMilliSeconds(TXMLParser.GetDoubleAttribute(ACursor, "time"));
-
-            deviation = GetMilliSeconds(TXMLParser.GetDoubleAttribute(ACursor, "random"));
-
-            if (deviation > 0)
-            {
-                ReturnValue = rnd.Next((Int32)(time - deviation), (Int32)(time + deviation));
-            }
-            else
-            {
-                ReturnValue = time;
-            }
-
-            return ReturnValue;
+            ReturnValue = rnd.Next((Int32)(time - deviation), (Int32)(time + deviation));
         }
+        else
+        {
+            ReturnValue = time;
+        }
+
+        return ReturnValue;
+    }
 
     /// <summary>
     /// Tells whether the Server is still running.
@@ -119,144 +119,144 @@ public class main
          Justification =
              "We use the following server call ONLY for an 'side effect' but since we are inquiring a Property its value must be assigned to a variable. [christiank]",
          MessageId = "Tmp")]
-        public static bool ServerStillRunning()
+    public static bool ServerStillRunning()
+    {
+        bool ReturnValue = true;
+
+        try
         {
-            bool ReturnValue = true;
+            // We use the following server call ONLY for an 'side effect' - namely when it throws an Exception!
+            int Tmp = TRemote.GetClientsConnected();      // Causes: CA1804:RemoveUnusedLocals (but is suppressed for that reason with the SuppressMessage Attribute!)
+        }
+        catch (Exception exp)
+        {
+            System.Console.WriteLine("{0}: Exception: {1}", DateTime.Now.ToLongTimeString(), exp.Message);
+            System.Console.WriteLine("{0}: Stopping the test", DateTime.Now.ToLongTimeString());
 
-            try
-            {
-                // We use the following server call ONLY for an 'side effect' - namely when it throws an Exception!
-                int Tmp = TRemote.GetClientsConnected();  // Causes: CA1804:RemoveUnusedLocals (but is suppressed for that reason with the SuppressMessage Attribute!)
-            }
-            catch (Exception exp)
-            {
-                System.Console.WriteLine("{0}: Exception: {1}", DateTime.Now.ToLongTimeString(), exp.Message);
-                System.Console.WriteLine("{0}: Stopping the test", DateTime.Now.ToLongTimeString());
-
-                ReturnValue = false;
-            }
-            
-            return ReturnValue;
+            ReturnValue = false;
         }
 
-        /// <summary>
-        /// Executes the tests (main method of this executable!).
-        /// </summary>
-        public static void RunTest()
-        {
-            XmlNode startNode;
-            XmlNode curGroup;
-            Thread groupThread;
-            TestGroup myGroup;
-            String testcase;
-            
-            new TAppSettingsManager(true);
-            
-            testcase = TAppSettingsManager.GetValue("testcase");
-            Global.StartClientID = TAppSettingsManager.GetInt16("startclientid");
-            
-            rnd = new System.Random(DateTime.Now.Millisecond);     // Init
+        return ReturnValue;
+    }
 
-            try
-            {
-                parser = new TXMLParser(TAppSettingsManager.GetValue("testscript"), false);
-                startNode = parser.GetDocument().DocumentElement;
-            }
-            catch (Exception E)
-            {
-                System.Console.WriteLine("{0}: trouble in RunTest", DateTime.Now.ToLongTimeString());
-                System.Console.WriteLine("{0}: {1}", DateTime.Now.ToLongTimeString(), E.Message);
-                
-                return;
-            }
-            
-            new TLogging(@"..\..\log\PetraMultiStart.log");
-            
+    /// <summary>
+    /// Executes the tests (main method of this executable!).
+    /// </summary>
+    public static void RunTest()
+    {
+        XmlNode startNode;
+        XmlNode curGroup;
+        Thread groupThread;
+        TestGroup myGroup;
+        String testcase;
+
+        new TAppSettingsManager(true);
+
+        testcase = TAppSettingsManager.GetValue("testcase");
+        Global.StartClientID = TAppSettingsManager.GetInt16("startclientid");
+
+        rnd = new System.Random(DateTime.Now.Millisecond);         // Init
+
+        try
+        {
+            parser = new TXMLParser(TAppSettingsManager.GetValue("testscript"), false);
+            startNode = parser.GetDocument().DocumentElement;
+        }
+        catch (Exception E)
+        {
+            System.Console.WriteLine("{0}: trouble in RunTest", DateTime.Now.ToLongTimeString());
+            System.Console.WriteLine("{0}: {1}", DateTime.Now.ToLongTimeString(), E.Message);
+
+            return;
+        }
+
+        new TLogging(@"..\..\log\PetraMultiStart.log");
+
 //            TheConnector = new Ict.Petra.ServerAdmin.App.Core.Connector.TConnector();
 //            TheConnector.GetServerConnection(TAppSettingsManager.ConfigFileName, out TRemote);
-            
-            TRemote = new TMServerAdminNamespace().WebConnectors;
-            			 
-            CreateTestUsers();
 
-            if (startNode.Name.ToLower() == "tests")
+        TRemote = new TMServerAdminNamespace().WebConnectors;
+
+        CreateTestUsers();
+
+        if (startNode.Name.ToLower() == "tests")
+        {
+            startNode = startNode.FirstChild;
+
+            while ((startNode != null) && (startNode.Name.ToLower() == "test") && (TXMLParser.GetAttribute(startNode, "name") != testcase))
             {
-                startNode = startNode.FirstChild;
+                startNode = startNode.NextSibling;
+            }
+        }
 
-                while ((startNode != null) && (startNode.Name.ToLower() == "test") && (TXMLParser.GetAttribute(startNode, "name") != testcase))
+        if (startNode == null)
+        {
+            Console.WriteLine("{0}: cannot find testcase {1}", DateTime.Now.ToLongTimeString(), testcase);
+
+            return;
+        }
+
+        while (true)
+        {
+            // restart the whole test scenario
+
+            if (startNode.Name.ToLower() == "test")
+            {
+                Global.Filename = TXMLParser.GetAttribute(startNode, "app");
+
+                // kill instances of previous test
+                KillAllProcesses(Global.Filename.Substring(0, Global.Filename.IndexOf('.')));
+
+                Global.Configfile = TXMLParser.GetAttribute(startNode, "config");
+                curGroup = startNode.FirstChild;
+
+                while ((curGroup != null) && (curGroup.Name == "clientgroup"))
                 {
-                    startNode = startNode.NextSibling;
+                    if (TXMLParser.GetBoolAttribute(curGroup, "active", true) != false)
+                    {
+                        myGroup = new TestGroup(curGroup);
+                        groupThread = new Thread(myGroup.Run);
+                        groupThread.Start();
+                    }
+
+                    curGroup = curGroup.NextSibling;
                 }
             }
 
-            if (startNode == null)
+            Thread.CurrentThread.Join();
+            System.Console.WriteLine("{0}: All threads have stopped", DateTime.Now.ToLongTimeString());
+
+            if (TXMLParser.GetBoolAttribute(startNode, "loop", true) == false)
             {
-                Console.WriteLine("{0}: cannot find testcase {1}", DateTime.Now.ToLongTimeString(), testcase);
-                
                 return;
             }
 
-            while (true)
-            {
-                // restart the whole test scenario
+            Thread.Sleep(5 * 60 * 1000);
 
-                if (startNode.Name.ToLower() == "test")
-                {
-                    Global.Filename = TXMLParser.GetAttribute(startNode, "app");
-
-                    // kill instances of previous test
-                    KillAllProcesses(Global.Filename.Substring(0, Global.Filename.IndexOf('.')));
-                    
-                    Global.Configfile = TXMLParser.GetAttribute(startNode, "config");
-                    curGroup = startNode.FirstChild;
-
-                    while ((curGroup != null) && (curGroup.Name == "clientgroup"))
-                    {
-                        if (TXMLParser.GetBoolAttribute(curGroup, "active", true) != false)
-                        {
-                            myGroup = new TestGroup(curGroup);
-                            groupThread = new Thread(myGroup.Run);
-                            groupThread.Start();
-                        }
-
-                        curGroup = curGroup.NextSibling;
-                    }
-                }
-
-                Thread.CurrentThread.Join();
-                System.Console.WriteLine("{0}: All threads have stopped", DateTime.Now.ToLongTimeString());
-
-                if (TXMLParser.GetBoolAttribute(startNode, "loop", true) == false)
-                {
-                    return;
-                }
-
-                Thread.Sleep(5 * 60 * 1000);
-
-              // wait for 5 minutes before restarting
-            }
-        }
-
-        /// <summary>
-        /// Creates Test Users. No error occurs if these Test Users already exist,
-        /// </summary>
-        private static void CreateTestUsers()
-        {
-            const int NUMBEROFTESTUSERS = 40;
-
-            int UsersCreated = 0;
-
-            Console.WriteLine("Setting up " + NUMBEROFTESTUSERS.ToString() + " Test Users (if necessary)...");
-
-            for (int Counter = 0; Counter < NUMBEROFTESTUSERS; Counter++)
-            {
-                if (TRemote.AddUser("TESTUSER" + Counter.ToString(), "test"))
-                {
-                    UsersCreated++;
-                }
-            }
-
-            Console.WriteLine("Finished setting up Test Users (" + UsersCreated.ToString() + " users created.)");
+            // wait for 5 minutes before restarting
         }
     }
+
+    /// <summary>
+    /// Creates Test Users. No error occurs if these Test Users already exist,
+    /// </summary>
+    private static void CreateTestUsers()
+    {
+        const int NUMBEROFTESTUSERS = 40;
+
+        int UsersCreated = 0;
+
+        Console.WriteLine("Setting up " + NUMBEROFTESTUSERS.ToString() + " Test Users (if necessary)...");
+
+        for (int Counter = 0; Counter < NUMBEROFTESTUSERS; Counter++)
+        {
+            if (TRemote.AddUser("TESTUSER" + Counter.ToString(), "test"))
+            {
+                UsersCreated++;
+            }
+        }
+
+        Console.WriteLine("Finished setting up Test Users (" + UsersCreated.ToString() + " users created.)");
+    }
+}
 }

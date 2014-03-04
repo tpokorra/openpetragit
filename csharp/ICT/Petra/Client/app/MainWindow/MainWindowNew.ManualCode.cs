@@ -70,7 +70,7 @@ namespace Ict.Petra.Client.App.PetraClient
         private static Int64 FConferenceKey = 0;
 #if TODORemoting
         private PetraClient_AutomatedAppTest.TAutomatedAppTest TestRunner;
-#endif        
+#endif
 
         /// <summary>
         /// The currently selected Ledger
@@ -146,7 +146,7 @@ namespace Ict.Petra.Client.App.PetraClient
         {
             string DisconnectTimeFromCommandLine = TAppSettingsManager.GetValue("DisconnectTime");
 
-#if TODORemoting            
+#if TODORemoting
             if (TAppSettingsManager.GetBoolean("RunAutoTests", false) == true)
             {
                 // We need to manually 'fix up' the value of DisconnectTime that we get from .NET when we request
@@ -168,9 +168,10 @@ namespace Ict.Petra.Client.App.PetraClient
                 TestRunner.ClientID = TConnectionManagementBase.GConnectionManagement.ClientID;
                 TestRunner.Start(this);
             }
-            else 
-#endif                
-                if (System.Windows.Forms.Form.ModifierKeys != Keys.Control)
+            else
+#endif
+
+            if (System.Windows.Forms.Form.ModifierKeys != Keys.Control)
             {
                 string testAction = TAppSettingsManager.GetValue("TestAction");
 

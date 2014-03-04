@@ -1928,10 +1928,10 @@ namespace Ict.Petra.Client.MPartner.Gui
                     // Fetch the first page of data
                     try
                     {
-                            // For speed reasons we must add the necessary amount of emtpy Rows only *after* .AutoSizeCells()
-                            // has already been run! See XML Comment on the called Method
-                            // TSgrdDataGridPaged.LoadFirstDataPage for details!
-                            FPagedDataTable = grdResult.LoadFirstDataPage(@GetDataPagedResult, false);
+                        // For speed reasons we must add the necessary amount of emtpy Rows only *after* .AutoSizeCells()
+                        // has already been run! See XML Comment on the called Method
+                        // TSgrdDataGridPaged.LoadFirstDataPage for details!
+                        FPagedDataTable = grdResult.LoadFirstDataPage(@GetDataPagedResult, false);
 //TLogging.Log("grdResult.LoadFirstDataPage finished. FPagedDataTable.Rows.Count: " + FPagedDataTable.Rows.Count.ToString());
                     }
                     catch (Exception E)

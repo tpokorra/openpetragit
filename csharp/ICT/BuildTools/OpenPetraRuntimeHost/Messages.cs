@@ -46,7 +46,7 @@ namespace Ict.Tools.OpenPetraRuntimeHost
                 .error {margin-bottom: 10px;}
                 .expandable { text-decoration:underline; font-weight:bold; color:navy; cursor:hand; }
         </style>
-"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ;
+"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ;
 
         static string _httpErrorFormat2 =
             @"    </head>
@@ -59,13 +59,14 @@ namespace Ict.Tools.OpenPetraRuntimeHost
             <hr width=100% size=1 color=silver>
 
             <b>Version Information:</b>&nbsp;Cassini Web Server "
-            + VersionString + @"
+            +
+            VersionString + @"
 
             </font>
 
     </body>
 </html>
-"                                                                                 ;
+"                                                                               ;
 
         const string _dirListingFormat1 =
             @"<html>

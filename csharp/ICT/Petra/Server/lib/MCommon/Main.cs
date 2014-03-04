@@ -478,7 +478,7 @@ namespace Ict.Petra.Server.MCommon
 
                 TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
                 TProgressTracker.CancelJob(FProgressID);
-                
+
                 return;
             }
             catch (Exception Exp)
@@ -487,8 +487,6 @@ namespace Ict.Petra.Server.MCommon
 
                 TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
                 TProgressTracker.CancelJob(FProgressID);
-
-
 
 
                 return;
@@ -668,16 +666,16 @@ namespace Ict.Petra.Server.MCommon
                 if (FAsyncExecProgress.ProgressState == TAsyncExecProgressState.Aeps_Stopping)
                 {
 #endif
-                    // Cancel the executing query.
-                    TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery called...");
-                    FDataAdapter.SelectCommand.Cancel();
-                    TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery finished.");
+                // Cancel the executing query.
+                TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery called...");
+                FDataAdapter.SelectCommand.Cancel();
+                TLogging.LogAtLevel(7, "TPagedDataSet.StopQuery finished.");
 #if TODORemoting
-                }
-                else
-                {
-                    TLogging.LogAtLevel(7, this.GetType().FullName + ".StopQuery: Query got cancelled after returning records.");
-                }
+            }
+            else
+            {
+                TLogging.LogAtLevel(7, this.GetType().FullName + ".StopQuery: Query got cancelled after returning records.");
+            }
 #endif
 
                 TProgressTracker.SetCurrentState(FProgressID, "Query cancelled!", 0.0m);
