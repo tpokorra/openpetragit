@@ -30,24 +30,17 @@ using System.Windows.Forms;
 
 using Ict.Tools.OpenPetraRuntimeHost;
 
-/********************************************************************************************
-*
-* This class is the main multi-site UI for the Open Petra Web Server application.
-*
-* The application as a whole integrates with the Microsoft Cassini web server code
-* which is preserved more or less in tact with the exception that 'cosmetic' options
-* to allow remote connections and to specify a default page have been added.
-*
-*
-* Unlike IIS, multiple web sites must be on different ports - a separate instance of the
-* Cassini web server is created for each site.
-*
-* ******************************************************************************************/
-
 namespace Ict.Tools.OpenPetraWebServer
 {
-    /// <summary>
-    /// Class for the Full GUI
+    /// <summary>    
+    /// This class is the main multi-site UI for the Open Petra Web Server application.
+    ///
+    /// The application as a whole integrates with the Microsoft Cassini web server code
+    /// which is preserved more or less in tact with the exception that 'cosmetic' options
+    /// to allow remote connections and to specify a default page have been added.
+    ///
+    /// Unlike IIS, multiple web sites must be on different ports - a separate instance of the
+    /// Cassini web server is created for each site.
     /// </summary>
     public partial class MainForm : Form
     {
