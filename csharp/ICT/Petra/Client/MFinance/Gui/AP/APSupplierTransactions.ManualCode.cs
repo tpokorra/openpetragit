@@ -336,7 +336,7 @@ namespace Ict.Petra.Client.MFinance.Gui.AP
                 {
                     /* The next line of code calls a function on the PetraServer
                      * > causes a bit of data traffic everytime! */
-                    ThreadStatus = FFindObject.AsyncExecProgress.Progress;
+                    ThreadStatus = FFindObject.Progress;
                 }
                 catch (NullReferenceException)
                 {
