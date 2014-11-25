@@ -951,7 +951,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 {
                     //Error condition which should never happen
                     throw new Exception(String.Format(Catalog.GetString(
-                                "DATA QUALITY ERROR! Missing Cost Centre Code in Motivation Detail table for Partner {0} in Ledger {1}, Motivation Group {2} and motivation Detail Code {3}!"),
+                                "DATA QUALITY ERROR! Missing Cost Centre Code in Motivation Detail table for Partner {0} in Ledger {1}, Motivation Group {2} and Motivation Detail Code {3}!"),
                             ARecipientPartnerKey,
                             ALedgerNumber,
                             AMotivationGroupCode,

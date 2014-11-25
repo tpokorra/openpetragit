@@ -380,9 +380,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             grdDetails.DataSource = null;
 
             // if this form is readonly, then we need all codes, because old codes might have been used
-            if (firstLoad || (FActiveOnly != this.Enabled))
+            if (firstLoad || (FActiveOnly == (ViewMode || !FBatchUnposted)))
             {
-                FActiveOnly = this.Enabled;
+                FActiveOnly = !(ViewMode || !FBatchUnposted);
 
                 TFinanceControls.InitialiseMotivationGroupList(ref cmbDetailMotivationGroupCode, FLedgerNumber, FActiveOnly);
                 TFinanceControls.InitialiseMotivationDetailList(ref cmbDetailMotivationDetailCode, FLedgerNumber, FActiveOnly);
