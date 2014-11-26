@@ -1646,7 +1646,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             TVerificationResultCollection VerificationResultCollection = FPetraUtilsObject.VerificationResultCollection;
 
             TSharedFinanceValidation_Gift.ValidateGiftDetailManual(this, ARow, ref VerificationResultCollection,
-                FValidationControlsDict, null, null, null, FPreviouslySelectedDetailRow.RecipientField);
+                FValidationControlsDict, txtDetailRecipientKey.CurrentPartnerClass, null, null, null, FPreviouslySelectedDetailRow.RecipientField);
 
             //It is necessary to validate the unbound control for date entered. This requires us to pass the control.
             AGiftRow giftRow = GetGiftRow(ARow.GiftTransactionNumber);
