@@ -152,9 +152,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                 return;
             }
 
-            if (dtpEffectiveDate.Enabled && (dtpEffectiveDate.Text.Trim().Length == 0))
+            if (!dtpEffectiveDate.ValidDate())
             {
-                MessageBox.Show(Catalog.GetString("Please enter a valid batch date."));
                 dtpEffectiveDate.Focus();
                 return;
             }
@@ -291,6 +290,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             //add the focused event temporarily to allow execution of more manual code right at the
             //  end of the initialisation process.
             this.btnHelp.Enter += new System.EventHandler(this.HelpFocussed);
+
+            // validation is not done automatically on this form
+            dtpEffectiveDate.ShowWarningOnLostFocus = true;
         }
 
         private void HelpFocussed(System.Object sender, EventArgs e)
@@ -371,19 +373,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             if (ErrorMessages.Length > 0)
             {
                 System.Windows.Forms.MessageBox.Show(ErrorMessages, Catalog.GetString("Warning"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-        private void CheckBatchEffectiveDate(object sender, EventArgs e)
-        {
-            DateTime dateValue;
-            string aDate = dtpEffectiveDate.Text.Trim();
-
-            if ((aDate.Length > 0) && !DateTime.TryParse(aDate, out dateValue))
-            {
-                MessageBox.Show(Catalog.GetString("Invalid date entered!"));
-                dtpEffectiveDate.Focus();
-                dtpEffectiveDate.SelectAll();
             }
         }
     }
