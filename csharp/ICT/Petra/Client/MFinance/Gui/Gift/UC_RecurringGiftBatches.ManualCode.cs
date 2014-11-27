@@ -516,12 +516,21 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             RefreshCurrencyControls(FPreviouslySelectedDetailRow.CurrencyCode);
 
-            Boolean ComboSetsOk = cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1);
-            ComboSetsOk &= cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1);
-
-            if (!ComboSetsOk)
+            //Check for inactive cost centre and/or account codes
+            if (!cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1))
             {
-                MessageBox.Show("Can't set combo box with row details.");
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Cost Centre: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankCostCentre),
+                    Catalog.GetString("Recurring Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            if (!cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1))
+            {
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Bank Account: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankAccountCode),
+                    Catalog.GetString("Recurring Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
