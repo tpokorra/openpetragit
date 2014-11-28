@@ -224,10 +224,12 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             AddParam("ReversalCommentTwoType", cmbReversalCommentTwoType.Text);
             AddParam("ReversalCommentThreeType", cmbReversalCommentThreeType.Text);
 
+            int AdjustmentBatchNumber;
+
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                ok = TRemote.MFinance.Gift.WebConnectors.GiftRevertAdjust(requestParams, out AMessages);
+                ok = TRemote.MFinance.Gift.WebConnectors.GiftRevertAdjust(requestParams, out AdjustmentBatchNumber, out AMessages);
             }
             finally
             {
@@ -241,22 +243,22 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                 switch (function)
                 {
                     case "ReverseGiftBatch":
-                        MessageBox.Show(Catalog.GetString("Your batch has been successfully reversed"),
+                        MessageBox.Show(Catalog.GetString("Reversed gift batch has been successfully created with Batch Number " + AdjustmentBatchNumber + "."),
                         Catalog.GetString("Reverse Gift Batch"));
                         break;
 
                     case "ReverseGiftDetail":
-                        MessageBox.Show(Catalog.GetString("Your gift detail has been successfully reversed"),
+                        MessageBox.Show(Catalog.GetString("Reversed gift detail has been successfully added to Batch " + AdjustmentBatchNumber + "."),
                         Catalog.GetString("Reverse Gift Detail"));
                         break;
 
                     case "ReverseGift":
-                        MessageBox.Show(Catalog.GetString("Your gift has been successfully reversed"),
+                        MessageBox.Show(Catalog.GetString("Reversed gift has been successfully added to Batch " + AdjustmentBatchNumber + "."),
                         Catalog.GetString("Reverse Gift"));
                         break;
 
                     case "AdjustGift":
-                        MessageBox.Show(Catalog.GetString("Your gift has been successfully adjusted"),
+                        MessageBox.Show(Catalog.GetString("Adjustment transactions have been successfully added to Batch " + AdjustmentBatchNumber + "."),
                         Catalog.GetString("Adjust Gift"));
                         break;
                 }

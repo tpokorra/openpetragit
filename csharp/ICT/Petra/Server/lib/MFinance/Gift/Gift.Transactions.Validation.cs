@@ -72,12 +72,15 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
             for (int Counter = 0; Counter < ASubmitTable.Rows.Count; Counter++)
             {
-                TPartnerServerLookups.GetPartnerShortName(((GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter]).RecipientKey, out RecipientDescription, out RecipientPartnerClass);
+                if (ASubmitTable.Rows[Counter].RowState != DataRowState.Deleted)
+                {
+                    TPartnerServerLookups.GetPartnerShortName(((GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter]).RecipientKey, out RecipientDescription, out RecipientPartnerClass);
 
-                TSharedFinanceValidation_Gift.ValidateGiftDetailManual("TTransactionWebConnector" +
-                    " (Error in Row #" + Counter.ToString() + ")",  // No translation of message text since the server's messages should be all in English
-                    (GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter], ref AVerificationResult,
-                    ValidationControlsDict, RecipientPartnerClass);
+                    TSharedFinanceValidation_Gift.ValidateGiftDetailManual("TTransactionWebConnector" +
+                        " (Error in Row #" + Counter.ToString() + ")",  // No translation of message text since the server's messages should be all in English
+                        (GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter], ref AVerificationResult,
+                        ValidationControlsDict, RecipientPartnerClass);
+                }
             }
         }
 

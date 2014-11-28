@@ -299,11 +299,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                     SetBatchLastGiftNumber();
 
                     UpdateControlsProtection();
-
-                    if (!pnlDetails.Enabled)
-                    {
-                        ClearControls();
-                    }
                 }
 
                 UpdateTotals();
