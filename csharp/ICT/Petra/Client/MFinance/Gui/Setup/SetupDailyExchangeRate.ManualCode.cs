@@ -40,6 +40,7 @@ using Ict.Petra.Shared;
 using Ict.Petra.Shared.MFinance;
 using Ict.Petra.Shared.MFinance.Account.Data;
 using Ict.Petra.Shared.MFinance.Gift.Data;
+using Ict.Petra.Shared.MFinance.CrossLedger.Data;
 using Ict.Petra.Client.MCommon;
 using Ict.Petra.Client.MFinance.Logic;
 using Ict.Petra.Client.App.Core;
@@ -364,10 +365,10 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
             lblEnableEditDelete.Height = btnEnableEdit.Height;
             lblEnableEditDelete.TextAlign = ContentAlignment.MiddleCenter;
 
-            // We may need the information from the corporate exchange rate table when we create new rates
-            Ict.Common.Data.TTypedDataTable TypedTable;
-            TRemote.MCommon.DataReader.WebConnectors.GetData(ACorporateExchangeRateTable.GetTableDBName(), null, out TypedTable);
-            FCorporateDS.ACorporateExchangeRate.Merge(TypedTable);
+            txtUsage.Font = new System.Drawing.Font(txtUsage.Font, FontStyle.Regular);
+
+            // This is where we load all the data.  The auto-generated code did not load anything yet
+            FMainDS.Merge(TRemote.MFinance.Common.WebConnectors.LoadDailyExchangeRateData());
         }
 
         /// <summary>
@@ -695,7 +696,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
             UpdateExchangeRateLabels();
         }
 
-        private void NewRowManual(ref ADailyExchangeRateRow ARow)
+        private void NewRowManual(ref ExchangeRateTDSADailyExchangeRateRow ARow)
         {
             // We just need to decide on the appropriate currency pair and then call the standard method to get a suggested rate and date
             if (FPreviouslySelectedDetailRow == null)
@@ -945,13 +946,14 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
         /// Standardroutine
         /// </summary>
         /// <param name="ARow"></param>
-        private void ShowDetailsManual(ADailyExchangeRateRow ARow)
+        private void ShowDetailsManual(ExchangeRateTDSADailyExchangeRateRow ARow)
         {
             if (ARow == null)
             {
                 txtDetailRateOfExchange.NumberValueDecimal = null;
+                txtUsage.Text = String.Empty;
                 FIsCurrentRowStateAdded = false;
-                btnDelete.Enabled = false;
+                SetEnabledStates();
             }
             else
             {
@@ -981,6 +983,48 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
                         out FCanDeleteCurrentRow);
                 }
 
+                if ((ARow.JournalUsage == 0) && (ARow.GiftBatchUsage == 0))
+                {
+                    txtUsage.Text = String.Empty;
+                }
+                else
+                {
+                    string s = String.Empty;
+                    string filter =
+                        String.Format("{0}='{1}' AND {2}='{3}' AND {4}=#{5}#",
+                            ADailyExchangeRateTable.GetFromCurrencyCodeDBName(),
+                            ARow.FromCurrencyCode,
+                            ADailyExchangeRateTable.GetToCurrencyCodeDBName(),
+                            ARow.ToCurrencyCode,
+                            ADailyExchangeRateTable.GetDateEffectiveFromDBName(),
+                            ARow.DateEffectiveFrom.ToString("d", CultureInfo.InvariantCulture));
+
+                    DataView dv = new DataView(FMainDS.ADailyExchangeRateUsage, filter, "", DataViewRowState.CurrentRows);
+
+                    foreach (DataRowView drv in dv)
+                    {
+                        if (s.Length > 0)
+                        {
+                            s += Environment.NewLine;
+                        }
+
+                        ExchangeRateTDSADailyExchangeRateUsageRow row = (ExchangeRateTDSADailyExchangeRateUsageRow)drv.Row;
+
+                        if (row.JournalNumber == 0)
+                        {
+                            s += String.Format("{0} Gift Batch {1} in Ledger {2}",
+                                row.BatchStatus, row.BatchNumber, row.LedgerNumber);
+                        }
+                        else if (row.TimeEffectiveFrom == ARow.TimeEffectiveFrom)
+                        {
+                            s += String.Format("{0} GL Batch {1}, Journal {2} in Ledger {3}",
+                                row.BatchStatus, row.BatchNumber, row.JournalNumber, row.LedgerNumber);
+                        }
+                    }
+
+                    txtUsage.Text = s;
+                }
+
                 FIsCurrentRowStateAdded = ARow.RowState == DataRowState.Added;
                 SetEnabledStates();
             }
@@ -991,6 +1035,11 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
 
         private void SetEnabledStates()
         {
+            //Filter only applies to currency To/From fields, which are always disabled in Modal view
+            // and so filter is not needed. Otherwise the user is able to use the filter to select different currencies
+            //  other what is displayed in the To/From comboboxes
+            chkToggleFilter.Enabled = !blnIsInModalMode;
+
             btnClose.Enabled = pnlDetails.Enabled;
 
             if (!pnlDetails.Enabled)
@@ -1002,10 +1051,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
             bool bEnable = (FIsCurrentRowStateAdded && !blnIsInModalMode);
             cmbDetailFromCurrencyCode.Enabled = bEnable;
             cmbDetailToCurrencyCode.Enabled = bEnable && !chkHideOthers.Checked;
-            //Filter only applies to currency To/From fields, which are always disabled in Modal view
-            // and so filter is not needed. Otherwise the user is able to use the filter to select different currencies
-            //  other what is displayed in the To/From comboboxes
-            chkToggleFilter.Enabled = !blnIsInModalMode;
 
             // Set the Enabled states of txtRateOfExchange and the Invert and Delete buttons
             if (cmbDetailFromCurrencyCode.GetSelectedString() ==

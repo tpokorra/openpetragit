@@ -102,7 +102,17 @@ namespace Ict.Petra.Server.MCommon.DataReader.WebConnectors
                 }
                 else if (ATablename == ADailyExchangeRateTable.GetTableDBName())
                 {
-                    tempTable = ADailyExchangeRateAccess.LoadAll(ReadTransaction);
+                    if (ASearchCriteria == null)
+                    {
+                        // The manual client code will load the screen data as a full ExchangeRateTDS
+                        // So we have nothing to do
+                        AResultTable = new ADailyExchangeRateTable();
+                        return false;
+                    }
+                    else
+                    {
+                        tempTable = ADailyExchangeRateAccess.LoadUsingTemplate(ASearchCriteria, ReadTransaction);
+                    }
                 }
                 else if (ATablename == ACorporateExchangeRateTable.GetTableDBName())
                 {

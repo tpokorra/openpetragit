@@ -230,7 +230,7 @@ namespace {#NAMESPACE}
     {
         if(ValidateAllData(true, true))
         {    
-            {#DETAILTABLE}Row NewRow = FMainDS.{#DETAILTABLE}.NewRowTyped();
+            {#DETAILTABLETYPE}Row NewRow = FMainDS.{#DETAILTABLE}.NewRowTyped();
             {#INITNEWROWMANUAL}
             FMainDS.{#DETAILTABLE}.Rows.Add(NewRow);
             
@@ -344,7 +344,7 @@ namespace {#NAMESPACE}
         if (FPrevRowChangedRow > 0 && FPreviouslySelectedDetailRow != null)
         {
             DataRowView drv = ((DevAge.ComponentModel.BoundDataView)grdDetails.DataSource).DataView[FPrevRowChangedRow - 1];
-            RowNumberInData = DataUtilities.GetDataTableIndexByDataRowView(FMainDS.{#DETAILTABLETYPE}, drv);
+            RowNumberInData = DataUtilities.GetDataTableIndexByDataRowView(FMainDS.{#DETAILTABLE}, drv);
         }
 
         return RowNumberInData;
@@ -463,7 +463,7 @@ namespace {#NAMESPACE}
 
             if (rowView != null)
             {
-                FPreviouslySelectedDetailRow = ({#DETAILTABLE}Row)(rowView.Row);
+                FPreviouslySelectedDetailRow = ({#DETAILTABLETYPE}Row)(rowView.Row);
             }
 
             FPrevRowChangedRow = ARowNumberInGrid;
@@ -495,7 +495,7 @@ namespace {#NAMESPACE}
     /// IMPORTANT: Do not call this method from manual code because the internal variables will no longer match.
     /// </summary>
     /// <param name="ARow">The row for which details will be shown</param>
-    private void ShowDetails({#DETAILTABLE}Row ARow)
+    private void ShowDetails({#DETAILTABLETYPE}Row ARow)
     {
         FPetraUtilsObject.DisableDataChangedEvent();
         
@@ -526,7 +526,7 @@ namespace {#NAMESPACE}
     ///   ShowDetails(NewRow)
     /// so that the reference to the row object is updated automatically.
     /// </summary>
-    private {#DETAILTABLE}Row FPreviouslySelectedDetailRow = null;
+    private {#DETAILTABLETYPE}Row FPreviouslySelectedDetailRow = null;
     
     /// <summary>
     /// This variable may become obsolete in future.  It used to hold the most recent row passed as the parameter to the FocusedRowChanged event.
@@ -649,7 +649,7 @@ namespace {#NAMESPACE}
     public void HandlePreDelete(DataRow ARowToDelete, ref bool AAllowDeletion, ref string ADeletionQuestion)
     {
 {#IFDEF HASPREDELETEMANUAL}
-		AAllowDeletion = PreDeleteManual(({#DETAILTABLE}Row)ARowToDelete, ref ADeletionQuestion);
+		AAllowDeletion = PreDeleteManual(({#DETAILTABLETYPE}Row)ARowToDelete, ref ADeletionQuestion);
 {#ENDIF HASPREDELETEMANUAL}
     }
 
@@ -659,7 +659,7 @@ namespace {#NAMESPACE}
     public bool HandleDeleteRow(DataRow ARowToDelete, ref bool ADeletionPerformed, ref string ACompletionMessage)
     {
 {#IFDEF HASDELETEROWMANUAL}
-        ADeletionPerformed = DeleteRowManual(({#DETAILTABLE}Row)ARowToDelete, ref ACompletionMessage);
+        ADeletionPerformed = DeleteRowManual(({#DETAILTABLETYPE}Row)ARowToDelete, ref ACompletionMessage);
 		return true;
 {#ENDIF HASDELETEROWMANUAL}
 {#IFNDEF HASDELETEROWMANUAL}
@@ -673,7 +673,7 @@ namespace {#NAMESPACE}
     public bool HandlePostDelete(DataRow ARowToDelete, bool AAllowDeletion, bool ADeletionPerformed, string ACompletionMessage)
     {
 {#IFDEF HASPOSTDELETEMANUAL}
-		PostDeleteManual(({#DETAILTABLE}Row)ARowToDelete, AAllowDeletion, ADeletionPerformed, ACompletionMessage);
+		PostDeleteManual(({#DETAILTABLETYPE}Row)ARowToDelete, AAllowDeletion, ADeletionPerformed, ACompletionMessage);
 		return true;
 {#ENDIF HASPOSTDELETEMANUAL}
 {#IFNDEF HASPOSTDELETEMANUAL}
@@ -740,7 +740,7 @@ namespace {#NAMESPACE}
     /// <param name="ARow">Do not use</param>
     /// <param name="AIsNewRow">Do not use</param>
     /// <param name="AControl">Do not use</param>
-    private void GetDetailsFromControls({#DETAILTABLE}Row ARow, bool AIsNewRow = false, Control AControl=null)
+    private void GetDetailsFromControls({#DETAILTABLETYPE}Row ARow, bool AIsNewRow = false, Control AControl=null)
     {
         if (ARow != null && !grdDetails.Sorting)
         {
@@ -1295,7 +1295,7 @@ namespace {#NAMESPACE}
     }
 {#ENDIF MASTERTABLE}
 {#IFDEF DETAILTABLE}
-    private void ValidateDataDetails({#DETAILTABLE}Row ARow)
+    private void ValidateDataDetails({#DETAILTABLETYPE}Row ARow)
     {
         TVerificationResultCollection VerificationResultCollection = FPetraUtilsObject.VerificationResultCollection;
 

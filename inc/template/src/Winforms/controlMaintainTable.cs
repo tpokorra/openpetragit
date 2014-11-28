@@ -1177,7 +1177,7 @@ namespace {#NAMESPACE}
     }
 {#ENDIF MASTERTABLE}
 {#IFDEF DETAILTABLE}
-    private void ValidateDataDetails({#DETAILTABLE}Row ARow)
+    private void ValidateDataDetails({#DETAILTABLETYPE}Row ARow)
     {
         TVerificationResultCollection VerificationResultCollection = FPetraUtilsObject.VerificationResultCollection;
 
