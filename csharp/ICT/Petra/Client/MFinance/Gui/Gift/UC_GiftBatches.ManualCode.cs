@@ -867,11 +867,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
         /// </summary>
         private void ImportBatches(System.Object sender, System.EventArgs e)
         {
-            if (!FLoadAndFilterLogicObject.StatusEditing)
-            {
-                FLoadAndFilterLogicObject.StatusEditing = true;
-            }
-
             FImportLogicObject.ImportBatches(TUC_GiftBatches_Import.TGiftImportDataSourceEnum.FromFile);
         }
 
@@ -881,11 +876,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
         /// </summary>
         private void ImportFromClipboard(System.Object sender, System.EventArgs e)
         {
-            if (!FLoadAndFilterLogicObject.StatusEditing)
-            {
-                FLoadAndFilterLogicObject.StatusEditing = true;
-            }
-
             FImportLogicObject.ImportBatches(TUC_GiftBatches_Import.TGiftImportDataSourceEnum.FromClipboard);
         }
 
