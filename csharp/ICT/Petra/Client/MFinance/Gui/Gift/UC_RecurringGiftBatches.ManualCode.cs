@@ -479,12 +479,21 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             RefreshCurrencyControls(FPreviouslySelectedDetailRow.CurrencyCode);
 
-            Boolean ComboSetsOk = cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1);
-            ComboSetsOk &= cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1);
-
-            if (!ComboSetsOk)
+            //Check for inactive cost centre and/or account codes
+            if (!cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1))
             {
-                MessageBox.Show("Can't set combo box with row details.");
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Cost Centre: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankCostCentre),
+                    Catalog.GetString("Recurring Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            if (!cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1))
+            {
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Bank Account: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankAccountCode),
+                    Catalog.GetString("Recurring Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -552,7 +561,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                     //Load tables afresh
                     FMainDS.ARecurringGiftDetail.Clear();
                     FMainDS.ARecurringGift.Clear();
-                    FMainDS.Merge(TRemote.MFinance.Gift.WebConnectors.LoadRecurringGiftTransactions(FLedgerNumber, batchNumber));
+                    FMainDS.Merge(TRemote.MFinance.Gift.WebConnectors.LoadRecurringGiftTransactionsForBatch(FLedgerNumber, batchNumber));
                 }
 
                 //Delete transactions
@@ -889,7 +898,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
                 if (GiftDV.Count == 0)
                 {
-                    FMainDS.Merge(TRemote.MFinance.Gift.WebConnectors.LoadRecurringGiftTransactions(FLedgerNumber, FSelectedBatchNumber));
+                    FMainDS.Merge(TRemote.MFinance.Gift.WebConnectors.LoadRecurringGiftTransactionsForBatch(FLedgerNumber, FSelectedBatchNumber));
                 }
 
                 NoGiftRows = (GiftDV.Count == 0);

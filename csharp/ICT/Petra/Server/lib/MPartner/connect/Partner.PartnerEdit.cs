@@ -165,12 +165,15 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                 // workaround for bug 1871
                 List <Int32>DeletedBankingDetails = new List <Int32>();
 
-                foreach (DataRow bdrow in AInspectDS.PPartnerBankingDetails.Rows)
+                if (AInspectDS.PPartnerBankingDetails != null)
                 {
-                    if (bdrow.RowState == DataRowState.Deleted)
+                    foreach (DataRow bdrow in AInspectDS.PPartnerBankingDetails.Rows)
                     {
-                        DeletedBankingDetails.Add(Convert.ToInt32(bdrow[AInspectDS.PPartnerBankingDetails.ColumnBankingDetailsKey,
-                                                                        DataRowVersion.Original]));
+                        if (bdrow.RowState == DataRowState.Deleted)
+                        {
+                            DeletedBankingDetails.Add(Convert.ToInt32(bdrow[AInspectDS.PPartnerBankingDetails.ColumnBankingDetailsKey,
+                                                                            DataRowVersion.Original]));
+                        }
                     }
                 }
 
@@ -3048,11 +3051,10 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
         {
             TDBTransaction ReadTransaction;
             Boolean NewTransaction = false;
-            PartnerEditTDSPPartnerLocationTable LocationDT;
+            PartnerEditTDS PartnerLocations = new PartnerEditTDS();
             PLocationTable LocationTable;
             PLocationRow LocationRow;
 
-            LocationDT = new PartnerEditTDSPPartnerLocationTable();
             try
             {
                 ReadTransaction = DBAccess.GDBAccessObj.GetNewOrExistingTransaction(IsolationLevel.RepeatableRead,
@@ -3070,15 +3072,15 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                     {
                         ALocations = PLocationAccess.LoadViaPPartner(FPartnerKey, ReadTransaction);
 
-                        LocationDT.Merge(PPartnerLocationAccess.LoadViaPPartner(FPartnerKey, ReadTransaction));
+                        PPartnerLocationAccess.LoadViaPPartner(PartnerLocations, FPartnerKey, ReadTransaction);
 
-                        foreach (PartnerEditTDSPPartnerLocationRow row in LocationDT.Rows)
+                        foreach (PartnerEditTDSPPartnerLocationRow row in PartnerLocations.PPartnerLocation.Rows)
                         {
                             LocationTable = PLocationAccess.LoadByPrimaryKey(row.SiteKey, row.LocationKey, ReadTransaction);
 
                             if (LocationTable.Count > 0)
                             {
-                                LocationRow = (PLocationRow)LocationTable.Rows[0];
+                                LocationRow = LocationTable[0];
 
                                 row.LocationLocality = LocationRow.Locality;
                                 row.LocationStreetName = LocationRow.StreetName;
@@ -3092,14 +3094,14 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
 
                                 if (!LocationRow.IsDateCreatedNull())
                                 {
-                                    row.LocationDateCreated = (DateTime)LocationRow.DateCreated;
+                                    row.LocationDateCreated = LocationRow.DateCreated.Value;
                                 }
 
                                 row.LocationModifiedBy = LocationRow.ModifiedBy;
 
                                 if (!LocationRow.IsDateModifiedNull())
                                 {
-                                    row.LocationDateModified = (DateTime)LocationRow.DateModified;
+                                    row.LocationDateModified = LocationRow.DateModified.Value;
                                 }
                             }
                         }
@@ -3108,7 +3110,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                     {
                         throw;
                     }
-                    ACount = LocationDT.Rows.Count;
+                    ACount = PartnerLocations.PPartnerLocation.Rows.Count;
                 }
             }
             finally
@@ -3119,7 +3121,7 @@ namespace Ict.Petra.Server.MPartner.Partner.UIConnectors
                     TLogging.LogAtLevel(7, "TPartnerEditUIConnector.GetPartnerLocationsInternal: committed own transaction.");
                 }
             }
-            return LocationDT;
+            return PartnerLocations.PPartnerLocation;
         }
 
         private PDataLabelValuePartnerTable GetDataLocalPartnerDataValuesInternal(out Boolean ALabelsAvailable, Boolean ACountOnly)

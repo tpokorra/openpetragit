@@ -181,6 +181,7 @@ namespace Ict.Petra.Server.MFinance.GL.WebConnectors
             GLBatchTDS MainDS = new GLBatchTDS();
             TDBTransaction Transaction = DBAccess.GDBAccessObj.BeginTransaction(IsolationLevel.ReadCommitted);
 
+            ALedgerAccess.LoadByPrimaryKey(MainDS, ALedgerNumber, Transaction);
             ABatchAccess.LoadByPrimaryKey(MainDS, ALedgerNumber, ABatchNumber, Transaction);
             AJournalAccess.LoadViaABatch(MainDS, ALedgerNumber, ABatchNumber, Transaction);
             ATransactionAccess.LoadViaABatch(MainDS, ALedgerNumber, ABatchNumber, Transaction);
@@ -1845,19 +1846,33 @@ namespace Ict.Petra.Server.MFinance.GL.WebConnectors
         [RequireModulePermission("FINANCE-1")]
         public static List <TVariant>TestPostGLBatch(Int32 ALedgerNumber, Int32 ABatchNumber, out TVerificationResultCollection AVerifications)
         {
-            GLPostingTDS MainDS;
+            GLPostingTDS MainDS = null;
+            TVerificationResultCollection Verifications = null;
+
             int BatchPeriod = -1;
 
-            DBAccess.GDBAccessObj.BeginTransaction(IsolationLevel.Serializable);
+            TDBTransaction Transaction = null;
+            bool SubmissionOK = false;
+            bool Success = false;
 
-            bool success = TGLPosting.TestPostGLBatch(ALedgerNumber, ABatchNumber, out AVerifications, out MainDS, ref BatchPeriod);
+            DBAccess.GDBAccessObj.BeginAutoTransaction(IsolationLevel.Serializable,
+                ref Transaction,
+                ref SubmissionOK,
+                delegate
+                {
+                    Success = TGLPosting.TestPostGLBatch(ALedgerNumber,
+                        ABatchNumber,
+                        Transaction,
+                        out Verifications,
+                        out MainDS,
+                        ref BatchPeriod);
+                });
 
-            // we do not want to actually post the batch
-            DBAccess.GDBAccessObj.RollbackTransaction();
+            AVerifications = Verifications;
 
             List <TVariant>Result = new List <TVariant>();
 
-            if (success)
+            if (Success)
             {
                 MainDS.AGeneralLedgerMaster.DefaultView.RowFilter = string.Empty;
                 MainDS.AAccount.DefaultView.RowFilter = string.Empty;

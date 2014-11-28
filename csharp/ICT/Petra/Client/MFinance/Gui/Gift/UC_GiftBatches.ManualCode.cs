@@ -535,12 +535,21 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             RefreshCurrencyAndExchangeRateControls();
 
-            Boolean ComboSetsOk = cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1);
-            ComboSetsOk &= cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1);
-
-            if (!ComboSetsOk)
+            //Check for inactive cost centre and/or account codes
+            if (!cmbDetailBankCostCentre.SetSelectedString(ARow.BankCostCentre, -1))
             {
-                MessageBox.Show("Can't set combo box with row details.");
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Cost Centre: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankCostCentre),
+                    Catalog.GetString("Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            if (!cmbDetailBankAccountCode.SetSelectedString(ARow.BankAccountCode, -1))
+            {
+                MessageBox.Show(String.Format(Catalog.GetString("Batch {0} - the Bank Account: '{1}' is no longer active and so cannot be used."),
+                        ARow.BatchNumber,
+                        ARow.BankAccountCode),
+                    Catalog.GetString("Gift Batch"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -621,12 +630,12 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
         private void CurrencyChanged(object sender, EventArgs e)
         {
-            String ACurrencyCode = cmbDetailCurrencyCode.GetSelectedString();
+            String CurrencyCode = cmbDetailCurrencyCode.GetSelectedString();
 
             if (!FPetraUtilsObject.SuppressChangeDetection && (FPreviouslySelectedDetailRow != null)
                 && (GetCurrentBatchRow().BatchStatus == MFinanceConstants.BATCH_UNPOSTED))
             {
-                FPreviouslySelectedDetailRow.CurrencyCode = ACurrencyCode;
+                FPreviouslySelectedDetailRow.CurrencyCode = CurrencyCode;
                 RecalculateTransactionAmounts();
                 RefreshCurrencyAndExchangeRateControls(true);
             }
@@ -916,7 +925,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             if (FPostingLogicObject.PostBatch(FPreviouslySelectedDetailRow))
             {
                 // Posting succeeded so now deal with gift receipting ...
-                GiftBatchTDS PostedGiftTDS = TRemote.MFinance.Gift.WebConnectors.LoadAGiftBatchAndRelatedData(FLedgerNumber, FSelectedBatchNumber);
+                GiftBatchTDS PostedGiftTDS = TRemote.MFinance.Gift.WebConnectors.LoadAGiftBatchAndRelatedData(FLedgerNumber,
+                    FSelectedBatchNumber,
+                    false);
 
                 FReceiptingLogicObject.PrintGiftBatchReceipts(PostedGiftTDS);
 
