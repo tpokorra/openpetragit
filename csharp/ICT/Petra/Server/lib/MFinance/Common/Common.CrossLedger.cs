@@ -41,6 +41,21 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
     ///</summary>
     public static class TCrossLedger
     {
+        /// <summary>
+        /// This is the main method to load all the data required by the Daily Exchange rate Setup screen.
+        /// It slices and dices the exchange rate data in two ways:
+        ///   1. It populates a table with all the rows from the daily exchange rate table itself, plus the data from the Journal and Gift
+        ///      tables as well that are not referenced by any of the daily rate table rows.  Additionally this table contains two columns
+        ///      that show how many times the specified rate has been used.  This table has one row for every defined rate.  The rate may be used 
+        ///      in more than one place.  The primary key for this table (like the Daily Exchange Rate table itself) is From/To/Date/Time
+        ///   2. It populates another table with rate and date information in the same Daily Exchange Rate table format but this table is extended
+        ///      such that the row specifies the ledger/batch/journal details where this rate can be found.  There is one row per place where a rate
+        ///      is used, so the same from/to/date/time may occur more than once, each with a different ledger/batch/journal.  Typically this table has 
+        ///      fewer rows than (1) because it does not contain any unused rows and it does not contain any inverse currency rows.  The primary key
+        ///      is From/To/Date/Time/Ledger/Batch/Journal.
+        /// The third table is the Corporate Exchange Rate table, which contains standard content
+        /// </summary>
+        /// <returns>A complete typed data set containing three tables.</returns>
         [RequireModulePermission("FINANCE-1")]
         public static ExchangeRateTDS LoadDailyExchangeRateData()
         {
