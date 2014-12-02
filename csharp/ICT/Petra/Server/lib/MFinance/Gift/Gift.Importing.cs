@@ -4,7 +4,7 @@
 // @Authors:
 //       matthiash, timop, dougm, alanP
 //
-// Copyright 2004-2012 by OM International
+// Copyright 2004-2014 by OM International
 //
 // This file is part of OpenPetra.org.
 //
@@ -1305,7 +1305,9 @@ namespace Ict.Petra.Server.MFinance.Gift
             // Find the default Tax deductabilty from the motivation detail. This ensures that the column can be missing.
             AMotivationDetailRow motivationDetailRow = (AMotivationDetailRow)AValidationMotivationDetailTable.Rows.Find(
                 new object[] { FLedgerNumber, AGiftDetails.MotivationGroupCode, AGiftDetails.MotivationDetailCode });
-            string defaultTaxDeductible = ((motivationDetailRow != null) && motivationDetailRow.TaxDeductible) ? "yes" : "no";
+            string defaultTaxDeductible =
+                ((motivationDetailRow != null) && !motivationDetailRow.IsTaxDeductibleAccountNull()
+                 && motivationDetailRow.TaxDeductible) ? "yes" : "no";
 
             AGiftDetails.TaxDeductible = ImportBoolean(Catalog.GetString("Tax deductible"),
                 FMainDS.AGiftDetail.ColumnTaxDeductible, AValidationControlsDictGiftDetail, defaultTaxDeductible);
