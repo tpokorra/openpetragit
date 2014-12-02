@@ -1181,17 +1181,17 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
             bool AllValidationsOK = true;
 
-            bool giftBatchTableInDataSet = (AInspectDS.AGiftBatch != null);
-            bool giftTableInDataSet = (AInspectDS.AGift != null);
-            bool giftDetailTableInDataSet = (AInspectDS.AGiftDetail != null);
+            bool GiftBatchTableInDataSet = (AInspectDS.AGiftBatch != null);
+            bool GiftTableInDataSet = (AInspectDS.AGift != null);
+            bool GiftDetailTableInDataSet = (AInspectDS.AGiftDetail != null);
 
-            bool recurrGiftBatchTableInDataSet = (AInspectDS.ARecurringGiftBatch != null);
-            bool recurrGiftTableInDataSet = (AInspectDS.ARecurringGift != null);
-            bool recurrGiftDetailTableInDataSet = (AInspectDS.ARecurringGiftDetail != null);
+            bool RecurrGiftBatchTableInDataSet = (AInspectDS.ARecurringGiftBatch != null);
+            bool RecurrGiftTableInDataSet = (AInspectDS.ARecurringGift != null);
+            bool RecurrGiftDetailTableInDataSet = (AInspectDS.ARecurringGiftDetail != null);
 
-            if (recurrGiftBatchTableInDataSet || recurrGiftTableInDataSet || recurrGiftDetailTableInDataSet)
+            if (RecurrGiftBatchTableInDataSet || RecurrGiftTableInDataSet || RecurrGiftDetailTableInDataSet)
             {
-                if (giftBatchTableInDataSet || giftTableInDataSet || giftDetailTableInDataSet)
+                if (GiftBatchTableInDataSet || GiftTableInDataSet || GiftDetailTableInDataSet)
                 {
                     throw new Exception(
                         "SaveGiftBatchTDS: need to call GetChangesTyped before saving, otherwise confusion about recurring or normal gl batch");
@@ -1200,7 +1200,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 return SaveRecurringGiftBatchTDS(ref AInspectDS, ref AVerificationResult);
             }
 
-            if (giftBatchTableInDataSet)
+            if (GiftBatchTableInDataSet)
             {
                 ValidateGiftBatch(ref AVerificationResult, AInspectDS.AGiftBatch);
                 ValidateGiftBatchManual(ref AVerificationResult, AInspectDS.AGiftBatch);
@@ -1211,7 +1211,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 }
             }
 
-            if (giftDetailTableInDataSet)
+            if (GiftDetailTableInDataSet)
             {
                 ValidateGiftDetail(ref AVerificationResult, AInspectDS.AGiftDetail);
                 ValidateGiftDetailManual(ref AVerificationResult, AInspectDS.AGiftDetail);
@@ -1235,17 +1235,17 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 int giftCount = 0;
                 int giftDetailCount = 0;
 
-                if (giftBatchTableInDataSet)
+                if (GiftBatchTableInDataSet)
                 {
                     giftBatchCount = AInspectDS.AGiftBatch.Count;
                 }
 
-                if (giftTableInDataSet)
+                if (GiftTableInDataSet)
                 {
                     giftCount = AInspectDS.AGift.Count;
                 }
 
-                if (giftDetailTableInDataSet)
+                if (GiftDetailTableInDataSet)
                 {
                     giftDetailCount = AInspectDS.AGiftDetail.Count;
                 }
@@ -1270,7 +1270,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
                     //Import the other rows in ascending order
                     DataView giftDetails2 = new DataView(AInspectDS.AGiftDetail);
-                    giftDetails1.RowFilter = string.Format("{0}={1}",
+                    giftDetails2.RowFilter = string.Format("{0}={1}",
                         AGiftDetailTable.GetBatchNumberDBName(),
                         AInspectDS.AGiftBatch[0].BatchNumber);
 
@@ -1282,7 +1282,6 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                     foreach (DataRowView giftDetailRows in giftDetails2)
                     {
                         AGiftDetailRow gDR = (AGiftDetailRow)giftDetailRows.Row;
-
                         cloneDetail.ImportRow(gDR);
                     }
 
@@ -1292,7 +1291,6 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                     for (int i = 0; i < giftDetailCount; i++)
                     {
                         AGiftDetailRow gDR2 = (AGiftDetailRow)cloneDetail[i];
-
                         AInspectDS.AGiftDetail.ImportRow(gDR2);
                     }
                 }
@@ -1301,9 +1299,9 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
                 SubmissionResult = TSubmitChangesResult.scrOK;
 
-                if (giftTableInDataSet)
+                if (GiftTableInDataSet)
                 {
-                    if (giftDetailTableInDataSet)
+                    if (GiftDetailTableInDataSet)
                     {
                         AInspectDS.AGiftDetail.AcceptChanges();
                     }
@@ -1428,11 +1426,11 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
             bool AllValidationsOK = true;
 
-            bool recurrGiftBatchTableInDataSet = (AInspectDS.ARecurringGiftBatch != null);
-            bool recurrGiftTableInDataSet = (AInspectDS.ARecurringGift != null);
-            bool recurrGiftDetailTableInDataSet = (AInspectDS.ARecurringGiftDetail != null);
+            bool RecurrGiftBatchTableInDataSet = (AInspectDS.ARecurringGiftBatch != null);
+            bool RecurrGiftTableInDataSet = (AInspectDS.ARecurringGift != null);
+            bool RecurrGiftDetailTableInDataSet = (AInspectDS.ARecurringGiftDetail != null);
 
-            if (recurrGiftBatchTableInDataSet)
+            if (RecurrGiftBatchTableInDataSet)
             {
                 ValidateRecurringGiftBatch(ref AVerificationResult, AInspectDS.ARecurringGiftBatch);
                 ValidateRecurringGiftBatchManual(ref AVerificationResult, AInspectDS.ARecurringGiftBatch);
@@ -1443,7 +1441,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 }
             }
 
-            if (recurrGiftDetailTableInDataSet)
+            if (RecurrGiftDetailTableInDataSet)
             {
                 ValidateRecurringGiftDetail(ref AVerificationResult, AInspectDS.ARecurringGiftDetail);
                 ValidateRecurringGiftDetailManual(ref AVerificationResult, AInspectDS.ARecurringGiftDetail);
@@ -1463,18 +1461,77 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
             if (AllValidationsOK)
             {
+                int recurrGiftBatchCount = 0;
+                int recurrGiftCount = 0;
+                int recurrGiftDetailCount = 0;
+
+                if (RecurrGiftBatchTableInDataSet)
+                {
+                    recurrGiftBatchCount = AInspectDS.ARecurringGiftBatch.Count;
+                }
+
+                if (RecurrGiftTableInDataSet)
+                {
+                    recurrGiftCount = AInspectDS.ARecurringGift.Count;
+                }
+
+                if (RecurrGiftDetailTableInDataSet)
+                {
+                    recurrGiftDetailCount = AInspectDS.ARecurringGiftDetail.Count;
+                }
+
+                if (recurrGiftBatchCount > 0 && recurrGiftCount > 0 && recurrGiftDetailCount > 1)
+                {
+                    //The Gift Detail table must be in ascending order
+                    ARecurringGiftDetailTable cloneDetail = (ARecurringGiftDetailTable)AInspectDS.ARecurringGiftDetail.Clone();
+
+                    //Copy across any rows marked as deleted first.
+                    DataView giftDetails1 = new DataView(AInspectDS.ARecurringGiftDetail);
+                    giftDetails1.RowFilter = string.Format("{0}={1}",
+                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                        AInspectDS.ARecurringGiftBatch[0].BatchNumber);
+                    giftDetails1.RowStateFilter = DataViewRowState.Deleted;
+
+                    foreach (DataRowView drv in giftDetails1)
+                    {
+                        ARecurringGiftDetailRow gDeletedDetailRow = (ARecurringGiftDetailRow)drv.Row;
+                        cloneDetail.ImportRow(gDeletedDetailRow);
+                    }
+
+                    //Import the other rows in ascending order
+                    DataView giftDetails2 = new DataView(AInspectDS.ARecurringGiftDetail);
+                    giftDetails2.RowFilter = string.Format("{0}={1}",
+                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                        AInspectDS.ARecurringGiftBatch[0].BatchNumber);
+
+                    giftDetails2.Sort = String.Format("{0} ASC, {1} ASC, {2} ASC",
+                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                        ARecurringGiftDetailTable.GetGiftTransactionNumberDBName(),
+                        ARecurringGiftDetailTable.GetDetailNumberDBName());
+
+                    foreach (DataRowView giftDetailRows in giftDetails2)
+                    {
+                        ARecurringGiftDetailRow gDetailRow = (ARecurringGiftDetailRow)giftDetailRows.Row;
+                        cloneDetail.ImportRow(gDetailRow);
+                    }
+
+                    //Clear the table and import the rows from the clone
+                    AInspectDS.ARecurringGiftDetail.Clear();
+
+                    for (int i = 0; i < recurrGiftDetailCount; i++)
+                    {
+                        ARecurringGiftDetailRow gDR2 = (ARecurringGiftDetailRow)cloneDetail[i];
+                        AInspectDS.ARecurringGiftDetail.ImportRow(gDR2);
+                    }
+                }
+
                 GiftBatchTDSAccess.SubmitChanges(AInspectDS);
 
                 SubmissionResult = TSubmitChangesResult.scrOK;
 
-                if (recurrGiftTableInDataSet && (AInspectDS.ARecurringGift.Count > 0))
+                if (RecurrGiftTableInDataSet)
                 {
-                    if (recurrGiftBatchTableInDataSet)
-                    {
-                        AInspectDS.ARecurringGiftBatch.AcceptChanges();
-                    }
-
-                    if (recurrGiftDetailTableInDataSet)
+                    if (RecurrGiftDetailTableInDataSet)
                     {
                         AInspectDS.ARecurringGiftDetail.AcceptChanges();
                     }
@@ -1521,7 +1578,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                         {
                             TLogging.Log("Saving DataSet: " + ex.Message);
 
-                            TLogging.Log(String.Format("Error trying to save changes: {0} in Batch: {1}",
+                            TLogging.Log(String.Format("Error trying to save changes: {0} in recurring Batch: {1}",
                                     giftToDelete,
                                     currentBatch
                                     ));
