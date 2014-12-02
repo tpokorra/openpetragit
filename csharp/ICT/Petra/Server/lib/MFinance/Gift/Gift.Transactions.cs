@@ -1480,7 +1480,7 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                     recurrGiftDetailCount = AInspectDS.ARecurringGiftDetail.Count;
                 }
 
-                if (recurrGiftBatchCount > 0 && recurrGiftCount > 0 && recurrGiftDetailCount > 1)
+                if ((recurrGiftBatchCount > 0) && (recurrGiftCount > 0) && (recurrGiftDetailCount > 1))
                 {
                     //The Gift Detail table must be in ascending order
                     ARecurringGiftDetailTable cloneDetail = (ARecurringGiftDetailTable)AInspectDS.ARecurringGiftDetail.Clone();

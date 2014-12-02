@@ -351,18 +351,18 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             else if (!FFilterAndFindObject.IsActiveFilterEqualToBase)
             {
                 MessageBox.Show(Catalog.GetString("Please remove the filter before attempting to delete all gifts in this batch."),
-                                Catalog.GetString("Delete All Gifts"));
+                    Catalog.GetString("Delete All Gifts"));
 
                 return;
             }
 
             if (MessageBox.Show(String.Format(Catalog.GetString(
-                             "You have chosen to delete all gifts from batch ({0}).{1}{1}Are you sure you want to delete all?"),
-                         BatchNumberToClear,
-                         Environment.NewLine),
-                     Catalog.GetString("Confirm Delete All"),
-                     MessageBoxButtons.YesNo,
-                     MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                            "You have chosen to delete all gifts from batch ({0}).{1}{1}Are you sure you want to delete all?"),
+                        BatchNumberToClear,
+                        Environment.NewLine),
+                    Catalog.GetString("Confirm Delete All"),
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
             {
                 try
                 {

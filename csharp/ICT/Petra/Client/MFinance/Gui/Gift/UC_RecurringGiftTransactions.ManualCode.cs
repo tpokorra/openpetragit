@@ -1318,15 +1318,15 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             }
 
             // temporarily disable  New Donor Warning
-            ((TFrmRecurringGiftBatch)this.ParentForm).NewDonorWarning = false;
+            ((TFrmRecurringGiftBatch) this.ParentForm).NewDonorWarning = false;
 
-            if ((ARowToDelete.RowState != DataRowState.Added) && !((TFrmRecurringGiftBatch)this.ParentForm).SaveChangesManual())
+            if ((ARowToDelete.RowState != DataRowState.Added) && !((TFrmRecurringGiftBatch) this.ParentForm).SaveChangesManual())
             {
                 MessageBox.Show("Error in trying to save prior to deleting current gift detail!");
                 return deletionSuccessful;
             }
 
-            ((TFrmRecurringGiftBatch)this.ParentForm).NewDonorWarning = true;
+            ((TFrmRecurringGiftBatch) this.ParentForm).NewDonorWarning = true;
 
             //Backup the Dataset for reversion purposes
             GiftBatchTDS FTempDS = (GiftBatchTDS)FMainDS.Copy();
@@ -1334,8 +1334,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             if (ARowToDelete.RowState != DataRowState.Added)
             {
-                FMainDS.AcceptChanges();  
-            } 
+                FMainDS.AcceptChanges();
+            }
 
             int selectedDetailNumber = ARowToDelete.DetailNumber;
             int giftToDeleteTransNo = 0;
@@ -1552,18 +1552,18 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             else if (!FFilterAndFindObject.IsActiveFilterEqualToBase)
             {
                 MessageBox.Show(Catalog.GetString("Please remove the filter before attempting to delete all gifts in this recurring batch."),
-                                Catalog.GetString("Delete All Gifts"));
+                    Catalog.GetString("Delete All Gifts"));
 
                 return;
             }
 
             if (MessageBox.Show(String.Format(Catalog.GetString(
-                             "You have chosen to delete all gifts from recurring batch ({0}).{1}{1}Are you sure you want to delete all?"),
-                         BatchNumberToClear,
-                         Environment.NewLine),
-                     Catalog.GetString("Confirm Delete All"),
-                     MessageBoxButtons.YesNo,
-                     MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                            "You have chosen to delete all gifts from recurring batch ({0}).{1}{1}Are you sure you want to delete all?"),
+                        BatchNumberToClear,
+                        Environment.NewLine),
+                    Catalog.GetString("Confirm Delete All"),
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
             {
                 try
                 {
@@ -1635,6 +1635,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             //Copy the current dataset
             GiftBatchTDS TempDS = (GiftBatchTDS)FMainDS.Copy();
+
             TempDS.Merge(FMainDS);
 
             GiftBatchTDS BackupDS = (GiftBatchTDS)FMainDS.Copy();
