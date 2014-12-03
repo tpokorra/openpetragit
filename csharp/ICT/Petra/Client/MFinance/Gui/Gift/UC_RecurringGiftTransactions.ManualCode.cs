@@ -1556,6 +1556,10 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
                 return;
             }
+            else if (!((TFrmRecurringGiftBatch)ParentForm).SaveChangesManual())
+            {
+                return;
+            }
 
             if (MessageBox.Show(String.Format(Catalog.GetString(
                             "You have chosen to delete all gifts from recurring batch ({0}).{1}{1}Are you sure you want to delete all?"),
@@ -1588,7 +1592,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
                     FPetraUtilsObject.SetChangedFlag();
 
-                    // save first, then post
+                    // save
                     if (!((TFrmRecurringGiftBatch)ParentForm).SaveChangesManual())
                     {
                         SelectRowInGrid(1);
@@ -1709,7 +1713,11 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             return RetVal;
         }
 
-        private void DeleteCurrentRecurringBatchGiftData(Int32 ABatchNumber)
+        /// <summary>
+        /// Delete all batch gifts and details
+        /// </summary>
+        /// <param name="ABatchNumber"></param>
+        public void DeleteCurrentRecurringBatchGiftData(Int32 ABatchNumber)
         {
             DataView giftDetailView = new DataView(FMainDS.ARecurringGiftDetail);
 

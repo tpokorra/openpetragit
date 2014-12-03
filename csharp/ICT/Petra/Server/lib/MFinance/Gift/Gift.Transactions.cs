@@ -1200,6 +1200,17 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 return SaveRecurringGiftBatchTDS(ref AInspectDS, ref AVerificationResult);
             }
 
+            //Get a list of all batches involved
+            List <Int32>ListAllGiftBatchesToProcess = new List <int>();
+
+            DataView AllBatchesToProcess = new DataView(AInspectDS.AGiftBatch);
+            AllBatchesToProcess.RowStateFilter = DataViewRowState.OriginalRows;
+
+            foreach (DataRowView drv in AllBatchesToProcess)
+            {
+                ListAllGiftBatchesToProcess.Add((int)(drv[AGiftBatchTable.ColumnBatchNumberId]));
+            }
+
             if (GiftBatchTableInDataSet)
             {
                 ValidateGiftBatch(ref AVerificationResult, AInspectDS.AGiftBatch);
@@ -1255,34 +1266,37 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                     //The Gift Detail table must be in ascending order
                     AGiftDetailTable cloneDetail = (AGiftDetailTable)AInspectDS.AGiftDetail.Clone();
 
-                    //Copy across any rows marked as deleted first.
-                    DataView giftDetails1 = new DataView(AInspectDS.AGiftDetail);
-                    giftDetails1.RowFilter = string.Format("{0}={1}",
-                        AGiftDetailTable.GetBatchNumberDBName(),
-                        AInspectDS.AGiftBatch[0].BatchNumber);
-                    giftDetails1.RowStateFilter = DataViewRowState.Deleted;
-
-                    foreach (DataRowView drv in giftDetails1)
+                    foreach (int batchNumber in ListAllGiftBatchesToProcess)
                     {
-                        AGiftDetailRow gDetailRow = (AGiftDetailRow)drv.Row;
-                        cloneDetail.ImportRow(gDetailRow);
-                    }
+                        //Copy across any rows marked as deleted first.
+                        DataView giftDetails1 = new DataView(AInspectDS.AGiftDetail);
+                        giftDetails1.RowFilter = string.Format("{0}={1}",
+                            AGiftDetailTable.GetBatchNumberDBName(),
+                            batchNumber);
+                        giftDetails1.RowStateFilter = DataViewRowState.Deleted;
 
-                    //Import the other rows in ascending order
-                    DataView giftDetails2 = new DataView(AInspectDS.AGiftDetail);
-                    giftDetails2.RowFilter = string.Format("{0}={1}",
-                        AGiftDetailTable.GetBatchNumberDBName(),
-                        AInspectDS.AGiftBatch[0].BatchNumber);
+                        foreach (DataRowView drv in giftDetails1)
+                        {
+                            AGiftDetailRow gDetailRow = (AGiftDetailRow)drv.Row;
+                            cloneDetail.ImportRow(gDetailRow);
+                        }
 
-                    giftDetails2.Sort = String.Format("{0} ASC, {1} ASC, {2} ASC",
-                        AGiftDetailTable.GetBatchNumberDBName(),
-                        AGiftDetailTable.GetGiftTransactionNumberDBName(),
-                        AGiftDetailTable.GetDetailNumberDBName());
+                        //Import the other rows in ascending order
+                        DataView giftDetails2 = new DataView(AInspectDS.AGiftDetail);
+                        giftDetails2.RowFilter = string.Format("{0}={1}",
+                            AGiftDetailTable.GetBatchNumberDBName(),
+                            batchNumber);
 
-                    foreach (DataRowView giftDetailRows in giftDetails2)
-                    {
-                        AGiftDetailRow gDR = (AGiftDetailRow)giftDetailRows.Row;
-                        cloneDetail.ImportRow(gDR);
+                        giftDetails2.Sort = String.Format("{0} ASC, {1} ASC, {2} ASC",
+                            AGiftDetailTable.GetBatchNumberDBName(),
+                            AGiftDetailTable.GetGiftTransactionNumberDBName(),
+                            AGiftDetailTable.GetDetailNumberDBName());
+
+                        foreach (DataRowView giftDetailRows in giftDetails2)
+                        {
+                            AGiftDetailRow gDR = (AGiftDetailRow)giftDetailRows.Row;
+                            cloneDetail.ImportRow(gDR);
+                        }
                     }
 
                     //Clear the table and import the rows from the clone
@@ -1459,6 +1473,28 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                 TVerificationResultCollection.DowngradeScreenVerificationResults(AVerificationResult);
             }
 
+            //Get a list of all batches involved
+            List <Int32>ListAllGiftBatchesToProcess = new List <int>();
+
+            DataView AllBatchesToProcess = new DataView(AInspectDS.ARecurringGiftBatch);
+            AllBatchesToProcess.RowStateFilter = DataViewRowState.OriginalRows;
+
+            foreach (DataRowView drv in AllBatchesToProcess)
+            {
+                ListAllGiftBatchesToProcess.Add((int)(drv[ARecurringGiftBatchTable.ColumnBatchNumberId]));
+            }
+
+            //Get a list of all batches to delete - for multi-delete
+            //List <Int32>ListAllGiftBatchesToDelete = new List <int>();
+
+            //DataView AllBatchesToDelete = new DataView(AInspectDS.ARecurringGiftBatch);
+            //AllBatchesToDelete.RowStateFilter = DataViewRowState.Deleted;
+
+            //foreach (DataRowView drv in AllBatchesToDelete)
+            //{
+            //    ListAllGiftBatchesToDelete.Add((int)(drv[ARecurringGiftBatchTable.ColumnBatchNumberId]));
+            //}
+
             if (AllValidationsOK)
             {
                 int recurrGiftBatchCount = 0;
@@ -1485,34 +1521,37 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                     //The Gift Detail table must be in ascending order
                     ARecurringGiftDetailTable cloneDetail = (ARecurringGiftDetailTable)AInspectDS.ARecurringGiftDetail.Clone();
 
-                    //Copy across any rows marked as deleted first.
-                    DataView giftDetails1 = new DataView(AInspectDS.ARecurringGiftDetail);
-                    giftDetails1.RowFilter = string.Format("{0}={1}",
-                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
-                        AInspectDS.ARecurringGiftBatch[0].BatchNumber);
-                    giftDetails1.RowStateFilter = DataViewRowState.Deleted;
-
-                    foreach (DataRowView drv in giftDetails1)
+                    foreach (int batchNumber in ListAllGiftBatchesToProcess)
                     {
-                        ARecurringGiftDetailRow gDeletedDetailRow = (ARecurringGiftDetailRow)drv.Row;
-                        cloneDetail.ImportRow(gDeletedDetailRow);
-                    }
+                        //Copy across any rows marked as deleted first.
+                        DataView giftDetails1 = new DataView(AInspectDS.ARecurringGiftDetail);
+                        giftDetails1.RowFilter = string.Format("{0}={1}",
+                            ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                            batchNumber);
+                        giftDetails1.RowStateFilter = DataViewRowState.Deleted;
 
-                    //Import the other rows in ascending order
-                    DataView giftDetails2 = new DataView(AInspectDS.ARecurringGiftDetail);
-                    giftDetails2.RowFilter = string.Format("{0}={1}",
-                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
-                        AInspectDS.ARecurringGiftBatch[0].BatchNumber);
+                        foreach (DataRowView drv in giftDetails1)
+                        {
+                            ARecurringGiftDetailRow gDeletedDetailRow = (ARecurringGiftDetailRow)drv.Row;
+                            cloneDetail.ImportRow(gDeletedDetailRow);
+                        }
 
-                    giftDetails2.Sort = String.Format("{0} ASC, {1} ASC, {2} ASC",
-                        ARecurringGiftDetailTable.GetBatchNumberDBName(),
-                        ARecurringGiftDetailTable.GetGiftTransactionNumberDBName(),
-                        ARecurringGiftDetailTable.GetDetailNumberDBName());
+                        //Import the other rows in ascending order
+                        DataView giftDetails2 = new DataView(AInspectDS.ARecurringGiftDetail);
+                        giftDetails2.RowFilter = string.Format("{0}={1}",
+                            ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                            batchNumber);
 
-                    foreach (DataRowView giftDetailRows in giftDetails2)
-                    {
-                        ARecurringGiftDetailRow gDetailRow = (ARecurringGiftDetailRow)giftDetailRows.Row;
-                        cloneDetail.ImportRow(gDetailRow);
+                        giftDetails2.Sort = String.Format("{0} ASC, {1} ASC, {2} ASC",
+                            ARecurringGiftDetailTable.GetBatchNumberDBName(),
+                            ARecurringGiftDetailTable.GetGiftTransactionNumberDBName(),
+                            ARecurringGiftDetailTable.GetDetailNumberDBName());
+
+                        foreach (DataRowView giftDetailRows in giftDetails2)
+                        {
+                            ARecurringGiftDetailRow gDetailRow = (ARecurringGiftDetailRow)giftDetailRows.Row;
+                            cloneDetail.ImportRow(gDetailRow);
+                        }
                     }
 
                     //Clear the table and import the rows from the clone
