@@ -2165,24 +2165,24 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                             MainDS.PPartnerTaxDeductiblePct.Merge(
                                 PPartnerTaxDeductiblePctAccess.LoadViaPPartner(giftDetail.RecipientKey, ATransaction));
                         }
-
-                        //And account code
-                        if (motivationDetailRow != null)
-                        {
-                            giftDetail.AccountCode = motivationDetailRow.AccountCode;
-                            giftDetail.TaxDeductibleAccountCode = motivationDetailRow.TaxDeductibleAccount;
-                        }
-                        else
-                        {
-                            giftDetail.SetAccountCodeNull();
-                            giftDetail.SetTaxDeductibleAccountCodeNull();
-                        }
                     }
                     else
                     {
                         giftDetail.RecipientDescription = "INVALID";
                         giftDetail.SetRecipientFieldNull();
                         giftDetail.SetRecipientKeyMinistryNull();
+                    }
+
+                    //And account code
+                    if (motivationDetailRow != null)
+                    {
+                        giftDetail.AccountCode = motivationDetailRow.AccountCode;
+                        giftDetail.TaxDeductibleAccountCode = motivationDetailRow.TaxDeductibleAccount;
+                    }
+                    else
+                    {
+                        giftDetail.SetAccountCodeNull();
+                        giftDetail.SetTaxDeductibleAccountCodeNull();
                     }
                 }
             }
