@@ -1639,17 +1639,28 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
             transactionForTotals.TransactionDate = giftBatch.GlEffectiveDate;
             transactionForTotals.SystemGenerated = true;
 
-            foreach (GiftBatchTDSAGiftDetailRow giftdetail in AGiftDataset.AGiftDetail.Rows)
+            foreach (ATransactionRow transactionRow in GLDataset.ATransaction.Rows)
             {
-                transactionForTotals.TransactionAmount += giftdetail.GiftTransactionAmount;
-                transactionForTotals.AmountInBaseCurrency += Math.Abs(giftdetail.GiftAmount);
-                transactionForTotals.AmountInIntlCurrency += Math.Abs(giftdetail.GiftAmountIntl);
+                if (transactionRow.DebitCreditIndicator)
+                {
+                    transactionForTotals.TransactionAmount -= transactionRow.TransactionAmount;
+                    transactionForTotals.AmountInBaseCurrency -= transactionRow.AmountInBaseCurrency;
+                    transactionForTotals.AmountInIntlCurrency -= transactionRow.AmountInIntlCurrency;
+                }
+                else
+                {
+                    transactionForTotals.TransactionAmount += transactionRow.TransactionAmount;
+                    transactionForTotals.AmountInBaseCurrency += transactionRow.AmountInBaseCurrency;
+                    transactionForTotals.AmountInIntlCurrency += transactionRow.AmountInIntlCurrency;
+                }
             }
 
-            // determine whether gift is debit or credit
-            transactionForTotals.DebitCreditIndicator = transactionForTotals.TransactionAmount >= 0;
+            // determine whether transaction is debit or credit
+            transactionForTotals.DebitCreditIndicator = transactionForTotals.TransactionAmount > 0;
 
             transactionForTotals.TransactionAmount = Math.Abs(transactionForTotals.TransactionAmount);
+            transactionForTotals.AmountInBaseCurrency = Math.Abs(transactionForTotals.AmountInBaseCurrency);
+            transactionForTotals.AmountInIntlCurrency = Math.Abs(transactionForTotals.AmountInIntlCurrency);
 
             // TODO: account and costcentre based on linked costcentre, current commitment, and Motivation detail
             // if motivation cost centre is a summary cost centre, make sure the transaction costcentre is reporting to that summary cost centre
@@ -1660,7 +1671,11 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
             transactionForTotals.Narrative = "Deposit from receipts - Gift Batch " + giftBatch.BatchNumber.ToString();
             transactionForTotals.Reference = "GB" + giftBatch.BatchNumber.ToString();
 
-            GLDataset.ATransaction.Rows.Add(transactionForTotals);
+            // it is possible that the total transaction amount is 0 in which case we do not need this transaction
+            if (transactionForTotals.TransactionAmount != 0)
+            {
+                GLDataset.ATransaction.Rows.Add(transactionForTotals);
+            }
 
             GLDataset.ATransaction.DefaultView.RowFilter = string.Empty;
 
@@ -1744,6 +1759,11 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
                     transaction.DebitCreditIndicator = !transaction.DebitCreditIndicator;
                 }
+            }
+
+            if (transaction.TransactionAmount == 0)
+            {
+                transaction.Delete();
             }
         }
 
@@ -2850,13 +2870,25 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
 
                             ABatchRow batch = GLDataset.ABatch[0];
 
-                            // save the batch
-                            if (TGLTransactionWebConnector.SaveGLBatchTDS(ref GLDataset,
+                            // it is possible that gl transactions are not actually needed for a gift posting.
+                            // E.g. it is only a donor name adjustment -- there is no change in the general ledger account.
+                            bool GLBatchNotRequired = GLDataset.ATransaction.Count == 0;
+
+                            if (GLBatchNotRequired)
+                            {
+                                TGLPosting.DeleteGLBatch(ALedgerNumber, batch.BatchNumber, out SingleVerificationResultCollection);
+                                VerificationResult.AddCollection(SingleVerificationResultCollection);
+                            }
+
+                            // save the batch (or delete if it is not actually needed)
+                            if (GLBatchNotRequired || TGLTransactionWebConnector.SaveGLBatchTDS(ref GLDataset,
                                     out SingleVerificationResultCollection) == TSubmitChangesResult.scrOK)
                             {
-                                VerificationResult.AddCollection(SingleVerificationResultCollection);
-
-                                GLBatchNumbers.Add(batch.BatchNumber);
+                                if (!GLBatchNotRequired)
+                                {
+                                    VerificationResult.AddCollection(SingleVerificationResultCollection);
+                                    GLBatchNumbers.Add(batch.BatchNumber);
+                                }
 
                                 //
                                 //                     Assign ReceiptNumbers to Gifts

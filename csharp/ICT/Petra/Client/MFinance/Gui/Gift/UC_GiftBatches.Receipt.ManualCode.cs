@@ -109,6 +109,19 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             String HtmlDoc = "";
 
+            OpenFileDialog DialogOpen = new OpenFileDialog();
+
+            DialogOpen.Filter = Catalog.GetString("HTML file (*.html)|*.html;*.htm");
+            DialogOpen.RestoreDirectory = true;
+            DialogOpen.Title = Catalog.GetString("Select the template for the gift receipt");
+
+            if (DialogOpen.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            string HTMLTemplateFilename = DialogOpen.FileName;
+
             foreach (Int64 DonorKey in GiftsPerDonor.Keys)
             {
                 String DonorShortName;
@@ -121,7 +134,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                     DonorShortName,
                     DonorKey,
                     DonorClass,
-                    GiftsPerDonor[DonorKey]
+                    GiftsPerDonor[DonorKey],
+                    HTMLTemplateFilename
                     );
 
                 TFormLettersTools.AttachNextPage(ref HtmlDoc, HtmlPage);

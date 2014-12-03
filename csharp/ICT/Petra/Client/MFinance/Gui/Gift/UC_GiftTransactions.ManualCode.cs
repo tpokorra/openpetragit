@@ -180,6 +180,9 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                 SetupTaxDeductibilityControls();
             }
 
+            // set tooltip
+            grdDetails.SetHeaderTooltip(4, Catalog.GetString("Confidential"));
+
             chkDetailChargeFlag.Enabled = UserInfo.GUserInfo.IsInModule(SharedConstants.PETRAMODULE_FINANCE3);
         }
 

@@ -150,11 +150,24 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                 return;
             }
 
+            OpenFileDialog DialogOpen = new OpenFileDialog();
+
+            DialogOpen.Filter = Catalog.GetString("HTML file (*.html)|*.html;*.htm");
+            DialogOpen.RestoreDirectory = true;
+            DialogOpen.Title = Catalog.GetString("Select the template for the gift receipt");
+
+            if (DialogOpen.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            string HTMLTemplateFilename = DialogOpen.FileName;
+
             this.Cursor = Cursors.WaitCursor;
 
             //
             // The HTML string returned here may be several complete HTML documents, with <body>...</body> for each page.
-            string HtmlDoc = TRemote.MFinance.Gift.WebConnectors.PrintReceipts(FLedgerNumber, SelectedRecords);
+            string HtmlDoc = TRemote.MFinance.Gift.WebConnectors.PrintReceipts(FLedgerNumber, SelectedRecords, HTMLTemplateFilename);
 
             if (HtmlDoc == "")
             {
