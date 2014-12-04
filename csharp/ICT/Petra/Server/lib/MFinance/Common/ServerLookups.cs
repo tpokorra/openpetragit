@@ -60,8 +60,10 @@ namespace Ict.Petra.Server.MFinance.Common.ServerLookups.WebConnectors
             DateTime StartDateCurrentPeriod = new DateTime();
             DateTime EndDateLastForwardingPeriod = new DateTime();
             TDBTransaction Transaction = null;
-             
-            DBAccess.GDBAccessObj.GetNewOrExistingAutoReadTransaction(IsolationLevel.ReadCommitted, TEnforceIsolationLevel.eilMinimum, ref Transaction,
+
+            DBAccess.GDBAccessObj.GetNewOrExistingAutoReadTransaction(IsolationLevel.ReadCommitted,
+                TEnforceIsolationLevel.eilMinimum,
+                ref Transaction,
                 delegate
                 {
                     ALedgerTable LedgerTable = ALedgerAccess.LoadByPrimaryKey(ALedgerNumber, Transaction);

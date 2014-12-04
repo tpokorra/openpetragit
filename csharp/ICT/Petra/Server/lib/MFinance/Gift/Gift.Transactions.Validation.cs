@@ -74,7 +74,9 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
             {
                 if (ASubmitTable.Rows[Counter].RowState != DataRowState.Deleted)
                 {
-                    TPartnerServerLookups.GetPartnerShortName(((GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter]).RecipientKey, out RecipientDescription, out RecipientPartnerClass);
+                    TPartnerServerLookups.GetPartnerShortName(((GiftBatchTDSAGiftDetailRow)ASubmitTable.Rows[Counter]).RecipientKey,
+                        out RecipientDescription,
+                        out RecipientPartnerClass);
 
                     TSharedFinanceValidation_Gift.ValidateGiftDetailManual("TTransactionWebConnector" +
                         " (Error in Row #" + Counter.ToString() + ")",  // No translation of message text since the server's messages should be all in English

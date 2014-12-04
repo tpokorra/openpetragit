@@ -243,7 +243,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                 switch (function)
                 {
                     case "ReverseGiftBatch":
-                        MessageBox.Show(Catalog.GetString("Reversed gift batch has been successfully created with Batch Number " + AdjustmentBatchNumber + "."),
+                        MessageBox.Show(Catalog.GetString("Reversed gift batch has been successfully created with Batch Number " +
+                            AdjustmentBatchNumber + "."),
                         Catalog.GetString("Reverse Gift Batch"));
                         break;
 
@@ -258,7 +259,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                         break;
 
                     case "AdjustGift":
-                        MessageBox.Show(Catalog.GetString("Adjustment transactions have been successfully added to Batch " + AdjustmentBatchNumber + "."),
+                        MessageBox.Show(Catalog.GetString("Adjustment transactions have been successfully added to Batch " + AdjustmentBatchNumber +
+                            "."),
                         Catalog.GetString("Adjust Gift"));
                         break;
                 }

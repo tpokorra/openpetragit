@@ -360,7 +360,9 @@ namespace Ict.Petra.Server.MFinance.Common
             {
                 TDBTransaction Transaction = null;
 
-                DBAccess.GDBAccessObj.GetNewOrExistingAutoReadTransaction(IsolationLevel.ReadCommitted, TEnforceIsolationLevel.eilMinimum, ref Transaction,
+                DBAccess.GDBAccessObj.GetNewOrExistingAutoReadTransaction(IsolationLevel.ReadCommitted,
+                    TEnforceIsolationLevel.eilMinimum,
+                    ref Transaction,
                     delegate
                     {
                         // use the first bank account
@@ -375,19 +377,19 @@ namespace Ict.Petra.Server.MFinance.Common
                         }
                         else
                         {
-                            string SQLQuery = "SELECT a_gift_batch.a_bank_account_code_c "
-                                                + "FROM a_gift_batch "
-                                                + "WHERE a_gift_batch.a_ledger_number_i = " + ALedgerNumber
-                                                + " AND a_gift_batch.a_batch_number_i = ("
-                                                    + "SELECT max(a_gift_batch.a_batch_number_i) "
-                                                    + "FROM a_gift_batch "
-                                                    + "WHERE a_gift_batch.a_ledger_number_i = " + ALedgerNumber
-                                                    + " AND a_gift_batch.a_gift_type_c = '" + MFinanceConstants.GIFT_TYPE_GIFT + "')";
+                            string SQLQuery = "SELECT a_gift_batch.a_bank_account_code_c " +
+                                              "FROM a_gift_batch " +
+                                              "WHERE a_gift_batch.a_ledger_number_i = " + ALedgerNumber +
+                                              " AND a_gift_batch.a_batch_number_i = (" +
+                                              "SELECT max(a_gift_batch.a_batch_number_i) " +
+                                              "FROM a_gift_batch " +
+                                              "WHERE a_gift_batch.a_ledger_number_i = " + ALedgerNumber +
+                                              " AND a_gift_batch.a_gift_type_c = '" + MFinanceConstants.GIFT_TYPE_GIFT + "')";
 
                             DataTable LatestAccountCode = DBAccess.GDBAccessObj.SelectDT(SQLQuery, "LatestAccountCode", Transaction);
 
                             // use the Bank Account of the previous Gift Batch
-                            if (LatestAccountCode != null && LatestAccountCode.Rows.Count > 0)
+                            if ((LatestAccountCode != null) && (LatestAccountCode.Rows.Count > 0))
                             {
                                 BankAccountCode = LatestAccountCode.Rows[0]["a_bank_account_code_c"].ToString();
                             }
@@ -403,7 +405,7 @@ namespace Ict.Petra.Server.MFinance.Common
 
                                 TLedgerInfo ledgerInfo = new TLedgerInfo(ALedgerNumber);
                                 TGetAccountHierarchyDetailInfo accountHierarchyTools = new TGetAccountHierarchyDetailInfo(ledgerInfo);
-                                List<string> children = accountHierarchyTools.GetChildren(MFinanceConstants.CASH_ACCT);
+                                List <string>children = accountHierarchyTools.GetChildren(MFinanceConstants.CASH_ACCT);
 
                                 foreach (DataRow account in sortedDT.Rows)
                                 {

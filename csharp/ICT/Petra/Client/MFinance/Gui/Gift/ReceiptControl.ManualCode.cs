@@ -157,7 +157,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             {
                 DialogOpen.InitialDirectory = TAppSettingsManager.GetValue("Formletters.Path");
             }
-            
+
             DialogOpen.Filter = Catalog.GetString("HTML file (*.html)|*.html;*.htm");
             DialogOpen.RestoreDirectory = true;
             DialogOpen.Title = Catalog.GetString("Select the template for the gift receipt");

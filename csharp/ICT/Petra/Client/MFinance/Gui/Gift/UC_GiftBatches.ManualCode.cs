@@ -417,7 +417,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
         /// <summary>
         /// Gift Type radiobutton selection changed
         /// </summary>
-         private void GiftTypeChanged(Object sender, EventArgs e)
+        private void GiftTypeChanged(Object sender, EventArgs e)
         {
             bool BankAccountOnly = true;
 
@@ -429,7 +429,10 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             if (BankAccountOnly != FBankAccountOnly)
             {
-                FAccountAndCostCentreLogicObject.SetupAccountCombo(FActiveOnly, BankAccountOnly, ref lblDetailBankAccountCode, FPreviouslySelectedDetailRow);
+                FAccountAndCostCentreLogicObject.SetupAccountCombo(FActiveOnly,
+                    BankAccountOnly,
+                    ref lblDetailBankAccountCode,
+                    FPreviouslySelectedDetailRow);
                 FBankAccountOnly = BankAccountOnly;
             }
         }

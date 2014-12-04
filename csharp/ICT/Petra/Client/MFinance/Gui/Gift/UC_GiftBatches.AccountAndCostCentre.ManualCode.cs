@@ -222,10 +222,20 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
         /// <param name="ABankAccountOnly"></param>
         /// <param name="ALblBankAccoountCode"></param>
         /// <param name="ARow"></param>
-        public void SetupAccountCombo(bool AActiveOnly, bool ABankAccountOnly, ref System.Windows.Forms.Label ALblBankAccoountCode, AGiftBatchRow ARow)
+        public void SetupAccountCombo(bool AActiveOnly,
+            bool ABankAccountOnly,
+            ref System.Windows.Forms.Label ALblBankAccoountCode,
+            AGiftBatchRow ARow)
         {
             FCmbBankAccountCode.Clear();
-            TFinanceControls.InitialiseAccountList(ref FCmbBankAccountCode, FLedgerNumber, true, false, AActiveOnly, ABankAccountOnly, true, FAccountTable);
+            TFinanceControls.InitialiseAccountList(ref FCmbBankAccountCode,
+                FLedgerNumber,
+                true,
+                false,
+                AActiveOnly,
+                ABankAccountOnly,
+                true,
+                FAccountTable);
 
             if (ABankAccountOnly)
             {

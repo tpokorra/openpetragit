@@ -1461,7 +1461,7 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             //Update all transactions
             foreach (AGiftRow giftRow in FMainDS.AGift.Rows)
             {
-                if (giftRow.RowState != DataRowState.Deleted
+                if ((giftRow.RowState != DataRowState.Deleted)
                     && giftRow.BatchNumber.Equals(BatchNumber) && giftRow.LedgerNumber.Equals(LedgerNumber)
                     && (giftRow.MethodOfPaymentCode != FBatchMethodOfPayment))
                 {
@@ -1643,7 +1643,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
         private void ValidateDataDetailsManual(GiftBatchTDSAGiftDetailRow ARow)
         {
-            if ((ARow == null) || ARow.RowState == DataRowState.Deleted || (GetCurrentBatchRow() == null) || (GetCurrentBatchRow().BatchStatus != MFinanceConstants.BATCH_UNPOSTED)
+            if ((ARow == null) || (ARow.RowState == DataRowState.Deleted) || (GetCurrentBatchRow() == null)
+                || (GetCurrentBatchRow().BatchStatus != MFinanceConstants.BATCH_UNPOSTED)
                 || (GetCurrentBatchRow().BatchNumber != ARow.BatchNumber))
             {
                 return;

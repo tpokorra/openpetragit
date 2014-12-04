@@ -293,7 +293,14 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             if (BankAccountOnly != FBankAccountOnly)
             {
                 cmbDetailBankAccountCode.Clear();
-                TFinanceControls.InitialiseAccountList(ref cmbDetailBankAccountCode, FLedgerNumber, true, false, FActiveOnly, BankAccountOnly, true, FAccountTable);
+                TFinanceControls.InitialiseAccountList(ref cmbDetailBankAccountCode,
+                    FLedgerNumber,
+                    true,
+                    false,
+                    FActiveOnly,
+                    BankAccountOnly,
+                    true,
+                    FAccountTable);
 
                 if (BankAccountOnly)
                 {

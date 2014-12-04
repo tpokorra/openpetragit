@@ -1067,7 +1067,7 @@ namespace Ict.Petra.Server.MFinance.GL.WebConnectors
                                     VerificationResult.Add(new TVerificationResult(
                                             Catalog.GetString("Cannot save transaction"),
                                             String.Format(Catalog.GetString("Invalid amount in batch {0}, journal {1}, transaction {2}. " +
-                                                "Either the debit amount or the credit amount needs to be greater than 0."),
+                                                    "Either the debit amount or the credit amount needs to be greater than 0."),
                                                 transaction.BatchNumber,
                                                 transaction.JournalNumber,
                                                 transaction.TransactionNumber),

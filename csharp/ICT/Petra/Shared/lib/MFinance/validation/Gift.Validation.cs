@@ -585,9 +585,10 @@ namespace Ict.Petra.Shared.MFinance.Validation
                 ARow.DetailNumber);
 
             if (!ARow.IsMotivationDetailCodeNull()
-                && ARow.MotivationGroupCode == MFinanceConstants.MOTIVATION_GROUP_GIFT && ARecipientPartnerClass != null
-                && (ARow.MotivationDetailCode == MFinanceConstants.GROUP_DETAIL_FIELD || ARow.MotivationDetailCode == MFinanceConstants.GROUP_DETAIL_KEY_MIN)
-                && ARecipientPartnerClass == TPartnerClass.FAMILY)
+                && (ARow.MotivationGroupCode == MFinanceConstants.MOTIVATION_GROUP_GIFT) && (ARecipientPartnerClass != null)
+                && ((ARow.MotivationDetailCode == MFinanceConstants.GROUP_DETAIL_FIELD)
+                    || (ARow.MotivationDetailCode == MFinanceConstants.GROUP_DETAIL_KEY_MIN))
+                && (ARecipientPartnerClass == TPartnerClass.FAMILY))
             {
                 if (AValidationControlsDict.TryGetValue(ValidationColumn, out ValidationControlsData))
                 {
@@ -596,9 +597,9 @@ namespace Ict.Petra.Shared.MFinance.Validation
                             ARow.MotivationDetailCode),
                         TResultSeverity.Resv_Critical);
 
-                    if (AVerificationResultCollection.Auto_Add_Or_AddOrRemove(AContext, 
-                        new TScreenVerificationResult(VerificationResult, ValidationColumn, ValidationControlsData.ValidationControl), 
-                        ValidationColumn, true))
+                    if (AVerificationResultCollection.Auto_Add_Or_AddOrRemove(AContext,
+                            new TScreenVerificationResult(VerificationResult, ValidationColumn, ValidationControlsData.ValidationControl),
+                            ValidationColumn, true))
                     {
                         VerifResultCollAddedCount++;
                     }

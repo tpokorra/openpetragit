@@ -641,7 +641,7 @@ namespace Ict.Petra.Client.MPartner.Gui
             }
             else if ((string.IsNullOrEmpty(cmbBankCode.GetSelectedString()) && !string.IsNullOrEmpty(FCurrentBankRow.BranchCode))
                      || ((cmbBankCode.GetSelectedString() == SharedConstants.INACTIVE_VALUE_WITH_QUALIFIERS + " ")
-                         && (FCurrentBankRow == null || FCurrentBankRow.BranchCode != SharedConstants.INACTIVE_VALUE_WITH_QUALIFIERS + " ")))
+                         && ((FCurrentBankRow == null) || (FCurrentBankRow.BranchCode != SharedConstants.INACTIVE_VALUE_WITH_QUALIFIERS + " "))))
             {
                 // if "<INACTIVE>" has been selected change it to blank
                 cmbBankCode.SelectedIndex = -1;

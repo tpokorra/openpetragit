@@ -2968,8 +2968,8 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
                             }
 
                             // save the batch (or delete if it is not actually needed)
-                            if (GLBatchNotRequired || TGLTransactionWebConnector.SaveGLBatchTDS(ref GLDataset,
-                                    out SingleVerificationResultCollection) == TSubmitChangesResult.scrOK)
+                            if (GLBatchNotRequired || (TGLTransactionWebConnector.SaveGLBatchTDS(ref GLDataset,
+                                                           out SingleVerificationResultCollection) == TSubmitChangesResult.scrOK))
                             {
                                 if (!GLBatchNotRequired)
                                 {
