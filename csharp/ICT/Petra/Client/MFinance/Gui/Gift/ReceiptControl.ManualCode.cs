@@ -23,6 +23,7 @@
 //
 using System;
 using System.Data;
+using System.IO;
 using System.Windows.Forms;
 using DevAge.ComponentModel;
 
@@ -152,6 +153,11 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
 
             OpenFileDialog DialogOpen = new OpenFileDialog();
 
+            if (Directory.Exists(TAppSettingsManager.GetValue("Formletters.Path")))
+            {
+                DialogOpen.InitialDirectory = TAppSettingsManager.GetValue("Formletters.Path");
+            }
+            
             DialogOpen.Filter = Catalog.GetString("HTML file (*.html)|*.html;*.htm");
             DialogOpen.RestoreDirectory = true;
             DialogOpen.Title = Catalog.GetString("Select the template for the gift receipt");

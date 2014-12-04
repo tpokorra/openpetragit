@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Windows.Forms;
 
 using Ict.Common;
@@ -110,6 +111,11 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
             String HtmlDoc = "";
 
             OpenFileDialog DialogOpen = new OpenFileDialog();
+
+            if (Directory.Exists(TAppSettingsManager.GetValue("Formletters.Path")))
+            {
+                DialogOpen.InitialDirectory = TAppSettingsManager.GetValue("Formletters.Path");
+            }
 
             DialogOpen.Filter = Catalog.GetString("HTML file (*.html)|*.html;*.htm");
             DialogOpen.RestoreDirectory = true;

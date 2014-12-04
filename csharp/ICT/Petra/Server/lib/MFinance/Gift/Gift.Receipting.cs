@@ -671,9 +671,6 @@ namespace Ict.Petra.Server.MFinance.Gift.WebConnectors
             FormValues["TxdTotal"].Add(StringHelper.FormatUsingCurrencyCode(TxdTotal, AGiftCurrency));
             FormValues["NonTxdTotal"].Add(StringHelper.FormatUsingCurrencyCode(NonTxdTotal, AGiftCurrency));
 
-            //string PageHtml = TFormLettersTools.PrintSimpleHTMLLetter(
-                //TAppSettingsManager.GetValue("Formletters.Path") + "\\GiftReceipt.html", FormValues);
-
             return TFormLettersTools.PrintSimpleHTMLLetter(AHTMLTemplateFilename, FormValues);
         }
 
