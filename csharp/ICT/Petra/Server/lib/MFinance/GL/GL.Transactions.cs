@@ -1060,8 +1060,9 @@ namespace Ict.Petra.Server.MFinance.GL.WebConnectors
                                             TResultSeverity.Resv_Critical));
                                 }
 
-                                // Transaction amount must be greater than 0.
-                                if (transaction.TransactionAmount <= 0)
+                                // AmountInBaseCurrency must be greater than 0.
+                                // Transaction amount can be 0 if ForexGain.
+                                if (transaction.AmountInBaseCurrency <= 0)
                                 {
                                     VerificationResult.Add(new TVerificationResult(
                                             Catalog.GetString("Cannot save transaction"),
