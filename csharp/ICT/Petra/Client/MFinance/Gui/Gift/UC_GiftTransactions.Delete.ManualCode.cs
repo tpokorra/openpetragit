@@ -360,7 +360,8 @@ namespace Ict.Petra.Client.MFinance.Gui.Gift
                         Environment.NewLine),
                     Catalog.GetString("Confirm Delete All"),
                     MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes)
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.Yes)
             {
                 try
                 {

@@ -1149,7 +1149,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                          FJournalNumber),
                      Catalog.GetString("Confirm Deletion"),
                      MessageBoxButtons.YesNo,
-                     MessageBoxIcon.Question) == System.Windows.Forms.DialogResult.Yes))
+                     MessageBoxIcon.Question,
+                     MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.Yes))
             {
                 try
                 {
