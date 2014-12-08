@@ -46,11 +46,11 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
         /// It slices and dices the exchange rate data in two ways:
         ///   1. It populates a table with all the rows from the daily exchange rate table itself, plus the data from the Journal and Gift
         ///      tables as well that are not referenced by any of the daily rate table rows.  Additionally this table contains two columns
-        ///      that show how many times the specified rate has been used.  This table has one row for every defined rate.  The rate may be used 
+        ///      that show how many times the specified rate has been used.  This table has one row for every defined rate.  The rate may be used
         ///      in more than one place.  The primary key for this table (like the Daily Exchange Rate table itself) is From/To/Date/Time
         ///   2. It populates another table with rate and date information in the same Daily Exchange Rate table format but this table is extended
         ///      such that the row specifies the ledger/batch/journal details where this rate can be found.  There is one row per place where a rate
-        ///      is used, so the same from/to/date/time may occur more than once, each with a different ledger/batch/journal.  Typically this table has 
+        ///      is used, so the same from/to/date/time may occur more than once, each with a different ledger/batch/journal.  Typically this table has
         ///      fewer rows than (1) because it does not contain any unused rows and it does not contain any inverse currency rows.  The primary key
         ///      is From/To/Date/Time/Ledger/Batch/Journal.
         /// The third table is the Corporate Exchange Rate table, which contains standard content
@@ -69,6 +69,9 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                 ref Transaction,
                 delegate
                 {
+                    // Load the table so we can read bits of it into our dataset
+                    ADailyExchangeRateTable exchangeRates = ADailyExchangeRateAccess.LoadAll(Transaction);
+
                     // Populate the ExchangeRateTDSADailyExchangeRate table
                     //-- This is the complete query for the DAILYEXCHANGERATE TABLE
                     //-- It returns all the rows from the DailyExchangeRate table
@@ -189,11 +192,13 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                     strSQL += "  j.a_date_effective_d AS a_date_effective_from_d, ";
                     strSQL += "  j.a_exchange_rate_time_i AS a_time_effective_from_i, ";
                     strSQL += String.Format(
-                        "  j.a_ledger_number_i AS {0}, j.a_batch_number_i AS {1}, j.a_journal_number_i AS {2}, b.a_batch_status_c AS {3}, 'J' AS {4} ",
+                        "  j.a_ledger_number_i AS {0}, j.a_batch_number_i AS {1}, j.a_journal_number_i AS {2}, b.a_batch_status_c AS {3}, b.a_batch_year_i AS {4}, b.a_batch_period_i AS {5}, 'J' AS {6} ",
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetLedgerNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetJournalNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchStatusDBName(),
+                        ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchYearDBName(),
+                        ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchPeriodDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetTableSourceDBName());
                     strSQL += "FROM a_journal j ";
                     strSQL += "JOIN a_batch b ";
@@ -213,11 +218,13 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                     strSQL += "  gb.a_gl_effective_date_d AS a_date_effective_from_d, ";
                     strSQL += "  0 AS a_time_effective_from_i, ";
                     strSQL += String.Format(
-                        "  gb.a_ledger_number_i AS {0}, gb.a_batch_number_i AS {1}, 0 AS {2}, gb.a_batch_status_c AS {3}, 'GB' AS {4} ",
+                        "  gb.a_ledger_number_i AS {0}, gb.a_batch_number_i AS {1}, 0 AS {2}, gb.a_batch_status_c AS {3}, gb.a_batch_year_i AS {4}, gb.a_batch_period_i AS {5}, 'GB' AS {6} ",
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetLedgerNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetJournalNumberDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchStatusDBName(),
+                        ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchYearDBName(),
+                        ExchangeRateTDSADailyExchangeRateUsageTable.GetBatchPeriodDBName(),
                         ExchangeRateTDSADailyExchangeRateUsageTable.GetTableSourceDBName());
                     strSQL += "FROM a_gift_batch gb ";
                     strSQL += "JOIN a_ledger ldg ";
@@ -263,6 +270,26 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                         ExchangeRateTDSADailyExchangeRateRow drThis = (ExchangeRateTDSADailyExchangeRateRow)dv[i].Row;
                         ExchangeRateTDSADailyExchangeRateRow drNext = (ExchangeRateTDSADailyExchangeRateRow)dv[i + 1].Row;
 
+                        if ((drThis.JournalUsage == 0) && (drThis.GiftBatchUsage == 0))
+                        {
+                            // This will be a row that the client can edit/delete, so we need to add the modification info
+                            ADailyExchangeRateRow foundRow = (ADailyExchangeRateRow)exchangeRates.Rows.Find(new object[] {
+                                    drThis.FromCurrencyCode, drThis.ToCurrencyCode, drThis.DateEffectiveFrom, drThis.TimeEffectiveFrom
+                                });
+
+                            if (foundRow != null)
+                            {
+                                // it should always be non-null
+                                drThis.BeginEdit();
+                                drThis.ModificationId = foundRow.ModificationId;
+                                drThis.DateModified = foundRow.DateModified;
+                                drThis.ModifiedBy = foundRow.ModifiedBy;
+                                drThis.DateCreated = foundRow.DateCreated;
+                                drThis.CreatedBy = foundRow.CreatedBy;
+                                drThis.EndEdit();
+                            }
+                        }
+
                         if (!drThis.FromCurrencyCode.Equals(drNext.FromCurrencyCode)
                             || !drThis.ToCurrencyCode.Equals(drNext.ToCurrencyCode)
                             || !drThis.DateEffectiveFrom.Equals(drNext.DateEffectiveFrom)
@@ -272,25 +299,16 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                             continue;
                         }
 
-                        // So now we know that the two rows have the same potential primary key...
-                        // We know from our sort order that the first row of a group will be the 'unused' row, if it exists
-                        if ((drThis.JournalUsage == 0) && (drThis.GiftBatchUsage == 0))
-                        {
-                            // The current row is never used but the following row must be (from sort order)
-                            // So we can delete this row from out dataset table
-                            drThis.Delete();
-                            continue;
-                        }
-
                         // We have got two (or more) rows with the same potential primary key and different rates.
                         // We need to work out how many rows ahead also have the same time and adjust them all
+                        bool moveForwards = (drThis.TimeEffectiveFrom < 43200);
                         int timeOffset = 60;        // 1 minute
 
                         // Start by adjusting our 'next' row we are already working with
                         drNext.BeginEdit();
                         int prevTimeEffectiveFrom = drNext.TimeEffectiveFrom;
-                        drNext.TimeEffectiveFrom = prevTimeEffectiveFrom + timeOffset;
-                        timeOffset += 60;
+                        drNext.TimeEffectiveFrom = (moveForwards) ? prevTimeEffectiveFrom + timeOffset : prevTimeEffectiveFrom - timeOffset;
+                        timeOffset = (moveForwards) ? timeOffset + 60 : timeOffset - 60;
                         drNext.EndEdit();
                         i++;            // we can increment our main loop counter now that we have dealt with our 'next' row.
 
@@ -316,8 +334,8 @@ namespace Ict.Petra.Server.MFinance.Common.WebConnectors
                             // Do exactly the same to this row as we did to the 'next' row above
                             drLookAhead.BeginEdit();
                             prevTimeEffectiveFrom = drLookAhead.TimeEffectiveFrom;
-                            drLookAhead.TimeEffectiveFrom = prevTimeEffectiveFrom + timeOffset;
-                            timeOffset += 60;
+                            drLookAhead.TimeEffectiveFrom = (moveForwards) ? prevTimeEffectiveFrom + timeOffset : prevTimeEffectiveFrom - timeOffset;
+                            timeOffset = (moveForwards) ? timeOffset + 60 : timeOffset - 60;
                             drLookAhead.EndEdit();
                             i++;
 
