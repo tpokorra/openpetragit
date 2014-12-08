@@ -109,9 +109,16 @@ namespace {#NAMESPACE}
 {#ENDIFN DATASETTYPE}      
       {#INITUSERCONTROLS}
 
+{#IFDEF DATASETTYPE}
+      // Since FMainDS is a DataSet the data must be loaded inside the call to InitializeManualCode.
+      // Do not forget to implement this method and merge the data from the server into the DataSet using the relevant server call.
+
+{#ENDIF DATASETTYPE}
+{#IFNDEF DATASETTYPE}
       Ict.Common.Data.TTypedDataTable TypedTable;
       TRemote.MCommon.DataReader.WebConnectors.GetData({#DETAILTABLE}Table.GetTableDBName(), ASearchCriteria, out TypedTable);
       FMainDS.{#DETAILTABLE}.Merge(TypedTable);
+{#ENDIFN DATASETTYPE}      
       FPetraUtilsObject.ActionEnablingEvent += ActionEnabledEvent;
       {#INITMANUALCODE}
 {#IFDEF SAVEDETAILS}

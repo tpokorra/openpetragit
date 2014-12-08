@@ -172,7 +172,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         [Test]
         public void LoadModalEmptyTable()
         {
-            // Initialse data - create an empty table and our test ledger
+            // Initialise data - create an empty table and our test ledger
             FMainDS.LoadAll();
             FMainDS.DeleteAllRows();
             FMainDS.SaveChanges();
@@ -233,8 +233,6 @@ namespace Tests.MFinance.Client.ExchangeRates
             Button btnNew = btnNewTester.Properties;
             Button btnClose = btnCloseTester.Properties;
             Button btnDelete = (new ButtonTester("btnDelete", FModalFormName)).Properties;
-            Button btnEditDelete = (new ButtonTester("btnEnableEdit", FModalFormName)).Properties;
-            Label lblEditDelete = (new LabelTester("lblEnableEditDelete", FModalFormName)).Properties;
             TSgrdDataGrid grdDetails = (TSgrdDataGrid)((new TSgrdDataGridPagedTester("grdDetails", FModalFormName)).Properties);
             Panel pnlDetails = (new PanelTester("pnlDetails", FModalFormName)).Properties;
             TCmbAutoPopulated cmbFromCurrency = (new TCmbAutoPopulatedTester("cmbDetailFromCurrencyCode", FModalFormName)).Properties;
@@ -246,9 +244,7 @@ namespace Tests.MFinance.Client.ExchangeRates
             try
             {
                 Assert.IsFalse(btnClose.Enabled);
-                Assert.IsFalse(btnDelete.Enabled);
-                Assert.IsTrue(btnEditDelete.Visible);
-                Assert.IsFalse(lblEditDelete.Visible);
+                Assert.IsTrue(btnDelete.Enabled);
                 Assert.IsFalse(dtpDateEffective.Date.HasValue);
                 Assert.IsFalse(pnlDetails.Enabled);
                 Assert.AreEqual(1, grdDetails.Rows.Count);
@@ -264,8 +260,6 @@ namespace Tests.MFinance.Client.ExchangeRates
                 Assert.IsFalse(cmbToCurrency.Enabled);
                 Assert.IsTrue(btnClose.Enabled);
                 Assert.IsTrue(btnDelete.Enabled);
-                Assert.IsTrue(btnEditDelete.Visible);
-                Assert.IsFalse(lblEditDelete.Visible);
                 Assert.IsTrue(pnlDetails.Enabled);
                 Assert.AreEqual(2, grdDetails.Rows.Count);
 
@@ -343,8 +337,6 @@ namespace Tests.MFinance.Client.ExchangeRates
 
             Button btnClose = btnCloseTester.Properties;
             Button btnDelete = (new ButtonTester("btnDelete", FModalFormName)).Properties;
-            Button btnEditDelete = (new ButtonTester("btnEnableEdit", FModalFormName)).Properties;
-            Label lblEditDelete = (new LabelTester("lblEnableEditDelete", FModalFormName)).Properties;
             TSgrdDataGrid grdDetails = (TSgrdDataGrid)((new TSgrdDataGridPagedTester("grdDetails", FModalFormName)).Properties);
             Panel pnlDetails = (new PanelTester("pnlDetails", FModalFormName)).Properties;
             TCmbAutoPopulated cmbFromCurrency = (new TCmbAutoPopulatedTester("cmbDetailFromCurrencyCode", FModalFormName)).Properties;
@@ -364,9 +356,7 @@ namespace Tests.MFinance.Client.ExchangeRates
                 Assert.IsTrue(btnClose.Enabled);
                 Assert.IsTrue(btnClose.Visible);
                 Assert.IsTrue(btnCancelTester.Properties.Visible);
-                Assert.IsFalse(btnDelete.Enabled);
-                Assert.IsTrue(btnEditDelete.Visible);
-                Assert.IsFalse(lblEditDelete.Visible);
+                Assert.IsTrue(btnDelete.Enabled);
                 Assert.IsTrue(pnlDetails.Enabled);
                 Assert.AreEqual(3, grdDetails.Rows.Count);
 
@@ -497,7 +487,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test for usage of a specific rate in Journal and Gift Batch
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void ExchangeRateUsage1()
         {
             FMainDS.LoadAll();
@@ -630,7 +620,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test for usage of a specific rate in Journal and Gift Batch
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void ExchangeRateUsage2()
         {
             FMainDS.LoadAll();
@@ -755,7 +745,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test for usage of a specific rate in Journal and Gift Batch
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void ExchangeRateUsage3()
         {
             FMainDS.LoadAll();
@@ -880,7 +870,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test for usage of a specific rate in Journal and Gift Batch
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void ExchangeRateUsage4()
         {
             FMainDS.LoadAll();
@@ -997,7 +987,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test for usage of a specific rate in Journal and Gift Batch
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void ExchangeRateUsage5()
         {
             FMainDS.LoadAll();
@@ -1099,7 +1089,7 @@ namespace Tests.MFinance.Client.ExchangeRates
         /// <summary>
         /// Test editing a rate that has been used in several places
         /// </summary>
-        [Test]
+        [Test, Ignore("This test needs re-work or replacing because the interaction between a modal form and the gift/GL screens is now different")]
         public void EditUsedRate()
         {
             FMainDS.LoadAll();
@@ -1116,6 +1106,7 @@ namespace Tests.MFinance.Client.ExchangeRates
 
             // Open the screen modally on our test ledger and a from currency of GBP
             TFrmSetupDailyExchangeRate mainScreen = new TFrmSetupDailyExchangeRate(null);
+            mainScreen.ShowUsedRates();
 
             DialogBoxHandler = delegate(string name, IntPtr hWnd)
             {
