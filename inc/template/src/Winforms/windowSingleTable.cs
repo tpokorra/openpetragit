@@ -166,8 +166,6 @@ namespace {#NAMESPACE}
         grdDetails.Selection.SelectRow(RowNumberGrid, true);
         // scroll to the row
         grdDetails.ShowCell(RowNumberGrid);
-
-        FocusedRowChanged(this, new SourceGrid.RowEventArgs(RowNumberGrid));
     }
 
     /// return the selected row
@@ -181,11 +179,6 @@ namespace {#NAMESPACE}
         }
 
         return null;
-    }
-    private {#DETAILTABLE}Row FPreviouslySelectedDetailRow = null;
-    private void FocusedRowChanged(System.Object sender, SourceGrid.RowEventArgs e)
-    {
-        FPreviouslySelectedDetailRow = GetSelectedDetailRow();
     }
 
 {#IFDEF BUTTONPANEL}

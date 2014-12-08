@@ -638,7 +638,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
             }
 
             string showRatesFilter = String.Empty;
-            RadioButton rbtShowAll = (RadioButton)FFilterAndFindObject.FilterPanelControls.FindControlByName("rbtAll");
             RadioButton rbtShowUsed = (RadioButton)FFilterAndFindObject.FilterPanelControls.FindControlByName("rbtUsedRates");
             RadioButton rbtShowUnused = (RadioButton)FFilterAndFindObject.FilterPanelControls.FindControlByName("rbtUnusedRates");
 
