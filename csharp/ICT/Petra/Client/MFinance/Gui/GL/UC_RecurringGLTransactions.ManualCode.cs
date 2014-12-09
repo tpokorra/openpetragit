@@ -1042,6 +1042,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             {
                 return;
             }
+            else if (!FFilterAndFindObject.IsActiveFilterEqualToBase)
+            {
+                MessageBox.Show(Catalog.GetString("Please remove the filter before attempting to delete all transactions in this recurring batch."),
+                    Catalog.GetString("Delete All Transactions"));
+
+                return;
+            }
 
             if ((MessageBox.Show(String.Format(Catalog.GetString(
                              "You have chosen to delete all transactions in this recurring Journal ({0}).\n\nDo you really want to continue?"),
@@ -1053,6 +1060,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             {
                 //Backup the Dataset for reversion purposes
                 GLBatchTDS FTempDS = (GLBatchTDS)FMainDS.Copy();
+                FTempDS.Merge(FMainDS);
 
                 try
                 {
@@ -1099,7 +1107,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                    FMainDS = (GLBatchTDS)FTempDS.Copy();
+                    FMainDS.Merge(FTempDS);
                 }
 
                 //If some row(s) still exist after deletion
@@ -1108,6 +1116,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     UpdateChangeableStatus();
                     ClearControls();
                 }
+
+                UpdateRecordNumberDisplay();
             }
         }
 
