@@ -911,7 +911,8 @@ namespace Ict.Tools.CodeGeneration.Winforms
                     "INITUSERCONTROLS",
                     "FPetraUtilsObject.SetStatusBarText(" + ctrl.controlName +
                     ", Catalog.GetString(\"Use the arrow keys to change the Splitter position and change the relative proportions of the panels\"));"
-                    + Environment.NewLine);
+                    +
+                    Environment.NewLine);
             }
 
             //TODO: CT

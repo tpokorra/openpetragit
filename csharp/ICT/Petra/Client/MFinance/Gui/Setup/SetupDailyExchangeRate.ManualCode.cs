@@ -109,8 +109,27 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
 
                 if (FPreviouslySelectedDetailRow != null)
                 {
-                    usage = String.Format("{0} Journals and {1} Gift Batches",
+                    usage = String.Format("{0} Journals and {1} Gift Batches;",
                         FPreviouslySelectedDetailRow.JournalUsage, FPreviouslySelectedDetailRow.GiftBatchUsage);
+
+                    if ((FPreviouslySelectedDetailRow.JournalUsage > 0) || (FPreviouslySelectedDetailRow.GiftBatchUsage > 0))
+                    {
+                        DataView usageView = ((DevAge.ComponentModel.BoundDataView)grdRateUsage.DataSource).DataView;
+
+                        foreach (DataRowView drv in usageView)
+                        {
+                            ExchangeRateTDSADailyExchangeRateUsageRow row = (ExchangeRateTDSADailyExchangeRateUsageRow)drv.Row;
+                            usage += Environment.NewLine;
+                            usage += String.Format("Ledger:{0} Batch:{1} Journal:{2} Status:{3} at Rate:{4} on Date:{5} at Time:{6}",
+                                row.LedgerNumber,
+                                row.BatchNumber,
+                                row.JournalNumber,
+                                row.BatchStatus,
+                                row.RateOfExchange,
+                                row.DateEffectiveFrom.ToString("yyyy-MM-dd"),
+                                row.TimeEffectiveFrom);
+                        }
+                    }
                 }
 
                 return usage;
@@ -697,11 +716,6 @@ namespace Ict.Petra.Client.MFinance.Gui.Setup
                 txtDetailTimeEffectiveFrom.Text = new Ict.Common.TypeConverter.TShortTimeConverter().ConvertTo(-1, typeof(string)).ToString();
                 txtDetailRateOfExchange.NumberValueDecimal = 0.0m;
             }
-        }
-
-        private void DeleteRecord(Object sender, EventArgs e)
-        {
-            DeleteADailyExchangeRate();
         }
 
         /// <summary>
