@@ -49,7 +49,8 @@ namespace Ict.Petra.Server.MCommon
         public static readonly string StrExceptionWhileSavingTransactions = Catalog.GetString("An exception occurred while saving the transactions");
 
         /// <summary>'An exception occurred while saving the batch number {0}'</summary>
-        public static readonly string StrExceptionWhileSavingBatch = Catalog.GetString("An exception occurred while saving the batch with description: '{0}'");
+        public static readonly string StrExceptionWhileSavingBatch = Catalog.GetString(
+            "An exception occurred while saving the batch with description: '{0}'");
 
         /// <summary>'Parsing error in Line {0}'</summary>
         public static readonly string StrParsingErrorInLine = Catalog.GetString("Parsing error in Line {0}");

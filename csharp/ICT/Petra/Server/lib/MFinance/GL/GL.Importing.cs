@@ -592,6 +592,7 @@ namespace Ict.Petra.Server.MFinance.GL
 
                 // Update totals of final batch
                 ImportMessage = Catalog.GetString("Saving changes to batch totals");
+
                 if (NewBatch != null)
                 {
                     GLRoutines.UpdateTotalsOfBatch(ref MainDS, NewBatch);
