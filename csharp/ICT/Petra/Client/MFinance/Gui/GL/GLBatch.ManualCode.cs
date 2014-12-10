@@ -297,9 +297,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                             ucoJournals.GetSelectedDetailRow().BatchNumber,
                             ucoJournals.GetSelectedDetailRow().JournalNumber,
                             ucoJournals.GetSelectedDetailRow().TransactionCurrency,
+                            fromBatchTab,
                             ucoBatches.GetSelectedDetailRow().BatchStatus,
-                            ucoJournals.GetSelectedDetailRow().JournalStatus,
-                            fromBatchTab);
+                            ucoJournals.GetSelectedDetailRow().JournalStatus);
 
                         FPreviouslySelectedTab = eGLTabs.Transactions;
                     }
