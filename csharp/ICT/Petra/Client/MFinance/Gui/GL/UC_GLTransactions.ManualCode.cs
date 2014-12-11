@@ -1327,7 +1327,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             int transactionNumberToDelete = ARowToDelete.TransactionNumber;
             int lastTransactionNumber = FJournalRow.LastTransactionNumber;
 
-            FMainDS.EnforceConstraints = false;            try
+            FMainDS.EnforceConstraints = false;
+
+            try
             {
                 // Delete on client side data through views that is already loaded. Data that is not
                 // loaded yet will be deleted with cascading delete on server side so we don't have
@@ -1453,7 +1455,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             }
             finally
             {
-                FMainDS.EnforceConstraints = true;                SetTransactionDefaultView();
+                FMainDS.EnforceConstraints = true;
+                SetTransactionDefaultView();
                 FFilterAndFindObject.ApplyFilter();
             }
 
