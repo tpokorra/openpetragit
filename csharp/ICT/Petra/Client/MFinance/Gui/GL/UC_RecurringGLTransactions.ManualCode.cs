@@ -63,6 +63,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         private decimal FCreditAmount = 0;
 
         private ARecurringBatchRow FBatchRow = null;
+        private AAccountTable FAccountList;
+        private ACostCentreTable FCostCentreList;
 
         private GLSetupTDS FCacheDS;
         private GLBatchTDSARecurringJournalRow FJournalRow = null;
@@ -70,8 +72,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         private TAnalysisAttributes FAnalysisAttributesLogic;
 
         private SourceGrid.Cells.Editors.ComboBox FcmbAnalAttribValues;
-
-        private bool FDoneComboInitialise = false;
 
         private void InitialiseControls()
         {
@@ -626,6 +626,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
         private void SetupExtraGridFunctionality()
         {
+            DataTable TempTbl1 = TDataCache.TMFinance.GetCacheableFinanceTable(TCacheableFinanceTablesEnum.CostCentreList, FLedgerNumber);
+
+            FCostCentreList = (ACostCentreTable)TempTbl1;
+
+            DataTable TempTbl2 = TDataCache.TMFinance.GetCacheableFinanceTable(TCacheableFinanceTablesEnum.AccountList, FLedgerNumber);
+            FAccountList = (AAccountTable)TempTbl2;
+
             //Prepare grid to highlight inactive accounts/cost centres
             // Create a cell view for special conditions
             SourceGrid.Cells.Views.Cell strikeoutCell = new SourceGrid.Cells.Views.Cell();
@@ -720,13 +727,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
             }
 
-            AccountActive = TFinanceControls.AccountIsActive(FLedgerNumber, AAccountCode, out AccountExists);
+            AccountActive = TFinanceControls.AccountIsActive(FLedgerNumber, AAccountCode, FAccountList, out AccountExists);
 
             if (!AccountExists)
             {
                 string errorMessage = String.Format(Catalog.GetString("Account {0} does not exist in Ledger {1}!"),
-                                                        AAccountCode,
-                                                        FLedgerNumber);
+                    AAccountCode,
+                    FLedgerNumber);
                 MessageBox.Show(errorMessage, "Confirm Account Code Exists", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
@@ -753,13 +760,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
             }
 
-            CostCentreActive = TFinanceControls.CostCentreIsActive(FLedgerNumber, ACostCentreCode, out CostCentreExists);
+            CostCentreActive = TFinanceControls.CostCentreIsActive(FLedgerNumber, ACostCentreCode, FCostCentreList, out CostCentreExists);
 
             if (!CostCentreExists)
             {
                 string errorMessage = String.Format(Catalog.GetString("Cost Centre {0} does not exist in Ledger {1}!"),
-                                                        ACostCentreCode,
-                                                        FLedgerNumber);
+                    ACostCentreCode,
+                    FLedgerNumber);
                 MessageBox.Show(errorMessage, "Confirm Cost Centre Exists", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
@@ -1064,6 +1071,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             try
             {
+                this.Cursor = Cursors.WaitCursor;
+
                 // Delete on client side data through views that is already loaded. Data that is not
                 // loaded yet will be deleted with cascading delete on server side so we don't have
                 // to worry about this here.
@@ -1191,6 +1200,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 FMainDS.EnforceConstraints = true;
                 SetTransactionDefaultView();
                 FFilterAndFindObject.ApplyFilter();
+                this.Cursor = Cursors.Default;
             }
 
             return deletionSuccessful;
@@ -1254,7 +1264,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             if ((FPreviouslySelectedDetailRow.TransactionNumber == FTransactionNumber)
                 && (FTransactionNumber != -1))
             {
-                FAnalysisAttributesLogic.ReconcileRecurringTransAnalysisAttributes(ref FMainDS, cmbDetailAccountCode.GetSelectedString(), FTransactionNumber);
+                FAnalysisAttributesLogic.ReconcileRecurringTransAnalysisAttributes(ref FMainDS,
+                    cmbDetailAccountCode.GetSelectedString(), FTransactionNumber);
                 RefreshAnalysisAttributesGrid();
             }
 
@@ -1300,7 +1311,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             //Local validation
             if (((txtDebitAmount.NumberValueDecimal.Value == 0)
-                && (txtCreditAmount.NumberValueDecimal.Value == 0))
+                 && (txtCreditAmount.NumberValueDecimal.Value == 0))
                 || (txtDebitAmount.NumberValueDecimal.Value < 0))
             {
                 controlToPass = txtDebitAmount;
@@ -1325,9 +1336,9 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             if ((FPreviouslySelectedDetailRow != null)
                 && !FAnalysisAttributesLogic.AccountRecurringAnalysisAttributeCountIsCorrect(
-                        FPreviouslySelectedDetailRow.TransactionNumber,
-                        FPreviouslySelectedDetailRow.AccountCode,
-                        FMainDS))
+                    FPreviouslySelectedDetailRow.TransactionNumber,
+                    FPreviouslySelectedDetailRow.AccountCode,
+                    FMainDS))
             {
                 DataColumn ValidationColumn;
                 TVerificationResult VerificationResult = null;
@@ -1352,12 +1363,12 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             String ValueRequiredForType;
 
-            if (FPreviouslySelectedDetailRow != null
+            if ((FPreviouslySelectedDetailRow != null)
                 && !FAnalysisAttributesLogic.AccountRecurringAnalysisAttributesValuesExist(
-                        FPreviouslySelectedDetailRow.TransactionNumber,
-                        FPreviouslySelectedDetailRow.AccountCode,
-                        FMainDS,
-                        out ValueRequiredForType))
+                    FPreviouslySelectedDetailRow.TransactionNumber,
+                    FPreviouslySelectedDetailRow.AccountCode,
+                    FMainDS,
+                    out ValueRequiredForType))
             {
                 DataColumn ValidationColumn;
                 TVerificationResult VerificationResult = null;
@@ -1384,7 +1395,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
         /// </summary>
         public void FocusGrid()
         {
-            if (grdDetails != null && grdDetails.CanFocus)
+            if ((grdDetails != null) && grdDetails.CanFocus)
             {
                 grdDetails.Focus();
             }
@@ -1461,6 +1472,5 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 FJournalRow.LastTransactionNumber = 0;
             }
         }
-
     }
 }

@@ -55,22 +55,22 @@ namespace Ict.Petra.Client.MFinance.Logic
         /// </summary>
         /// <param name="ALedgerNumber"></param>
         /// <param name="AAccountCode"></param>
+        /// <param name="AAccountList"></param>
         /// <param name="AAccountExists"></param>
         /// <returns></returns>
         public static bool AccountIsActive(Int32 ALedgerNumber,
             string AAccountCode,
+            AAccountTable AAccountList,
             out bool AAccountExists)
         {
             AAccountExists = false;
             bool RetVal = false;
 
-            DataTable TempTbl = TDataCache.TMFinance.GetCacheableFinanceTable(TCacheableFinanceTablesEnum.AccountList, ALedgerNumber);
-            AAccountTable AccountList = (AAccountTable)TempTbl;
             AAccountRow CurrentAccountRow = null;
 
-            if (AccountList != null)
+            if (AAccountList != null)
             {
-                CurrentAccountRow = (AAccountRow)AccountList.Rows.Find(new object[] { ALedgerNumber, AAccountCode });
+                CurrentAccountRow = (AAccountRow)AAccountList.Rows.Find(new object[] { ALedgerNumber, AAccountCode });
 
                 if (CurrentAccountRow != null)
                 {
@@ -87,22 +87,22 @@ namespace Ict.Petra.Client.MFinance.Logic
         /// </summary>
         /// <param name="ALedgerNumber"></param>
         /// <param name="ACostCentreCode"></param>
+        /// <param name="ACostCentreList"></param>
         /// <param name="ACostCentreExists"></param>
         /// <returns></returns>
         public static bool CostCentreIsActive(Int32 ALedgerNumber,
             string ACostCentreCode,
+            ACostCentreTable ACostCentreList,
             out bool ACostCentreExists)
         {
             ACostCentreExists = false;
             bool RetVal = false;
 
-            DataTable TempTbl = TDataCache.TMFinance.GetCacheableFinanceTable(TCacheableFinanceTablesEnum.CostCentreList, ALedgerNumber);
-            ACostCentreTable CostCentreList = (ACostCentreTable)TempTbl;
             ACostCentreRow CurrentCostCentreRow = null;
 
-            if (CostCentreList != null)
+            if (ACostCentreList != null)
             {
-                CurrentCostCentreRow = (ACostCentreRow)CostCentreList.Rows.Find(new object[] { ALedgerNumber, ACostCentreCode });
+                CurrentCostCentreRow = (ACostCentreRow)ACostCentreList.Rows.Find(new object[] { ALedgerNumber, ACostCentreCode });
 
                 if (CurrentCostCentreRow != null)
                 {
@@ -113,7 +113,7 @@ namespace Ict.Petra.Client.MFinance.Logic
 
             return RetVal;
         }
-        
+
         /// <summary>
         /// returns a filter for cost centre cached table
         /// </summary>

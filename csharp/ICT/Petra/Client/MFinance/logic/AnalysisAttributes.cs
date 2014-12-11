@@ -624,6 +624,5 @@ namespace Ict.Petra.Client.MFinance.Logic
 
             return true;
         }
-
     }
 }
