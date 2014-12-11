@@ -115,6 +115,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
             bool AFromBatchTab = false)
         {
             bool DifferentBatchSelected = false;
+            bool HadChangesFromTheStart = FPetraUtilsObject.HasChanges;
 
             FLoadCompleted = false;
             FBatchRow = GetRecurringBatchRow();
@@ -218,7 +219,12 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     TFinanceControls.InitialiseCostCentreList(ref cmbDetailCostCentreCode, FLedgerNumber, true, false, FActiveOnly, false);
                 }
 
+                // This modifies the content of the text boxes that display the totals.  This is not a user change.
+                bool prev = FPetraUtilsObject.SuppressChangeDetection;
+                FPetraUtilsObject.SuppressChangeDetection = true;
                 UpdateTransactionTotals();
+                FPetraUtilsObject.SuppressChangeDetection = prev;
+
                 grdDetails.ResumeLayout();
                 FLoadCompleted = true;
             }
@@ -233,6 +239,13 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     rtr.ExchangeRateToBase = 1;
                     FPetraUtilsObject.HasChanges = true;
                 }
+            }
+
+            if (FPetraUtilsObject.HasChanges && !HadChangesFromTheStart)
+            {
+                // This means we updated the transaction totals.  We will save them behind the scenes since there were no other changes when we started
+                ((TFrmRecurringGLBatch)ParentForm).SaveChanges();
+                FMainDS.ARecurringTransaction.AcceptChanges();
             }
 
             ShowData();
@@ -570,6 +583,8 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 return;
             }
 
+            bool AmountsChanged = false;
+
             if (FPreviouslySelectedDetailRow != null)
             {
                 if (FPreviouslySelectedDetailRow.DebitCreditIndicator)
@@ -582,6 +597,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     if (FPreviouslySelectedDetailRow.TransactionAmount != Convert.ToDecimal(txtDebitAmount.NumberValueDecimal))
                     {
                         FPreviouslySelectedDetailRow.TransactionAmount = Convert.ToDecimal(txtDebitAmount.NumberValueDecimal);
+                        AmountsChanged = true;
                     }
                 }
                 else
@@ -594,6 +610,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                     if (FPreviouslySelectedDetailRow.TransactionAmount != Convert.ToDecimal(txtCreditAmount.NumberValueDecimal))
                     {
                         FPreviouslySelectedDetailRow.TransactionAmount = Convert.ToDecimal(txtCreditAmount.NumberValueDecimal);
+                        AmountsChanged = true;
                     }
                 }
             }
@@ -610,9 +627,10 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 }
             }
 
-            if (FPetraUtilsObject.HasChanges)
+            if (AmountsChanged)
             {
                 GLRoutines.UpdateTotalsOfRecurringBatch(ref FMainDS, FBatchRow);
+                FPetraUtilsObject.SetChangedFlag();
             }
 
             txtCreditTotalAmount.NumberValueDecimal = FJournalRow.JournalCreditTotal;
@@ -620,8 +638,6 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
 
             // refresh the currency symbols
             ShowDataManual();
-
-            FPetraUtilsObject.SetChangedFlag();
         }
 
         private void SetupExtraGridFunctionality()

@@ -304,6 +304,8 @@ namespace Ict.Petra.Server.MFinance.Gift
 
                         if (RowType == "B")
                         {
+                            ImportMessage = Catalog.GetString("Parsing a batch row");
+
                             // It is a Batch row
                             if (numberOfElements < 8)
                             {
@@ -346,6 +348,7 @@ namespace Ict.Petra.Server.MFinance.Gift
                                 previousGift = null;
                             }
 
+                            ImportMessage = Catalog.GetString("Starting new batch");
                             totalBatchAmount = 0;
 
                             // Parse the complete line and validate it
@@ -358,6 +361,8 @@ namespace Ict.Petra.Server.MFinance.Gift
                                 // This row passes validation so we can do final actions if the batch is not in the ledger currency
                                 if (giftBatch.CurrencyCode != FLedgerBaseCurrency)
                                 {
+                                    ImportMessage = Catalog.GetString("Updating foreign exchange data");
+
                                     // Validation will have ensured that we have a corporate rate for the effective date
                                     // We need to know what that rate is...
                                     DateTime firstOfMonth = new DateTime(giftBatch.GlEffectiveDate.Year, giftBatch.GlEffectiveDate.Month, 1);
@@ -404,6 +409,8 @@ namespace Ict.Petra.Server.MFinance.Gift
                         }
                         else if (RowType == "T")
                         {
+                            ImportMessage = Catalog.GetString("Parsing a transaction row");
+
                             // It is a Transaction row
                             if (numberOfElements < 13) // Perhaps this CSV file is a summary, and can't be imported?
                             {
@@ -466,6 +473,8 @@ namespace Ict.Petra.Server.MFinance.Gift
                             {
                                 if ((FLedgerBaseCurrency != FLedgerIntlCurrency) && (giftDetails.GiftAmountIntl != 0))
                                 {
+                                    ImportMessage = Catalog.GetString("Updating international exchange rate data");
+
                                     // We should add a Daily Exchange Rate row pair
                                     // start with To Ledger currency
                                     decimal fromIntlToBase = GLRoutines.Divide(giftDetails.GiftAmount, giftDetails.GiftAmountIntl);
@@ -621,8 +630,17 @@ namespace Ict.Petra.Server.MFinance.Gift
                         msg += FNewLine + friendlyExceptionText;
                     }
 
-                    AMessages.Add(new TVerificationResult(String.Format(MCommonConstants.StrExceptionWhileParsingLine, RowNumber),
-                            msg, TResultSeverity.Resv_Critical));
+                    if (ImportMessage.StartsWith(Catalog.GetString("Saving ")))
+                    {
+                        // Do not display any specific line number because these errors occur outside the parsing loop
+                        AMessages.Add(new TVerificationResult(String.Format(MCommonConstants.StrExceptionWhileSavingBatch, giftBatch.BatchDescription),
+                                msg, TResultSeverity.Resv_Critical));
+                    }
+                    else
+                    {
+                        AMessages.Add(new TVerificationResult(String.Format(MCommonConstants.StrExceptionWhileParsingLine, RowNumber),
+                                msg, TResultSeverity.Resv_Critical));
+                    }
                 }
                 else
                 {
@@ -979,8 +997,17 @@ namespace Ict.Petra.Server.MFinance.Gift
                         msg += FNewLine + friendlyExceptionText;
                     }
 
-                    AMessages.Add(new TVerificationResult(String.Format(MCommonConstants.StrExceptionWhileParsingLine, RowNumber),
-                            msg, TResultSeverity.Resv_Critical));
+                    if (ImportMessage.StartsWith(Catalog.GetString("Saving ")))
+                    {
+                        // Do not display any specific line number because these errors occur outside the parsing loop
+                        AMessages.Add(new TVerificationResult(MCommonConstants.StrExceptionWhileSavingTransactions,
+                                msg, TResultSeverity.Resv_Critical));
+                    }
+                    else
+                    {
+                        AMessages.Add(new TVerificationResult(String.Format(MCommonConstants.StrExceptionWhileParsingLine, RowNumber),
+                                msg, TResultSeverity.Resv_Critical));
+                    }
                 }
                 else
                 {
@@ -1071,7 +1098,7 @@ namespace Ict.Petra.Server.MFinance.Gift
             string BatchDescription = ImportString(Catalog.GetString("Batch description"),
                 FMainDS.AGiftBatch.ColumnBatchDescription, AValidationControlsDictBatch);
             string BankAccountCode = ImportString(Catalog.GetString("Bank account code"),
-                FMainDS.AGiftBatch.ColumnBankAccountCode, AValidationControlsDictBatch);
+                FMainDS.AGiftBatch.ColumnBankAccountCode, AValidationControlsDictBatch).ToUpper();
             decimal HashTotal = ImportDecimal(Catalog.GetString("Hash total"),
                 FMainDS.AGiftBatch.ColumnHashTotal, ARowNumber, AMessages, AValidationControlsDictBatch);
             DateTime GlEffectiveDate = ImportDate(Catalog.GetString("Effective Date"),
@@ -1099,7 +1126,7 @@ namespace Ict.Petra.Server.MFinance.Gift
                 FMainDS.AGiftBatch.ColumnExchangeRateToBase, ARowNumber, AMessages, AValidationControlsDictBatch);
 
             AGiftBatch.BankCostCentre = ImportString(Catalog.GetString("Bank cost centre"),
-                FMainDS.AGiftBatch.ColumnBankCostCentre, AValidationControlsDictBatch);
+                FMainDS.AGiftBatch.ColumnBankCostCentre, AValidationControlsDictBatch).ToUpper();
             AGiftBatch.GiftType = ImportString(Catalog.GetString("Gift type"),
                 FMainDS.AGiftBatch.ColumnGiftType, AValidationControlsDictBatch);
 
