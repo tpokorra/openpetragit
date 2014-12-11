@@ -750,7 +750,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 string errorMessage = String.Format(Catalog.GetString("Account {0} does not exist in Ledger {1}!"),
                     AAccountCode,
                     FLedgerNumber);
-                MessageBox.Show(errorMessage, "Confirm Account Code Exists", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                TLogging.Log(errorMessage);
             }
 
             return AccountActive;
@@ -783,7 +783,7 @@ namespace Ict.Petra.Client.MFinance.Gui.GL
                 string errorMessage = String.Format(Catalog.GetString("Cost Centre {0} does not exist in Ledger {1}!"),
                     ACostCentreCode,
                     FLedgerNumber);
-                MessageBox.Show(errorMessage, "Confirm Cost Centre Exists", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                TLogging.Log(errorMessage);
             }
 
             return CostCentreActive;
